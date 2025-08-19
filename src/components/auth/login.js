@@ -10,6 +10,7 @@ const Login = ({ setIsAuthentificated }) => {
   const [user, setUser] = useState({
     email: "",
     mdp: "",
+    role: "responsable",
   });
 
   const navigate = useNavigate();

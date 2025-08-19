@@ -15,11 +15,11 @@ public class EdtController: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<EdtDto>>> GetAll()
-        => Ok(await _service.GetAllAsync());
-
     [HttpGet("{id}")]
+    public async Task<ActionResult<IEnumerable<EdtDto>>> GetAll(string id)
+        => Ok(await _service.GetAllAsync(id));
+
+    [HttpGet("filter/{id}")]
     public async Task<ActionResult<EdtDto>> GetById(string id)
     {
         var res = await _service.GetByIdAsync(id);

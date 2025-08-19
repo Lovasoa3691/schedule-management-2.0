@@ -15,11 +15,11 @@ public class DispoController: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll()
-        => Ok(await _service.GetAllAsync());
-
     [HttpGet("{id}")]
+    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll(string id)
+        => Ok(await _service.GetAllAsync(id));
+
+    [HttpGet("filter/{id}")]
     public async Task<ActionResult<DispoDto>> GetById(string id)
     {
         var res = await _service.GetByIdAsync(id);

@@ -19,18 +19,37 @@ public class ImEdt : IEdt
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<EdtDto>> GetAllAsync()
+    public async Task<IEnumerable<EdtDto>> GetAllAsync(string id)
     {
-        var mat = await _db.Edts
-            .AsNoTracking()
-            .Include(e => e.enseignant)
-            .Include(a => a.matiere)
-            .Include(m => m.mention)
-            .Include(n => n.niveau)
-            .Include(s => s.salle)
-            .Include(a => a.anneeScolaire)
-            .ToListAsync();
-        return _mapper.Map<IEnumerable<EdtDto>>(mat);
+        List<Edt> result = new List<Edt>();
+
+        if (id == "all")
+        {
+            result = await _db.Edts
+                .AsNoTracking()
+                .Include(e => e.enseignant)
+                .Include(a => a.matiere)
+                .Include(m => m.mention)
+                .Include(n => n.niveau)
+                .Include(s => s.salle)
+                .Include(a => a.anneeScolaire)
+                .ToListAsync();
+        }
+        else
+        {
+            result = await _db.Edts
+                .AsNoTracking()
+                .Include(e => e.enseignant)
+                .Include(a => a.matiere)
+                .Include(m => m.mention)
+                .Include(n => n.niveau)
+                .Include(s => s.salle)
+                .Include(a => a.anneeScolaire)
+                .Where(e => e.enseignantId == id)
+                .ToListAsync();
+        }
+       
+        return _mapper.Map<IEnumerable<EdtDto>>(result);
     }
 
     public async Task<EdtDto?> GetByIdAsync(string id)

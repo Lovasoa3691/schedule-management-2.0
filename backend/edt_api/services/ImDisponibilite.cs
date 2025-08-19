@@ -18,50 +18,69 @@ public class ImDisponibilite : IDisponibilite
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<DispoDto>> GetAllAsync()
+    public async Task<IEnumerable<DispoDto>> GetAllAsync(string id)
     {
-        var enseignants = await _db.Enseignants
-            .Include(e => e.disponibilites)
-            .ToListAsync();
-
         var result = new List<DispoDto>();
-
-        foreach (var enseignant in enseignants)
+        if (id == "all")
         {
-           
-            if (enseignant.disponibilites != null && enseignant.disponibilites.Any())
+            var enseignants = await _db.Enseignants
+                .Include(e => e.disponibilites)
+                .ToListAsync();
+
+            
+
+            foreach (var enseignant in enseignants)
             {
-                foreach (var dispo in enseignant.disponibilites)
+           
+                if (enseignant.disponibilites != null && enseignant.disponibilites.Any())
+                {
+                    foreach (var dispo in enseignant.disponibilites)
+                    {
+                        result.Add(new DispoDto(
+                            idDispo: dispo.numDispo,
+                            dateDispo: dispo.dateDispo,
+                            hDeb: dispo.hDeb,
+                            hFin: dispo.hFin,
+                            nomEns: enseignant.nom,
+                            prenomEns: enseignant.prenom,
+                            grade:enseignant.grade
+                        ));
+                    }
+                }
+                else
                 {
                     result.Add(new DispoDto(
-                        idDispo: dispo.numDispo,
-                        dateDispo: dispo.dateDispo,
-                        hDeb: dispo.hDeb,
-                        hFin: dispo.hFin,
+                        idDispo: null,
+                        dateDispo: default,
+                        hDeb: default,
+                        hFin: default,
                         nomEns: enseignant.nom,
                         prenomEns: enseignant.prenom,
                         grade:enseignant.grade
                     ));
                 }
             }
-            else
-            {
-                result.Add(new DispoDto(
-                    idDispo: null,
-                    dateDispo: default,
-                    hDeb: default,
-                    hFin: default,
-                    nomEns: enseignant.nom,
-                    prenomEns: enseignant.prenom,
-                    grade:enseignant.grade
-                ));
-            }
         }
-
+        else
+        {
+            var res = await _db.Enseignants
+                .Include(e => e.disponibilites)
+                .Where(d => d.idUt == id)
+                .FirstOrDefaultAsync();
+            
+            result.Add(new DispoDto(
+                idDispo: res.disponibilites.Select(i => i.numDispo).FirstOrDefault(),
+                dateDispo: res.disponibilites.Select(d => d.dateDispo).FirstOrDefault(),
+                hDeb: res.disponibilites.Select(h => h.hDeb).FirstOrDefault(),
+                hFin: res.disponibilites.Select(h => h.hFin).FirstOrDefault(),
+                nomEns: res.nom,
+                prenomEns: res.prenom,
+                grade:res.grade
+            ));
+        }
         return result;
     }
-
-
+    
     public async Task<DispoDto?> GetByIdAsync(string id)
     {
         var res =  await _db.Disponibilites.FindAsync(id);

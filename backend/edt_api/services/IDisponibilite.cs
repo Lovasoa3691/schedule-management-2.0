@@ -4,7 +4,7 @@ namespace edt_api.services;
 
 public interface IDisponibilite
 {
-    Task<IEnumerable<DispoDto>> GetAllAsync();
+    Task<IEnumerable<DispoDto>> GetAllAsync(string id);
     Task<DispoDto> GetByIdAsync(string id);
     Task<DispoDto> CreateAsync(CreateDispoDto dto);
     Task<bool> UpdateAsync(string id, UpdateDispoDto dto);
