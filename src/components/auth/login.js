@@ -109,7 +109,7 @@ const Login = ({ setIsAuthentificated }) => {
                 </svg>
               </div>
               <input
-                type="passord"
+                type="password"
                 name="mdp"
                 value={user.mdp}
                 onChange={handleChange}

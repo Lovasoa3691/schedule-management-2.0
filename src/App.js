@@ -39,6 +39,7 @@ function App() {
       })
       .then((rep) => {
         console.log(rep.data);
+        localStorage.setItem("user", rep.data);
         setIsAuthenticated(true);
       })
       .catch(() => {

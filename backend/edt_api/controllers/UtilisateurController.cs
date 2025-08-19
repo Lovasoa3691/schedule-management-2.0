@@ -30,7 +30,7 @@ public class UtilisateurController : ControllerBase
         => Ok(await _service.getAllTeacherAsync());
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ResponsableDto>> GetById(string id)
+    public async Task<ActionResult<IEnumerable<ResponsableDto>>> GetById(string id)
     {
         var res = await _service.getByIdAsync(id);
         return res == null ? NotFound() : Ok(res);
@@ -109,7 +109,7 @@ public class UtilisateurController : ControllerBase
         return ok ? NoContent() : NotFound();
     }
     
-    [HttpDelete("{id}")]
+    [HttpDelete("teacher/{id}")]
     public async Task<IActionResult> DeleteTeacher(string id)
     {
         var ok = await _service.deleteTeacherAsync(id);

@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [Man, setMan] = useState([]);
   const [Women, setWomen] = useState([]);
 
+  const [salles, setSalles] = useState([]);
+
   const [planning, setPlanning] = useState([]);
   const [progressPlan, setProgressPlan] = useState([]);
 
@@ -73,6 +75,10 @@ const Dashboard = () => {
       setPlanning(rep.data);
     });
 
+    axios.get("http://localhost:5142/api/salle").then((rep) => {
+      setSalles(rep.data);
+    });
+
     axios
       .get("http://localhost:5142/api/utilisateur/teacher/info")
       .then((res) => {
@@ -81,6 +87,18 @@ const Dashboard = () => {
       })
       .catch((err) => console.error("Erreur de chargement:", err));
   }, []);
+
+  const formatDate = (date) => {
+    const dateFormat = new Date(date);
+    const year = dateFormat.getFullYear();
+    const month = String(dateFormat.getMonth() + 1).padStart(2, "0");
+    const day = String(dateFormat.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const [filteredProgressPlan, setFilteredProgressPlan] = useState([]);
+  const [filteredPlanByDay, setFilteredPlanByDay] = useState([]);
 
   useEffect(() => {
     const man = enseignants.filter((item) => item.genre === "Masculin");
@@ -102,6 +120,13 @@ const Dashboard = () => {
     setHebdomadaire(hebd);
   }, [enseignants, planning]);
 
+  useEffect(() => {
+    const filtered = progressPlan.filter(
+      (p) => p.jour === formatDate(Date.now())
+    );
+    setFilteredProgressPlan(filtered);
+  }, [progressPlan]);
+
   const mentionOptions = mentions.map((ment) => ({
     value: ment.nomMention,
     label: ment.nomMention,
@@ -112,12 +137,23 @@ const Dashboard = () => {
     label: ment.intitule,
   }));
 
-  const handleMentionChange = (selectedOption) => {
-    setSelectedMention(selectedOption);
+  const filtrerData = (mention, niveau) => {
+    const filtered = filteredProgressPlan.filter(
+      (item) =>
+        (!mention || item.mention === mention.value) &&
+        (!niveau || item.niveau === niveau.value)
+    );
+    setFilteredProgressPlan(filtered);
   };
 
-  const handleNiveauChange = (selectedOption) => {
-    setSelectedNiveau(selectedOption);
+  const handleMentionChange = (selectedMention) => {
+    setSelectedMention(selectedMention);
+    filtrerData(selectedMention, selectedNiveau);
+  };
+
+  const handleNiveauChange = (selectedNiveau) => {
+    setSelectedNiveau(selectedNiveau);
+    filtrerData(selectedMention, selectedNiveau);
   };
 
   return (
@@ -133,17 +169,11 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-gray-700">
-                Enseignants
+                Total enseignants
               </h3>
               <p className="text-3xl font-bold mt-2">{enseignants?.length}</p>
-              <p className="text-sm text-gray-500">Performance moyenne : 87%</p>
             </div>
             <FaChalkboardTeacher className="text-indigo-600 text-4xl" />
-          </div>
-          <div className="mt-1">
-            <div className="h-2 w-full bg-gray-200 rounded">
-              <div className="h-2 bg-indigo-500 rounded w-[87%]"></div>
-            </div>
           </div>
         </div>
 
@@ -151,17 +181,11 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-gray-700">
-                Salles Disponibles
+                Total salles
               </h3>
-              <p className="text-3xl font-bold mt-2">12</p>
-              <p className="text-sm text-gray-500">Utilisation : 75%</p>
+              <p className="text-3xl font-bold mt-2">{salles?.length}</p>
             </div>
             <FaDoorOpen className="text-green-500 text-4xl" />
-          </div>
-          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-            <span>Laboratoires : 4</span>
-            <span>Amphis : 3</span>
-            <span>classNamees : 5</span>
           </div>
         </div>
 
@@ -174,7 +198,6 @@ const Dashboard = () => {
               <p className="text-3xl font-bold mt-2">
                 {progressPlan?.length ?? "N/A"}
               </p>
-              <p className="text-sm text-gray-500">Mis à jour aujourd'hui</p>
             </div>
             <FaCalendarAlt className="text-pink-500 text-4xl" />
           </div>
@@ -191,6 +214,7 @@ const Dashboard = () => {
             <div className="search-group flex items-center justify-between gap-4">
               <div className="flex items-center ml-auto justify-end gap-2">
                 <Select
+                  className="w-64"
                   options={mentionOptions}
                   placeholder="Selectionne une mention"
                   value={selectedMention}
@@ -198,6 +222,7 @@ const Dashboard = () => {
                   isClearable
                 />
                 <Select
+                  className="w-64"
                   options={niveauOptions}
                   placeholder="Selectionne un niveau"
                   value={selectedNiveau}
@@ -219,8 +244,8 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {progressPlan && progressPlan.length > 0 ? (
-                progressPlan.map((item, index) => (
+              {filteredProgressPlan && filteredProgressPlan.length > 0 ? (
+                filteredProgressPlan.map((item, index) => (
                   <tr key={index} className="border-b">
                     <td className="px-4 py-2">{index + 1}</td>
                     <td className="px-4 py-2">
@@ -256,13 +281,16 @@ const Dashboard = () => {
             <div className="flex items-center justify-between w-full border border-gray-400 rounded-lg p-4 mb-10">
               <span>Homme</span>
               <span>
-                {(Man?.length * 100) / enseignants?.length ?? "N/A"} %
+                {Math.floor((Man?.length * 100) / enseignants?.length) ?? "N/A"}{" "}
+                %
               </span>
             </div>
             <div className=" flex items-center justify-between w-full  border border-gray-400 rounded-lg p-4">
               <span>Femme</span>
               <span>
-                {(Women?.length * 100) / enseignants?.length ?? "N/A"} %
+                {Math.floor((Women?.length * 100) / enseignants?.length) ??
+                  "N/A"}{" "}
+                %
               </span>
             </div>
           </div>

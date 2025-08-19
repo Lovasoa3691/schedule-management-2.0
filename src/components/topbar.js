@@ -4,7 +4,7 @@ import {
   FiChevronDown,
   FiSearch,
 } from "react-icons/fi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdMenu } from "react-icons/md";
 import { Toast } from "./notification/toast";
 import axios from "axios";
@@ -14,7 +14,25 @@ const TopBar = ({ setIsAuthenticated }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  const userEmail = "admin@example.com";
+  const [user, setUser] = useState(null);
+  const [id, setId] = useState(() => {
+    const storedKey = localStorage.getItem("user");
+    return storedKey ? storedKey : null;
+  });
+
+  const getUser = (key) => {
+    axios
+      .get(`http://localhost:5142/api/utilisateur/${key}`)
+      .then((res) => setUser(res.data))
+      .catch((err) => console.error("Erreur de recuperation: ", err));
+  };
+
+  useEffect(() => {
+    if (id) {
+      getUser(id);
+      console.log(id);
+    }
+  }, [id]);
 
   const navigate = useNavigate();
 
@@ -58,6 +76,10 @@ const TopBar = ({ setIsAuthenticated }) => {
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  if (!user) {
+    return <div className="text-center">Chargement...</div>;
+  }
 
   return (
     <header className="bg-white shadow top-0 left-0 right-0 z-10 fixed">
@@ -108,7 +130,7 @@ const TopBar = ({ setIsAuthenticated }) => {
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center space-x-1 text-gray-800 font-medium focus:outline-none"
             >
-              <span>{userEmail}</span>
+              <span>{user?.email ?? "N/A"}</span>
               <FiChevronDown className="w-4 h-4" />
             </button>
 

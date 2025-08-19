@@ -56,7 +56,7 @@ const Disponibility = () => {
               />
             </button>
 
-            {dispo.idDispo === null && openIndex === index ? (
+            {dispo.idDispo !== null && openIndex === index ? (
               <div className="ml-16 mt-3 text-sm text-gray-700">
                 <div className="grid grid-cols-3 gap-4 font-semibold border-b pb-1">
                   <div>Date dispo</div>
@@ -65,20 +65,14 @@ const Disponibility = () => {
                 </div>
 
                 <div className="mt-2 space-y-2">
-                  {[
-                    { date: "2025-07-01", debut: "08:00", fin: "11:00" },
-                    { date: "2025-07-03", debut: "10:00", fin: "12:00" },
-                    { date: "2025-07-07", debut: "14:00", fin: "17:00" },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-3 gap-4 border rounded-lg px-3 py-2 hover:bg-slate-50 transition"
-                    >
-                      <div>{item.date}</div>
-                      <div>{item.debut}</div>
-                      <div>{item.fin}</div>
-                    </div>
-                  ))}
+                  <div
+                    key={index}
+                    className="grid grid-cols-3 gap-4 border rounded-lg px-3 py-2 hover:bg-slate-50 transition"
+                  >
+                    <div>{dispo.dateDispo}</div>
+                    <div>{dispo.hDeb}</div>
+                    <div>{dispo.hFin}</div>
+                  </div>
                 </div>
               </div>
             ) : null}

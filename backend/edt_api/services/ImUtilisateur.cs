@@ -68,7 +68,7 @@ public class ImUtilisateur : IUtilisateur
 
     public async Task<ResponsableDto?> getByIdAsync(string id)
     {
-        var res = await _db.Responsables.FindAsync(id);
+        var res = await _db.Responsables.Include(a => a.Authentifications).Where(e=> e.idUt == id).FirstOrDefaultAsync();
         return res == null ? null : _mapper.Map<ResponsableDto>(res);
     }
 

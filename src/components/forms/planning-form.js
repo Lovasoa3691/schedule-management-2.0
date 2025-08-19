@@ -4,11 +4,12 @@ const PlanningForm = ({
   niveaux,
   salles,
   matieres,
+  horaires,
   selectedDate,
   data,
   handleChange,
   handleSubmit,
-  isEdit,
+  setShowModal,
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -88,44 +89,46 @@ const PlanningForm = ({
             </select>
           </div>
 
-          <div className="text-start">
-            <label>Mention</label>
-            <select
-              name="mentionId"
-              value={data.mentionId}
-              onChange={handleChange}
-              className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              required
-            >
-              <option value="" disabled>
-                Choisir une mention
-              </option>
-              {mentions.map((mention, index) => (
-                <option key={index} value={mention.idMent}>
-                  {mention.nomMention}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+            <div className="text-start">
+              <label>Mention</label>
+              <select
+                name="mentionId"
+                value={data.mentionId}
+                onChange={handleChange}
+                className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                required
+              >
+                <option value="" disabled>
+                  Choisir une mention
                 </option>
-              ))}
-            </select>
-          </div>
+                {mentions.map((mention, index) => (
+                  <option key={index} value={mention.idMent}>
+                    {mention.nomMention}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="text-start">
-            <label>Niveau</label>
-            <select
-              name="niveauId"
-              value={data.niveauId}
-              onChange={handleChange}
-              className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              required
-            >
-              <option value="" disabled>
-                Choisir une niveau
-              </option>
-              {niveaux.map((niveau, index) => (
-                <option key={index} value={niveau.idNiv}>
-                  {niveau.intitule}
+            <div className="text-start">
+              <label>Niveau</label>
+              <select
+                name="niveauId"
+                value={data.niveauId}
+                onChange={handleChange}
+                className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                required
+              >
+                <option value="" disabled>
+                  Choisir une niveau
                 </option>
-              ))}
-            </select>
+                {niveaux.map((niveau, index) => (
+                  <option key={index} value={niveau.idNiv}>
+                    {niveau.intitule}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="text-start">
@@ -148,36 +151,48 @@ const PlanningForm = ({
             </select>
           </div>
 
-          <div className="text-start">
-            <label htmlFor="">Heure debut</label>
-            <input
-              name="hDeb"
-              type="time"
-              min="6:00"
-              max="18:00"
-              onChange={handleChange}
-              placeholder="Heure début"
-              className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-            />
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+            <div className="text-start">
+              <label htmlFor="">Heure debut</label>
+              <select
+                name="hDeb"
+                className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                value={data.hDeb}
+                onChange={handleChange}
+                required
+              >
+                <option value=""></option>
+                {horaires.map((hour, index) => (
+                  <option key={index} value={hour.heure}>
+                    {hour.heure}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="text-start">
-            <label htmlFor="">Heure fin</label>
-            <input
-              name="hFin"
-              type="time"
-              min="6:00"
-              max="18:00"
-              onChange={handleChange}
-              placeholder="Heure fin"
-              className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-            />
+            <div className="text-start">
+              <label htmlFor="">Heure fin</label>
+              <select
+                name="hFin"
+                className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                value={data.hFin}
+                onChange={handleChange}
+                required
+              >
+                <option value=""></option>
+                {horaires.map((hour, index) => (
+                  <option key={index} value={hour.heure}>
+                    {hour.heure}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
             <button
               type="button"
-              //   onClick={closeModal}
+              onClick={() => setShowModal(false)}
               className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
             >
               Annuler
