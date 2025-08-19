@@ -1,12 +1,12 @@
-import { FaCalendar, FaLockOpen } from "react-icons/fa";
-import { FiCalendar } from "react-icons/fi";
-import { MdPassword } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/calendar.png";
 import { useState } from "react";
 import axios from "axios";
+import { FileWarning } from "lucide-react";
 
 const Login = ({ setIsAuthentificated }) => {
+  const [showAlert, setShowAlert] = useState(false);
+  const [error, setError] = useState(null);
   const [user, setUser] = useState({
     email: "",
     mdp: "",
@@ -28,10 +28,14 @@ const Login = ({ setIsAuthentificated }) => {
       })
       .catch((err) => {
         if (err.response) {
-          console.error("Status:", err.response.status);
-          console.error("Erreur serveur:", err.response.data);
+          // console.error("Status:", err.response.status);
+          // console.error("Erreur serveur:", err.response.data);
+          setError(err.response.data);
+          setShowAlert(true);
         } else {
-          console.error("Erreur:", err.message);
+          // console.error("Erreur:", err.message);
+          setError(err.message);
+          setShowAlert(true)
         }
       });
   };
@@ -43,6 +47,35 @@ const Login = ({ setIsAuthentificated }) => {
 
   return (
     <div className="login-container h-screen flex flex-col items-center justify-center bg-slate-100">
+      {showAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-[420px] text-center animate-[fadeIn_0.3s_ease-out]">
+            <div className="flex justify-center mb-4">
+              <div className="bg-red-100 p-4 rounded-full">
+                <FileWarning className="text-red-600 w-10 h-10" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Erreur de connexion
+            </h2>
+
+            <p className="text-gray-600 mb-6">
+              {error || "Une erreur est survenue. Veuillez réessayer."}
+            </p>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowAlert(false)}
+                className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl shadow hover:from-red-600 hover:to-red-700 transition"
+              >
+                Ok
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col items-center justify-center">
         <div className="logo mb-4">
           <div className="p-4 text-center text-white flex flex-col items-center justify-center w-full h-20 mb-8 text-3xl">

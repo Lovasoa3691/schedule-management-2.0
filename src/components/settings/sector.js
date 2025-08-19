@@ -326,7 +326,7 @@ const Sector = () => {
           </div>
         </section>
 
-        <section className="bg-white p-4 rounded-lg shadow-md space-y-3">
+        {/* <section className="bg-white p-4 rounded-lg shadow-md space-y-3">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold text-indigo-700 flex items-center gap-2 mb-2">
               <MdOutlineCalendarMonth />
@@ -359,7 +359,7 @@ const Sector = () => {
           <div className="form-group">
             <form className="space-y-3 bg-gray-50 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-indigo-700">
-                {/* <FaPlus /> */}
+                
                 Ajouter un événement
               </h3>
 
@@ -389,7 +389,7 @@ const Sector = () => {
               </button>
             </form>
           </div>
-        </section>
+        </section> */}
       </div>
     </main>
   );

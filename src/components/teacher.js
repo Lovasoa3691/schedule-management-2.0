@@ -179,31 +179,41 @@ const Teacher = () => {
   };
 
   const ExportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(enseignant);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `Enseignant`);
-    XLSX.writeFile(wb, "enseignants.xlsx");
+    if (enseignant.length > 0) {
+      const ws = XLSX.utils.json_to_sheet(enseignant);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Enseignant`);
+      XLSX.writeFile(wb, "enseignants.xlsx");
+    }
+
+    setShowAlert(true);
+    setAlert("Desole! Aucun enseignant a exporte pour le moment");
   };
 
   const ExportPDF = () => {
     const doc = new jsPDF();
     const colonnes = ["NOM", "PRENOM", "GENRE", "GRADE", "TELEPHONE"];
-    const ligne = enseignant.map((ligne) => [
-      ligne.nom.toUpperCase(),
-      ligne.prenom,
-      ligne.genre,
-      ligne.grade,
-      ligne.phone,
-    ]);
+    if (enseignant.length > 0) {
+      const ligne = enseignant.map((ligne) => [
+        ligne.nom.toUpperCase(),
+        ligne.prenom,
+        ligne.genre,
+        ligne.grade,
+        ligne.phone,
+      ]);
 
-    doc.text(`Liste des enseignants`, 15, 10);
-    doc.autoTable({
-      head: [colonnes],
-      body: ligne,
-      startY: 20,
-    });
+      doc.text(`Liste des enseignants`, 15, 10);
+      doc.autoTable({
+        head: [colonnes],
+        body: ligne,
+        startY: 20,
+      });
 
-    doc.save(`liste_enseignants.pdf`);
+      doc.save(`liste_enseignants.pdf`);
+    }
+
+    setShowAlert(true);
+    setAlert("Desole! Aucun enseignant a exporte pour le moment");
   };
 
   return (

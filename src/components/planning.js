@@ -145,7 +145,7 @@ const Planning = () => {
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/disponibilite")
+      .get("http://localhost:5142/api/disponibilite/all")
       .then((res) => {
         setDisponibilite(res.data);
       })
@@ -154,7 +154,7 @@ const Planning = () => {
 
   const loadSchedule = () => {
     axios
-      .get("http://localhost:5142/api/edt")
+      .get("http://localhost:5142/api/edt/all")
       .then((res) => {
         setEvents(
           res.data.map((event) => ({
@@ -445,60 +445,64 @@ const Planning = () => {
     const colonnes = ["JOUR", "HORAIRE", "MATIERE", "PROFESSEUR", "SALLE"];
 
     if (selectedMention && selectedNiveau) {
-      const grouped = {};
-      events.forEach((e) => {
-        const jour = e.start
-          .toLocaleDateString("fr-FR", { weekday: "long" })
-          .toUpperCase();
-        const salle = e.salle;
-        const key = `${jour}-${salle}`;
+      if (events.length > 0) {
+        const grouped = {};
+        events.forEach((e) => {
+          const jour = e.start
+            .toLocaleDateString("fr-FR", { weekday: "long" })
+            .toUpperCase();
+          const salle = e.salle;
+          const key = `${jour}-${salle}`;
 
-        const horaire = `${e.start.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })} - ${e.end.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}`;
+          const horaire = `${e.start.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })} - ${e.end.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`;
 
-        if (!grouped[key]) {
-          grouped[key] = {
-            jour,
-            salle,
-            horaires: [horaire],
-            matieres: [e.title],
-            profs: [e.prenomEns],
-          };
-        } else {
-          grouped[key].horaires.push(horaire);
-          grouped[key].matieres.push(e.title);
-          grouped[key].profs.push(e.prenomEns);
-        }
-      });
+          if (!grouped[key]) {
+            grouped[key] = {
+              jour,
+              salle,
+              horaires: [horaire],
+              matieres: [e.title],
+              profs: [e.prenomEns],
+            };
+          } else {
+            grouped[key].horaires.push(horaire);
+            grouped[key].matieres.push(e.title);
+            grouped[key].profs.push(e.prenomEns);
+          }
+        });
 
-      const ligne = Object.values(grouped).map((g) => [
-        g.jour,
-        g.horaires.join("\n"),
-        g.matieres.join("\n"),
-        g.profs.join("\n"),
-        g.salle,
-      ]);
+        const ligne = Object.values(grouped).map((g) => [
+          g.jour,
+          g.horaires.join("\n"),
+          g.matieres.join("\n"),
+          g.profs.join("\n"),
+          g.salle,
+        ]);
 
-      doc.text(`Emploi du temps`, 15, 10);
-      doc.autoTable({
-        head: [colonnes],
-        body: ligne,
-        startY: 20,
-        styles: { cellWidth: "wrap" },
-        columnStyles: {
-          1: { cellWidth: 40 },
-          2: { cellWidth: 50 },
-          3: { cellWidth: 40 },
-        },
-      });
+        doc.text(`Emploi du temps`, 15, 10);
+        doc.autoTable({
+          head: [colonnes],
+          body: ligne,
+          startY: 20,
+          styles: { cellWidth: "wrap" },
+          columnStyles: {
+            1: { cellWidth: 40 },
+            2: { cellWidth: 50 },
+            3: { cellWidth: 40 },
+          },
+        });
 
-      doc.save(`edt_${selectedMention.value}_${selectedNiveau.value}.pdf`);
+        doc.save(`edt_${selectedMention.value}_${selectedNiveau.value}.pdf`);
+      }
     }
+    setShowAlert(true);
+    setAlert("Desole! Aucun emploi du temps a exporte pour le moment");
   };
 
   return (

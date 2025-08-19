@@ -9,7 +9,7 @@ const Disponibility = () => {
 
   const loadDisponibilites = () => {
     axios
-      .get("http://localhost:5142/api/disponibilite")
+      .get("http://localhost:5142/api/disponibilite/all")
       .then((res) => setDisponibilites(res.data))
       .catch((err) => console.error("Erreur de chargement:", err));
   };

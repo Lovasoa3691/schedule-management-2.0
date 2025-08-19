@@ -70,23 +70,23 @@ public class UtilisateurController : ControllerBase
         if (user == null) return Unauthorized("Email ou mot de passe invalide");
         if (dto.role == "responsable")
         {
-            Response.Cookies.Append("jwt_responsable", user.token, new CookieOptions
+            Response.Cookies.Append("jwt", user.token, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddHours(6),
+                Expires = DateTime.Now.AddHours(2),
                 Path = "/"
             });
         }
         else
         {
-            Response.Cookies.Append("jwt_enseignant", user.token, new CookieOptions
+            Response.Cookies.Append("jwt", user.token, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddHours(6),
+                Expires = DateTime.Now.AddHours(2),
                 Path = "/"
             });
         }
@@ -100,7 +100,7 @@ public class UtilisateurController : ControllerBase
     {
         if (role == "responsable")
         {
-            Response.Cookies.Delete("jwt_responsable", new CookieOptions
+            Response.Cookies.Delete("jwt", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true, 
@@ -110,7 +110,7 @@ public class UtilisateurController : ControllerBase
         }
         else
         {
-            Response.Cookies.Delete("jwt_enseignant", new CookieOptions
+            Response.Cookies.Delete("jwt", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true, 

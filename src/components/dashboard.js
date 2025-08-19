@@ -64,14 +64,14 @@ const Dashboard = () => {
         setUserId(rep.data);
       })
       .catch((err) => {
-        console.error(err);
+        console.error(err.message);
       });
 
     axios.get("http://localhost:5142/api/utilisateur/teacher").then((rep) => {
       setEnseignants(rep.data);
     });
 
-    axios.get("http://localhost:5142/api/edt").then((rep) => {
+    axios.get("http://localhost:5142/api/edt/all").then((rep) => {
       setPlanning(rep.data);
     });
 
@@ -80,7 +80,7 @@ const Dashboard = () => {
     });
 
     axios
-      .get("http://localhost:5142/api/utilisateur/teacher/info")
+      .get("http://localhost:5142/api/utilisateur/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);

@@ -38,7 +38,7 @@ function App() {
         withCredentials: true,
       })
       .then((rep) => {
-        console.log(rep.data);
+        console.log("Data: ", rep.data);
         localStorage.setItem("user", rep.data);
         setIsAuthenticated(true);
       })

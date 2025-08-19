@@ -38,13 +38,20 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5142/api/utilisateur/logout", null, {
-        withCredentials: true,
-      });
+      await axios.post(
+        "http://localhost:5142/api/utilisateur/logout",
+        "responsable",
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
       setIsAuthenticated(false);
+      localStorage.removeItem("user");
       navigate("/login");
     } catch (err) {
-      console.error("Erreur lors de la déconnexion :", err);
+      console.error("Erreur lors de la déconnexion :", err.response.data);
     }
   };
 

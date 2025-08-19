@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import axios from "axios"; // assure-toi que axios est installé
+import axios from "axios"; 
 import { MdPrint } from "react-icons/md";
 import { FaEdit, FaFileExcel, FaTrashAlt } from "react-icons/fa";
 import SubjectForm from "./forms/subject-form";

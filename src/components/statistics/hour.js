@@ -10,7 +10,7 @@ const TeacherHour = () => {
 
   const loadAll = () => {
     axios
-      .get("http://localhost:5142/api/utilisateur/teacher/info")
+      .get("http://localhost:5142/api/utilisateur/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
