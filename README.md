@@ -20,10 +20,10 @@ Développé avec React.js, React Native, ASP.Net Core (Entity Framework), et MyS
 
 * Configurer la base de données
 
-Configure la connection dans appsettings.json (backend):
+#### `Configure la connection dans appsettings.json (backend):
 "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=db_edt_p;User=ton_username;Password=ton_mot_de_passe"
-  },
+  }`
 
 * Applique les migrations EF:
 
