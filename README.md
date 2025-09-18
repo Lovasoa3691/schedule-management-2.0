@@ -11,10 +11,10 @@ Développé avec React.js, React Native, ASP.Net Core (Entity Framework), et MyS
 - Exportation en PDF de l'emploi du temps
 
 ## Installation et lancement
-Cloner le projet
+* Cloner le projet
 
-### `git clone https://github.com/Lovasoa3691/schedule-management.git`
-### `cd schedule-management`
+#### `git clone https://github.com/Lovasoa3691/schedule-management.git`
+#### `cd schedule-management`
 
 * Installer le runtime et dotnet SDK 8.0
 
@@ -43,7 +43,3 @@ Par défaut, l'API sera disponible sut http://localhost:5142
 ### `npm start`
 
 L'application sera disponible sur http://localhost:3000
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
