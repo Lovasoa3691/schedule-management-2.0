@@ -27,19 +27,19 @@ Configure la connection dans appsettings.json (backend):
 
 * Applique les migrations EF:
 
-### `cd backend/edt_api`
-### `dotnet ef database update`
+#### `cd backend/edt_api`
+#### `dotnet ef database update`
 
 * Lancer le backend
 
-### `dotnet run`
+#### `dotnet run`
 
 Par défaut, l'API sera disponible sut http://localhost:5142
 
 * Lancer le frontend
 
-### `cd schedule-management`
-### `npm install`
-### `npm start`
+#### `cd schedule-management`
+#### `npm install`
+#### `npm start`
 
 L'application sera disponible sur http://localhost:3000
