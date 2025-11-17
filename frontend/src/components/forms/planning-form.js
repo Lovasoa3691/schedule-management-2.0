@@ -12,7 +12,7 @@ const PlanningForm = ({
   setShowModal,
 }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white p-6 rounded-lg w-[500px] shadow-xl relative">
         <h2 className="text-lg font-semibold mb-4">
           Ajouter un événement le {selectedDate.toLocaleDateString()}

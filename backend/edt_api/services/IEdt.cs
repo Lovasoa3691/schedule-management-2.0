@@ -4,7 +4,7 @@ namespace edt_api.services;
 
 public interface IEdt
 {
-    Task<IEnumerable<EdtDto>> GetAllAsync(string id);
+    Task<IEnumerable<EdtDto>> GetAllAsync(string id, DateOnly? startDate = null, DateOnly? endDate = null);
     Task<EdtDto> GetByIdAsync(string id);
     Task<EdtDto> AddAsync(CreateEdtDto dto);
     Task<bool> UpdateAsync(string id, UpdateEdtDto dto);

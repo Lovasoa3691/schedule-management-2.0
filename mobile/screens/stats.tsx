@@ -1,4 +1,5 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,17 +13,48 @@ import { LineChart } from "react-native-chart-kit";
 import { Icon } from "react-native-vector-icons/Icon";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-export default function App() {
-  const subjects = [
-    { name: "Java", credit: 20, done: 2, color: "#f39c12" },
-    { name: "UML", credit: 15, done: 4, color: "#27ae60" },
-    { name: "C#", credit: 18, done: 6, color: "#2980b9" },
-    { name: "Droit", credit: 12, done: 3, color: "#8e44ad" },
-    { name: "C++", credit: 25, done: 25, color: "#e74c3c" },
-  ];
+interface MatiereInfo {
+  matiere: string;
+  hEffectue: number;
+  hPrevue: number;
+}
 
-  const labels = subjects.map((s) => s.name);
-  const dataDone = subjects.map((s) => s.done);
+interface Enseignant {
+  nom: string;
+  prenom: string;
+  email: string;
+  grade: string;
+  matiereInfo: MatiereInfo[];
+}
+
+export default function App() {
+  const [subjectData, setSubjectData] = useState<Enseignant[]>([]);
+
+  const loadStates = () => {
+    axios
+      .get(
+        "http://localhost:5142/api/utilisateur/teacher/info/98421799-1f02-4c1a-9bfe-ebe00d327004"
+      )
+      .then((rep) => {
+        setSubjectData(rep.data);
+      })
+      .catch((err) => console.error("Erreur: ", err.message));
+  };
+
+  useEffect(() => {
+    loadStates();
+  }, []);
+
+  if (subjectData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Chargement des données...</Text>
+      </View>
+    );
+  }
+
+  const labels = subjectData[0]?.matiereInfo?.map((s) => s.matiere);
+  const dataDone = subjectData[0]?.matiereInfo?.map((s) => s.hEffectue);
 
   return (
     <ScrollView style={styles.container}>
@@ -55,18 +87,18 @@ export default function App() {
           bezier
         />
 
-        {subjects.map((s, index) => {
-          const remaining = s.credit - s.done;
-          const completed = s.done >= s.credit;
+        {subjectData[0]?.matiereInfo?.map((s, index) => {
+          const remaining = s.hPrevue - s.hEffectue;
+          const completed = s.hEffectue >= s.hPrevue;
 
           return (
             <View key={index} style={styles.card}>
-              <View style={[styles.colorBar, { backgroundColor: s.color }]} />
+              <View style={[styles.colorBar, { backgroundColor: "#ab5" }]} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.subjectName}>{s.name}</Text>
-                <Text style={styles.details}>Crédit total : {s.credit}h</Text>
+                <Text style={styles.subjectName}>{s.matiere}</Text>
+                <Text style={styles.details}>Crédit total : {s.hPrevue}h</Text>
                 <Text style={styles.details}>
-                  Accompli : {s.done}h | Restant : {remaining}h
+                  Accompli : {s.hEffectue}h | Restant : {remaining}h
                 </Text>
               </View>
 

@@ -1,4 +1,4 @@
-const ClassForm = ({
+const TeacherForm = ({
   data,
   handleChange,
   handleSubmit,
@@ -6,18 +6,18 @@ const ClassForm = ({
   setShowModal,
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
         <h2 className="text-xl font-semibold mb-4">
-          Ajouter une nouvelle salle
+          Ajouter un nouvel élément
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block  font-medium">Nom de la salle</label>
+            <label className="block text-sm font-medium">Nom</label>
             <input
               type="text"
-              name="nomsalle"
-              value={data.nomsalle}
+              name="nom"
+              value={data.nom}
               onChange={handleChange}
               className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
@@ -25,34 +25,40 @@ const ClassForm = ({
           </div>
 
           <div>
-            <label className="block  font-medium">Type de salle</label>
+            <label className="block text-sm font-medium">Prenom</label>
+            <input
+              type="text"
+              name="prenom"
+              value={data.prenom}
+              onChange={handleChange}
+              className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Genre</label>
             <select
-              name="typesalle"
-              value={data.typesalle}
+              name="genre"
+              value={data.genre}
               onChange={handleChange}
               className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
             >
               <option value="" disabled defaultValue={true}>
-                Choisir
+                Choisir une genre
               </option>
-              <option value="Salle de cours">Salle de cours</option>
-              <option value="Amphithéâtre">Amphithéâtre</option>
-              <option value="Salle informatique">Salle informatique</option>
-              <option value="Laboratoire">Laboratoire</option>
-              <option value="Salle de réunion">Salle de réunion</option>
-              <option value="Salle de visioconférence">
-                Salle de visioconférence
-              </option>
+              <option value="Masculin">Masculin</option>
+              <option value="Feminin">Feminin</option>
             </select>
           </div>
 
           <div>
-            <label className="block  font-medium">Capacite</label>
+            <label className="block text-sm font-medium">Adresse</label>
             <input
               type="text"
-              name="capacite"
-              value={data.capacite}
+              name="adresse"
+              value={data.adresse}
               onChange={handleChange}
               className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
@@ -60,22 +66,39 @@ const ClassForm = ({
           </div>
 
           <div>
-            <label className="block  font-medium">Localisation</label>
-            <select
-              name="localisation"
-              value={data.localisation}
+            <label className="block text-sm font-medium">Contact</label>
+            <input
+              type="text"
+              name="phone"
+              value={data.phone}
               onChange={handleChange}
-              // className="w-full border p-2 rounded"
+              className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Grade</label>
+            <select
+              name="grade"
+              value={data.grade}
+              onChange={handleChange}
               className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
             >
               <option value="" disabled defaultValue={true}>
-                Choisir...
+                Choisir une grade
               </option>
-              <option value="Rée de chaussé">Rée de chaussé</option>
-              <option value="Etage 1">Etage 1</option>
-              <option value="Etage 2">Etage 2</option>
-              <option value="Etage 3">Etage 3</option>
+              <option value="Doctorant">Doctorant</option>
+              <option value="Professeur Tituliare">Professeur Tituliare</option>
+              <option value="Maitres de Conférences">
+                Maitres de Conférences
+              </option>
+              <option value="Assistant">Assistant</option>
+              <option value="Vacataire">Vacataire</option>
+              <option value="Chargé de cours">Chargé de cours</option>
+              <option value="Professeur Associé">Professeur Associé</option>
+              <option value="Professeur Émérite">Professeur Émérite</option>
             </select>
           </div>
 
@@ -109,4 +132,4 @@ const ClassForm = ({
   );
 };
 
-export default ClassForm;
+export default TeacherForm;

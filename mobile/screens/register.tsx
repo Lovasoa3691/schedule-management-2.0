@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,51 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
   //   CheckBox,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
+import axios from "axios";
 
 export default function RegisterScreen() {
   const [rememberMe, setRememberMe] = React.useState(false);
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [mdp, setMdp] = useState("");
+  const [role, setRole] = useState("enseignant");
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleRegister = () => {
+    const data = {
+      nom: nom.split(" ")[0].toUpperCase(),
+      prenom: prenom,
+      email: email,
+      phone: phone,
+      mdp: mdp,
+      role: role,
+    };
+    // Alert.alert(data.nom);
+    axios
+      .post("http://localhost:5142/api/utilisateur/register", data)
+      .then((rep) => {
+        Alert.alert("Compte cree avec sucees");
+      })
+      .catch((err) => {
+        if (err.response) {
+          console.error("Status:", err.response.status);
+          Alert.alert(err.response.data);
+        } else {
+          console.error("Erreur:", err.message);
+        }
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -32,6 +65,8 @@ export default function RegisterScreen() {
         <Icon name="person-outline" size={20} color="#666" />
         <TextInput
           placeholder="Nom complet"
+          value={nom}
+          onChangeText={setNom}
           placeholderTextColor={"gray"}
           style={styles.input}
           autoCapitalize="none"
@@ -42,6 +77,8 @@ export default function RegisterScreen() {
         <Icon name="mail-outline" size={20} color="#666" />
         <TextInput
           placeholder="Adresse mail"
+          value={email}
+          onChangeText={setEmail}
           placeholderTextColor={"gray"}
           style={styles.input}
           autoCapitalize="none"
@@ -52,6 +89,8 @@ export default function RegisterScreen() {
         <Icon name="call-outline" size={20} color="#666" />
         <TextInput
           placeholder="Telephone"
+          value={phone}
+          onChangeText={setPhone}
           placeholderTextColor={"gray"}
           style={styles.input}
           autoCapitalize="none"
@@ -62,6 +101,8 @@ export default function RegisterScreen() {
         <Icon name="lock-closed-outline" size={20} color="#666" />
         <TextInput
           placeholder="Mot de passe"
+          value={mdp}
+          onChangeText={setMdp}
           placeholderTextColor={"gray"}
           style={styles.input}
           secureTextEntry
@@ -81,7 +122,9 @@ export default function RegisterScreen() {
       </View>
 
       <TouchableOpacity style={styles.loginButton}>
-        <Text style={styles.loginText}>Inscrire</Text>
+        <Text style={styles.loginText} onPress={handleRegister}>
+          Inscrire
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.row}>

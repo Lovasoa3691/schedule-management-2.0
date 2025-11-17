@@ -34,16 +34,10 @@ const Navbar = ({ setLoading }) => {
   const menuClick = (menu, path) => {
     setActive(menu);
     localStorage.setItem("menuActive", menu);
-    // if (setLoading) {
-    //   setLoading(true);
-    // }
     nProgress.start();
     setCurrentPage(menu);
     setTimeout(() => {
       nProgress.done();
-      // if (setLoading) {
-      //   setLoading(false);
-      // }
       navigate(path);
     }, 1000);
   };
@@ -64,14 +58,11 @@ const Navbar = ({ setLoading }) => {
               <li>
                 <Link
                   onClick={() => menuClick("Dashboard", "/dashboard")}
-                  // className={active === "Dashboard" ? "nav-item active" : "nav-item"} onClick={() => menuClick('Enseignant', '/app/enseignant')}
                   className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
                     active === "Dashboard"
                       ? " bg-slate-100 text-blue-600"
                       : " text-gray-800"
                   }`}
-
-                  // className="flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold"
                 >
                   <MdAnalytics className="w-5 h-5 mr-3 text-gray-800" />
                   Dashboard
@@ -92,8 +83,6 @@ const Navbar = ({ setLoading }) => {
                         ? " bg-slate-100 text-blue-600"
                         : " text-gray-800"
                     }`}
-
-                    // className="flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold"
                   >
                     <MdPerson className="w-5 h-5 mr-3 text-gray-800" />
                     Enseignants
@@ -191,20 +180,6 @@ const Navbar = ({ setLoading }) => {
                           Heures enseignants
                         </Link>
                       </li>
-                      {/* <li>
-                        <Link
-                          onClick={() =>
-                            menuClick("Semaine", "/statistique/semaine")
-                          }
-                          className={`block px-2 py-1 hover:text-blue-600${
-                            active === "Semaine"
-                              ? " text-blue-600"
-                              : " text-gray-800"
-                          }`}
-                        >
-                          Planning par semaine
-                        </Link>
-                      </li> */}
                     </ul>
                   )}
                 </li>
@@ -216,19 +191,6 @@ const Navbar = ({ setLoading }) => {
                 Fonctionnalités avancées
               </h4>
               <ul className="space-y-2">
-                {/* <li>
-                  <Link
-                    onClick={() => menuClick("Messagerie", "/messagerie")}
-                    className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
-                      active === "Messagerie"
-                        ? " bg-slate-100 text-blue-600"
-                        : " text-gray-800"
-                    }`}
-                  >
-                    <MdMessage className="w-5 h-5 mr-3 text-gray-800" />
-                    <span>Messages</span>
-                  </Link>
-                </li> */}
 
                 <li>
                   <button

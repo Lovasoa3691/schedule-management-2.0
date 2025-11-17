@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace edt_api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FixCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -330,6 +330,7 @@ namespace edt_api.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     enseignantId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    numero = table.Column<int>(type: "int", nullable: false, defaultValueSql: "(UUID())"),
                     heureEffectue = table.Column<double>(type: "double", nullable: false),
                     ststusEnseignement = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -338,14 +339,14 @@ namespace edt_api.Migrations
                 {
                     table.PrimaryKey("PK_Enseignements", x => new { x.enseignantId, x.matiereId });
                     table.ForeignKey(
-                        name: "FK_Enseignements_Matieres_enseignantId",
-                        column: x => x.enseignantId,
+                        name: "FK_Enseignements_Matieres_matiereId",
+                        column: x => x.matiereId,
                         principalTable: "Matieres",
                         principalColumn: "codeMat",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Enseignements_Utilisateurs_matiereId",
-                        column: x => x.matiereId,
+                        name: "FK_Enseignements_Utilisateurs_enseignantId",
+                        column: x => x.enseignantId,
                         principalTable: "Utilisateurs",
                         principalColumn: "idUt",
                         onDelete: ReferentialAction.Cascade);
@@ -458,6 +459,12 @@ namespace edt_api.Migrations
                 name: "IX_Enseignements_matiereId",
                 table: "Enseignements",
                 column: "matiereId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Enseignements_numero",
+                table: "Enseignements",
+                column: "numero",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MatiereMentions_mentionId",

@@ -127,9 +127,9 @@ public class ImUtilisateur : IUtilisateur
         {
             nom = dto.nom,
             prenom = dto.prenom,
-            telephone = null,
-            adresse = null,
-            genre = null,
+            telephone = "+261345416063",
+            adresse = "fenomanana",
+            genre = "Masculin",
             fonction = "Responsable EDT",
         };
         
@@ -189,8 +189,8 @@ public class ImUtilisateur : IUtilisateur
                 utilisateurId = checked_info.idUt
             };
             
-            // _db.Authentifications.Add(auth);
-            // await _db.SaveChangesAsync();
+            _db.Authentifications.Add(auth);
+            await _db.SaveChangesAsync();
             
             res.Add(new EnseignantDto(
                 checked_info.idUt,

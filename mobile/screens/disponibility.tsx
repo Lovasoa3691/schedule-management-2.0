@@ -19,6 +19,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import axios from "axios";
 
 type Event = {
   title: string;
@@ -29,31 +30,11 @@ type Event = {
 
 interface Dispo {
   id: string;
-  date: string;
+  dateDispo: string;
   hdeb: string;
   hfin: string;
+  codeEns: string;
 }
-
-const events: Event[] = [
-  {
-    title: "",
-    start: new Date(2025, 7, 18, 8, 0),
-    end: new Date(2025, 7, 18, 12, 0),
-    color: "#4CAF50",
-  },
-  {
-    title: "",
-    start: new Date(2025, 7, 19, 9, 0),
-    end: new Date(2025, 7, 19, 11, 30),
-    color: "#2196F3",
-  },
-  {
-    title: "",
-    start: new Date(2025, 7, 19, 14, 0),
-    end: new Date(2025, 7, 19, 16, 0),
-    color: "#FF5722",
-  },
-];
 
 export default function DisponibilityCalendar() {
   const [mode, setMode] = useState<Mode>("week");
@@ -71,6 +52,30 @@ export default function DisponibilityCalendar() {
     null
   );
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+
+  const [dispoData, setDispoData] = useState<Event[]>([]);
+
+  const loadDispo = () => {
+    axios
+      .get(
+        "http://localhost:5142/api/disponibilite/98421799-1f02-4c1a-9bfe-ebe00d327004"
+      )
+      .then((rep) => {
+        const events: Event[] = rep.data.map((d: any) => ({
+          title: "Disponible",
+          start: new Date(`${d.dateDispo}T${d.hDeb}`),
+          end: new Date(`${d.dateDispo}T${d.hFin}`),
+          color: "green",
+        }));
+
+        setDispoData(events);
+      })
+      .catch((err) => console.error("Erreur de chargement dispo", err));
+  };
+
+  useEffect(() => {
+    loadDispo();
+  }, []);
 
   useEffect(() => {
     if (modalVisible) {
@@ -90,7 +95,12 @@ export default function DisponibilityCalendar() {
   }, [modalVisible]);
 
   const formatTime = (date: Date): string =>
-    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    date.toLocaleTimeString(["fr-FR"], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    });
 
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -122,13 +132,30 @@ export default function DisponibilityCalendar() {
     }
 
     const newDispo: Omit<Dispo, "id"> = {
-      date: dateDispo,
+      dateDispo: dateDispo,
       hdeb: heureDebut,
       hfin: heureFin,
+      codeEns: "98421799-1f02-4c1a-9bfe-ebe00d327004",
     };
 
-    Alert.alert(newDispo.date);
+    axios
+      .post("http://localhost:5142/api/disponibilite", newDispo)
+      .then((rep) => {
+        Alert.alert("Programme ajoute avec sucess");
+        loadDispo();
+      })
+      .catch((err) => {
+        console.error("Erreur: ", err.response.data);
+      });
   };
+
+  if (dispoData.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Chargement des données...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -173,7 +200,7 @@ export default function DisponibilityCalendar() {
       </View>
 
       <Calendar
-        events={events}
+        events={dispoData}
         height={600}
         mode={mode}
         date={date}

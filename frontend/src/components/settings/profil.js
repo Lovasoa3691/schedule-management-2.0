@@ -31,7 +31,6 @@ const Profil = () => {
   useEffect(() => {
     if (id) {
       getUser(id);
-      console.log(id);
     }
   }, [id]);
 
@@ -48,7 +47,7 @@ const Profil = () => {
     <main className="flex flex flex-col h-screen">
       <header className="p-4 bg-slate-100 border-b flex items-center">
         <div className="w-10 h-10  text-white flex items-center justify-center text-lg font-bold">
-          {/* {selectedTeacher?.nom?.charAt(0)} */}
+          
         </div>
       </header>
 

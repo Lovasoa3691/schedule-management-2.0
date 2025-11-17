@@ -20,8 +20,9 @@ public class EdtProfile:Profile
             .ForCtorParam("niveau", opt => opt.MapFrom(src => src.niveau.intitule))
             .ForCtorParam("nomEns", opt => opt.MapFrom(src => src.enseignant.nom))
             .ForCtorParam("prenomEns", opt => opt.MapFrom(src => src.enseignant.prenom))
-            .ForCtorParam("nomMatiere", opt => opt.MapFrom(src => src.matiere.nomMat));
-            // .ForCtorParam("status", opt => opt.MapFrom(src => src.matiere.status));
+            .ForCtorParam("nomMatiere", opt => opt.MapFrom(src => src.matiere.nomMat))
+            .ForCtorParam("idEns", opt => opt.MapFrom(src => src.enseignant.enseignements.FirstOrDefault()!.numero))
+            .ForCtorParam("status", opt => opt.MapFrom(src => src.enseignant.enseignements.FirstOrDefault()!.ststusEnseignement));
 
         CreateMap<CreateEdtDto, Edt>()
             .ForMember(dest => dest.jour, opt => opt.MapFrom(src => src.jour))

@@ -9,7 +9,7 @@ const SubjectForm = ({
   setShowModal
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex h-screen items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg">
         <h2 className="text-xl font-semibold mb-4">
           Ajouter une nouvelle matiere

@@ -81,7 +81,7 @@ public class UtilisateurController : ControllerBase
         }
         else
         {
-            Response.Cookies.Append("jwt", user.token, new CookieOptions
+            Response.Cookies.Append("jwt_ens", user.token, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -110,7 +110,7 @@ public class UtilisateurController : ControllerBase
         }
         else
         {
-            Response.Cookies.Delete("jwt", new CookieOptions
+            Response.Cookies.Delete("jwt_ens", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true, 

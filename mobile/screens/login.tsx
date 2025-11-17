@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
+import axios from "axios";
+import CookieManager from "@react-native-cookies/cookies";
 
 type Props = {
   onLoginSucces: () => void;
@@ -27,11 +29,28 @@ export default function LoginScreen({ onLoginSucces }: Props) {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleLogin = () => {
-    if (email === "admin@gmail.com" && mdp === "orion3691") {
-      onLoginSucces();
-    } else {
-      Alert.alert("Email ou mot de passe invalide!");
-    }
+    axios
+      .post(
+        "http://localhost:5142/api/utilisateur/login",
+        { email: email, mdp: mdp, role: "enseignant" },
+        { withCredentials: true }
+      )
+      .then((rep) => {
+        axios
+          .get("http://localhost:5142/api/utilisateur/profile", {
+            withCredentials: true,
+          })
+          .then((rep) => {
+            console.log(rep.data);
+          })
+          .catch((err) => {
+            console.error(err.message);
+          });
+      })
+      .catch((err) => {
+        Alert.alert(err.response.data);
+        console.log("Erreur: ", err);
+      });
   };
 
   return (

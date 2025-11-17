@@ -5,13 +5,7 @@ import { FaPlus, FaRegCalendarAlt, FaUniversity } from "react-icons/fa";
 import { MdOutlineCalendarMonth, MdSchool } from "react-icons/md";
 
 const Sector = () => {
-  const [annees, setAnnees] = useState([
-    { id: 1, libelle: "2022-2023", active: false },
-    { id: 2, libelle: "2023-2024", active: true },
-    { id: 3, libelle: "2024-2025", active: false },
-  ]);
-  const [nouvelleAnnee, setNouvelleAnnee] = useState("");
-
+  
   const [mentions, setMentions] = useState([]);
   const [niveaux, setNiveaux] = useState([]);
 
@@ -312,7 +306,7 @@ const Sector = () => {
                   <label className="inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={annee.status}
+                      checked={annee.status === "Active"}
                       onChange={() => handleToggle(annee.idAnnee)}
                       className="sr-only peer"
                     />

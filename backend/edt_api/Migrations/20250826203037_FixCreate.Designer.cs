@@ -12,8 +12,8 @@ using edt_api.config;
 namespace edt_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250801171011_ThirthCreate")]
-    partial class ThirthCreate
+    [Migration("20250826203037_FixCreate")]
+    partial class FixCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -212,6 +212,11 @@ namespace edt_api.Migrations
                     b.Property<double>("heureEffectue")
                         .HasColumnType("double");
 
+                    b.Property<int>("numero")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("(UUID())");
+
                     b.Property<string>("ststusEnseignement")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -219,6 +224,9 @@ namespace edt_api.Migrations
                     b.HasKey("enseignantId", "matiereId");
 
                     b.HasIndex("matiereId");
+
+                    b.HasIndex("numero")
+                        .IsUnique();
 
                     b.ToTable("Enseignements");
                 });

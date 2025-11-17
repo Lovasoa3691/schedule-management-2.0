@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import axios from "axios"; 
+import axios from "axios";
 import { MdPrint } from "react-icons/md";
 import { FaEdit, FaFileExcel, FaTrashAlt } from "react-icons/fa";
 import SubjectForm from "./forms/subject-form";
+import Confirm from "./notification/confirm";
+import AlertInfo from "./notification/alert";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
@@ -189,72 +191,16 @@ const Subject = () => {
   return (
     <div className="subject-container h-screen">
       {showAlert && alert && (
-        <div
-          id="alert-border-3"
-          className="flex items-center p-4 mb-4 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800"
-          role="alert"
-        >
-          <svg
-            className="shrink-0 w-4 h-4"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-          </svg>
-          <div className="ms-3 text-sm font-medium">{alert}</div>
-          <button
-            type="button"
-            onClick={() => setShowAlert(false)}
-            className="ms-auto -mx-1.5 -my-1.5 bg-green-50 text-green-500 rounded-lg focus:ring-2 focus:ring-green-400 p-1.5 hover:bg-green-200 inline-flex items-center justify-center h-8 w-8 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700"
-            data-dismiss-target="#alert-border-3"
-            aria-label="Close"
-          >
-            <span className="sr-only">Dismiss</span>
-            <svg
-              className="w-3 h-3"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 14"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-              />
-            </svg>
-          </button>
-        </div>
+        <AlertInfo alert={alert} setShowAlert={setShowAlert} />
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-lg p-6 w-96 text-center">
-            <h2 className="text-xl font-semibold mb-4">Confirmation</h2>
-            <p className="text-gray-700 mb-6">
-              Voulez-vous vraiment supprimer cet élément ?
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-              >
-                Oui, supprimer
-              </button>
-              <button
-                onClick={() => setConfirmDelete(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
+        <Confirm
+          handleDelete={handleDelete}
+          setConfirmDelete={setConfirmDelete}
+        />
       )}
+
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
           Gestion des matieres
@@ -270,11 +216,9 @@ const Subject = () => {
             </div>
             <input
               type="search"
-              id="search"
               value={searchfield}
               onChange={(e) => setSearchfield(e.target.value)}
-              className="w-full border border-gray-300 p-4 ps-10 text-sm text-gray-900 rounded-lg bg-gray-50 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              // className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="w-full border border-gray-300 p-4 ps-10 text-sm text-gray-900 rounded-lg bg-white rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               placeholder="Recherche"
               required
             />
@@ -331,9 +275,11 @@ const Subject = () => {
               <thead className="bg-indigo-100 text-left font-semibold sticky top-0 z-0">
                 <tr>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">#</th>
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">NOM</th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    NB HEURES
+                    MATIERE
+                  </th>
+                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
+                    CREDIT
                   </th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     COEFFICIENT
@@ -384,7 +330,7 @@ const Subject = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="8"
                       className="text-center px-6 py-4 text-gray-500"
                     >
                       Aucun matieres trouvé.
@@ -397,11 +343,7 @@ const Subject = () => {
         </div>
       </div>
 
-      <div className="mt-6 text-right">
-        <p className="text-gray-600">
-          Nombre total de matieres: {matieres.length}
-        </p>
-      </div>
+      
     </div>
   );
 };

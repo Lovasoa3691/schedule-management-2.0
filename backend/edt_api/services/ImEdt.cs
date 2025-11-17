@@ -19,38 +19,42 @@ public class ImEdt : IEdt
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<EdtDto>> GetAllAsync(string id)
+    public async Task<IEnumerable<EdtDto>> GetAllAsync(
+        string id,
+        DateOnly? startDate = null,
+        DateOnly? endDate = null)
     {
-        List<Edt> result = new List<Edt>();
+        IQueryable<Edt> query = _db.Edts
+            .AsNoTracking()
+            .Include(e => e.enseignant)
+            .ThenInclude(ee => ee.enseignements)
+            .Include(a => a.matiere)
+            .Include(m => m.mention)
+            .Include(n => n.niveau)
+            .Include(s => s.salle)
+            .Include(a => a.anneeScolaire);
 
-        if (id == "all")
+        if (id != "all")
         {
-            result = await _db.Edts
-                .AsNoTracking()
-                .Include(e => e.enseignant)
-                .Include(a => a.matiere)
-                .Include(m => m.mention)
-                .Include(n => n.niveau)
-                .Include(s => s.salle)
-                .Include(a => a.anneeScolaire)
-                .ToListAsync();
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                query = query.Where(e => e.enseignantId == id && e.jour >= startDate.Value && e.jour <= endDate.Value);
+            }
+            else
+            {
+                query = query.Where(e => e.enseignantId == id);
+            }
         }
-        else
+
+        if (startDate.HasValue && endDate.HasValue)
         {
-            result = await _db.Edts
-                .AsNoTracking()
-                .Include(e => e.enseignant)
-                .Include(a => a.matiere)
-                .Include(m => m.mention)
-                .Include(n => n.niveau)
-                .Include(s => s.salle)
-                .Include(a => a.anneeScolaire)
-                .Where(e => e.enseignantId == id)
-                .ToListAsync();
+            query = query.Where(e => e.jour >= startDate.Value && e.jour <= endDate.Value);
         }
-       
+
+        var result = await query.ToListAsync();
         return _mapper.Map<IEnumerable<EdtDto>>(result);
     }
+
 
     public async Task<EdtDto?> GetByIdAsync(string id)
     {

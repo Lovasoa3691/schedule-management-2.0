@@ -209,6 +209,11 @@ namespace edt_api.Migrations
                     b.Property<double>("heureEffectue")
                         .HasColumnType("double");
 
+                    b.Property<int>("numero")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("(UUID())");
+
                     b.Property<string>("ststusEnseignement")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -216,6 +221,9 @@ namespace edt_api.Migrations
                     b.HasKey("enseignantId", "matiereId");
 
                     b.HasIndex("matiereId");
+
+                    b.HasIndex("numero")
+                        .IsUnique();
 
                     b.ToTable("Enseignements");
                 });

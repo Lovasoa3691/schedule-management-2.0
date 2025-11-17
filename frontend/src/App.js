@@ -21,7 +21,7 @@ import Login from "./components/auth/login";
 import Dashboard from "./components/dashboard";
 import Register from "./components/auth/register";
 import Disponibility from "./components/statistics/disponibility";
-import TeacherHour from "./components/statistics/hour";
+import TeacherHour from "./components/statistics/teacherHour";
 import Week from "./components/statistics/week";
 import Profil from "./components/settings/profil";
 import Sector from "./components/settings/sector";
@@ -81,6 +81,7 @@ function App() {
                   <Route path="/parametre/curcus" element={<Sector />} />
                 </Routes>
               </div>
+              <AssistantFloatingForm />
             </div>
           </>
         ) : (
@@ -94,8 +95,6 @@ function App() {
           </Routes>
         )}
       </Router>
-
-      <AssistantFloatingForm />
     </div>
   );
 }

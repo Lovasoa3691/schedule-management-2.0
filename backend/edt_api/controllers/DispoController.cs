@@ -27,22 +27,10 @@ public class DispoController: ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<DispoDto>> Create()
+    public async Task<ActionResult<DispoDto>> Create([FromBody] CreateDispoDto dto)
     {
-        var dto = new CreateDispoDto(
-            dateDispo: new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
-            hDeb: new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
-            hFin: new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
-            codeEns: "6911ce47-c01d-4741-9486-2238cadcda0e"
-        );
-        
         var created = await _service.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.idDispo }, created);
-
-        // return Ok();
-
-        // created = await _service.addAsync(dto);
-        // return CreatedAtAction(nameof(GetById), new { id = created.idMent }, created);
     }
     
     [HttpPut("{id}")]

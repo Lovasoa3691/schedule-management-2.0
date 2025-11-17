@@ -82,6 +82,8 @@ var app = builder.Build();
 //     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 //     db.Database.Migrate();
 // }
+
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
