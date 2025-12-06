@@ -34,7 +34,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5142/api/utilisateur/profile", {
+      .get("http://localhost:8080/api/utilisateur/profile", {
         withCredentials: true,
       })
       .then((rep) => {

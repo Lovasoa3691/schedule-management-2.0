@@ -7,7 +7,7 @@ const PrivateRoute = ({ children }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/utilisateur/profile", {
+      .get("http://localhost:8080/api/utilisateur/profile", {
         withCredentials: true,
       })
       .then(() => setIsAuth(true))

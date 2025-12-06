@@ -12,7 +12,7 @@ const Subject = () => {
 
   const loadSubject = () => {
     axios
-      .get("http://localhost:5142/api/matiere")
+      .get("http://localhost:8080/api/matiere")
       .then((res) => setMatieres(res.data))
       .catch((err) => console.error("Erreur de chargement:", err));
   };
@@ -45,13 +45,13 @@ const Subject = () => {
 
   const loadData = () => {
     axios
-      .get("http://localhost:5142/api/mention")
+      .get("http://localhost:8080/api/mention")
       .then((res) => setMentions(res.data));
     axios
-      .get("http://localhost:5142/api/niveau")
+      .get("http://localhost:8080/api/niveau")
       .then((res) => setNiveaux(res.data));
     axios
-      .get("http://localhost:5142/api/utilisateur/teacher")
+      .get("http://localhost:8080/api/utilisateur/teacher")
       .then((res) => setEnseignants(res.data));
   };
 
@@ -80,7 +80,7 @@ const Subject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      axios.post("http://localhost:5142/api/matiere", formData).then((rep) => {
+      axios.post("http://localhost:8080/api/matiere", formData).then((rep) => {
         loadSubject();
         setFormData({
           id: "",
@@ -108,7 +108,7 @@ const Subject = () => {
       return;
     }
     axios
-      .put(`http://localhost:5142/api/matiere/${formData.id}`, formData)
+      .put(`http://localhost:8080/api/matiere/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -147,7 +147,7 @@ const Subject = () => {
 
   const handleDelete = () => {
     axios
-      .delete(`http://localhost:5142/api/matiere/${deleteId}`)
+      .delete(`http://localhost:8080/api/matiere/${deleteId}`)
       .then(() => {
         loadSubject();
         setShowAlert(true);

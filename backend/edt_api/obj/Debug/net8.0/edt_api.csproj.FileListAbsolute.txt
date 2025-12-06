@@ -352,3 +352,5 @@
 /home/julianot/Desktop/Projects/schedule-management/backend/edt_api/obj/Debug/net8.0/edt_api.pdb
 /home/julianot/Desktop/Projects/schedule-management/backend/edt_api/obj/Debug/net8.0/edt_api.genruntimeconfig.cache
 /home/julianot/Desktop/Projects/schedule-management/backend/edt_api/obj/Debug/net8.0/ref/edt_api.dll
+/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/bin/Debug/net8.0/Npgsql.dll
+/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/bin/Debug/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll

@@ -22,7 +22,7 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   const getUser = (key) => {
     axios
-      .get(`http://localhost:5142/api/utilisateur/${key}`)
+      .get(`http://localhost:8080/api/utilisateur/${key}`)
       .then((res) => setUser(res.data))
       .catch((err) => console.error("Erreur de recuperation: ", err));
   };
@@ -39,7 +39,7 @@ const TopBar = ({ setIsAuthenticated }) => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5142/api/utilisateur/logout",
+        "http://localhost:8080/api/utilisateur/logout",
         "responsable",
         {
           withCredentials: true,

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "qfo+misEHeQ=",
+  "dgSpecHash": "V+RmIfYr6eZqd2OpHJUj/A+OHEGXkjPUNkYXjpimDrSVjbGDbQd3ACxcW8G6OUHoqOi+h4A+thaHDoishQqedg==",
   "success": true,
   "projectFilePath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
   "expectedPackageFiles": [
@@ -40,6 +40,8 @@
     "/home/julianot/.nuget/packages/microsoft.openapi/1.4.3/microsoft.openapi.1.4.3.nupkg.sha512",
     "/home/julianot/.nuget/packages/mono.texttemplating/2.2.1/mono.texttemplating.2.2.1.nupkg.sha512",
     "/home/julianot/.nuget/packages/mysqlconnector/2.3.5/mysqlconnector.2.3.5.nupkg.sha512",
+    "/home/julianot/.nuget/packages/npgsql/8.0.6/npgsql.8.0.6.nupkg.sha512",
+    "/home/julianot/.nuget/packages/npgsql.entityframeworkcore.postgresql/8.0.11/npgsql.entityframeworkcore.postgresql.8.0.11.nupkg.sha512",
     "/home/julianot/.nuget/packages/pomelo.entityframeworkcore.mysql/8.0.3/pomelo.entityframeworkcore.mysql.8.0.3.nupkg.sha512",
     "/home/julianot/.nuget/packages/system.codedom/4.4.0/system.codedom.4.4.0.nupkg.sha512",
     "/home/julianot/.nuget/packages/system.collections.immutable/6.0.0/system.collections.immutable.6.0.0.nupkg.sha512",
@@ -56,15 +58,5 @@
     "/home/julianot/.nuget/packages/system.text.encoding.codepages/6.0.0/system.text.encoding.codepages.6.0.0.nupkg.sha512",
     "/home/julianot/.nuget/packages/system.threading.channels/6.0.0/system.threading.channels.6.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1900",
-      "level": "Warning",
-      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json.",
-      "projectPath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
-      "warningLevel": 1,
-      "filePath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
-      "targetGraphs": []
-    }
-  ]
+  "logs": []
 }

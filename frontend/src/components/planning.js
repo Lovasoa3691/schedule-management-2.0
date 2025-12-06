@@ -118,42 +118,42 @@ const Planning = () => {
 
   const loadAll = () => {
     axios
-      .get("http://localhost:5142/api/utilisateur/teacher")
+      .get("http://localhost:8080/api/utilisateur/teacher")
       .then((res) => {
         setEnsignants(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/mention")
+      .get("http://localhost:8080/api/mention")
       .then((res) => {
         setMentions(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/niveau")
+      .get("http://localhost:8080/api/niveau")
       .then((res) => {
         setNiveaux(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/salle")
+      .get("http://localhost:8080/api/salle")
       .then((res) => {
         setSalles(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/matiere")
+      .get("http://localhost:8080/api/matiere")
       .then((res) => {
         setMatieres(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     axios
-      .get("http://localhost:5142/api/disponibilite/all")
+      .get("http://localhost:8080/api/disponibilite/all")
       .then((res) => {
         setDisponibilite(res.data);
       })
@@ -162,7 +162,7 @@ const Planning = () => {
 
   const loadSchedule = () => {
     axios
-      .get("http://localhost:5142/api/edt/all", {
+      .get("http://localhost:8080/api/edt/all", {
         params: { startDate: null, endDate: null },
       })
       .then((res) => {
@@ -314,7 +314,7 @@ const Planning = () => {
     };
 
     axios
-      .post("http://localhost:5142/api/edt", data)
+      .post("http://localhost:8080/api/edt", data)
       .then((rep) => {
         loadSchedule();
         setFormData({
@@ -450,7 +450,7 @@ const Planning = () => {
 
   const handleDelete = () => {
     axios
-      .delete(`http://localhost:5142/api/utilisateur/teacher/${deleteId}`)
+      .delete(`http://localhost:8080/api/utilisateur/teacher/${deleteId}`)
       .then(() => {
         loadSchedule();
         setShowAlert(true);

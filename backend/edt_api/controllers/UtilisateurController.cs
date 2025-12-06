@@ -90,8 +90,6 @@ public class UtilisateurController : ControllerBase
                 Path = "/"
             });
         }
-        
-
         return Ok(new { email = user.email });
     }
 
