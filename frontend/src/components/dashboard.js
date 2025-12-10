@@ -48,16 +48,16 @@ const Dashboard = () => {
   const [filter, setFilter] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/mention").then((rep) => {
+    axios.get("http://localhost:8000/api/mention").then((rep) => {
       setMentions(rep.data);
     });
 
-    axios.get("http://localhost:8080/api/niveau").then((rep) => {
+    axios.get("http://localhost:8000/api/niveau").then((rep) => {
       setNiveaux(rep.data);
     });
 
     axios
-      .get("http://localhost:8080/api/utilisateur/profile", {
+      .get("http://localhost:8000/api/utilisateur/profile", {
         withCredentials: true,
       })
       .then((rep) => {
@@ -67,20 +67,20 @@ const Dashboard = () => {
         console.error(err.message);
       });
 
-    axios.get("http://localhost:8080/api/utilisateur/teacher").then((rep) => {
+    axios.get("http://localhost:8000/api/utilisateur/teacher").then((rep) => {
       setEnseignants(rep.data);
     });
 
-    axios.get("http://localhost:8080/api/edt/all").then((rep) => {
+    axios.get("http://localhost:8000/api/edt/all").then((rep) => {
       setPlanning(rep.data);
     });
 
-    axios.get("http://localhost:8080/api/salle").then((rep) => {
+    axios.get("http://localhost:8000/api/salle").then((rep) => {
       setSalles(rep.data);
     });
 
     axios
-      .get("http://localhost:8080/api/utilisateur/teacher/info/all")
+      .get("http://localhost:8000/api/utilisateur/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);

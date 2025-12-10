@@ -27,7 +27,7 @@ const Teacher = () => {
 
   const loadData = () => {
     axios
-      .get("http://localhost:8080/api/utilisateur/teacher")
+      .get("http://localhost:8000/api/utilisateur/teacher")
       .then((res) => {
         setEnseignant(res.data);
         setFiltered(res.data);
@@ -67,7 +67,7 @@ const Teacher = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/api/utilisateur/add/teacher", formData)
+      .post("http://localhost:8000/api/utilisateur/add/teacher", formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -94,7 +94,7 @@ const Teacher = () => {
     }
     axios
       .put(
-        `http://localhost:8080/api/utilisateur/teacher/${formData.id}`,
+        `http://localhost:8000/api/utilisateur/teacher/${formData.id}`,
         formData
       )
       .then((res) => {
@@ -125,7 +125,7 @@ const Teacher = () => {
 
   const handleDelete = () => {
     axios
-      .delete(`http://localhost:8080/api/utilisateur/teacher/${deleteId}`)
+      .delete(`http://localhost:8000/api/utilisateur/teacher/${deleteId}`)
       .then(() => {
         loadData();
         setShowAlert(true);

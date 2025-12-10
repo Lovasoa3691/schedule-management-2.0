@@ -21,7 +21,7 @@ const ClassRoom = () => {
 
   const loadData = () => {
     axios
-      .get("http://localhost:8080/api/salle")
+      .get("http://localhost:8000/api/salle")
       .then((res) => {
         setSalles(res.data);
         setFiltered(res.data);
@@ -59,7 +59,7 @@ const ClassRoom = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8080/api/salle", formData)
+      .post("http://localhost:8000/api/salle", formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -83,7 +83,7 @@ const ClassRoom = () => {
       return;
     }
     axios
-      .put(`http://localhost:8080/api/salle/${formData.id}`, formData)
+      .put(`http://localhost:8000/api/salle/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -110,7 +110,7 @@ const ClassRoom = () => {
 
   const handleDelete = () => {
     axios
-      .delete(`http://localhost:8080/api/salle/${deleteId}`)
+      .delete(`http://localhost:8000/api/salle/${deleteId}`)
       .then(() => {
         loadData();
         setShowAlert(true);
