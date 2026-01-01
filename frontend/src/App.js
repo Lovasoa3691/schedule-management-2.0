@@ -26,17 +26,15 @@ import Week from "./components/statistics/week";
 import Profil from "./components/settings/profil";
 import Sector from "./components/settings/sector";
 import AssistantFloatingForm from "./components/forms/assistant";
-import axios from "axios";
+import api from "./hooks/api";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/utilisateur/profile", {
-        withCredentials: true,
-      })
+    api
+      .get("/utilisateur/profile")
       .then((rep) => {
         console.log("Data: ", rep.data);
         localStorage.setItem("user", rep.data);
@@ -79,6 +77,7 @@ function App() {
                   <Route path="/statistique/semaine" element={<Week />} />
                   <Route path="/parametre/profile" element={<Profil />} />
                   <Route path="/parametre/curcus" element={<Sector />} />
+                  <Route path="/users" element={<Teacher />} />
                 </Routes>
               </div>
               <AssistantFloatingForm />

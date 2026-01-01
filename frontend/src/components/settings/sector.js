@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import CalendrierInteractif from "../customDate/calendar";
-import axios from "axios";
 import { FaPlus, FaRegCalendarAlt, FaUniversity } from "react-icons/fa";
 import { MdOutlineCalendarMonth, MdSchool } from "react-icons/md";
+import api from "../../hooks/api";
 
 const Sector = () => {
-  
   const [mentions, setMentions] = useState([]);
   const [niveaux, setNiveaux] = useState([]);
 
@@ -22,18 +20,18 @@ const Sector = () => {
   });
 
   const loadData = () => {
-    axios
-      .get("http://localhost:5142/api/mention")
+    api
+      .get("/mention")
       .then((res) => setMentions(res.data))
       .catch((err) => console.error("Erreur de chargement:", err.message));
 
-    axios
-      .get("http://localhost:5142/api/niveau")
+    api
+      .get("/niveau")
       .then((res) => setNiveaux(res.data))
       .catch((err) => console.error("Erreur de chargement:", err.message));
 
-    axios
-      .get("http://localhost:5142/api/annee")
+    api
+      .get("/annee")
       .then((res) => setAnnee(res.data))
       .catch((err) => console.error("Erreur de chargement:", err.message));
   };
@@ -44,17 +42,15 @@ const Sector = () => {
 
   const handleSaveMention = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:5142/api/mention", { nomMention })
-      .then((rep) => {
-        loadData();
-        setnomMention("");
-      });
+    api.post("/mention", { nomMention }).then((rep) => {
+      loadData();
+      setnomMention("");
+    });
   };
 
   const handleSaveNiveau = (e) => {
     e.preventDefault();
-    axios.post("http://localhost:5142/api/niveau", { intitule }).then((rep) => {
+    api.post("/niveau", { intitule }).then((rep) => {
       loadData();
       setIntitule("");
     });
@@ -78,8 +74,8 @@ const Sector = () => {
 
   const ajouterAnnee = () => {
     try {
-      axios
-        .post("http://localhost:5142/api/annee", anneeData)
+      api
+        .post("/annee", anneeData)
         .then((rep) => {
           loadData();
           alert("Année scolaire ajoutée avec succès");

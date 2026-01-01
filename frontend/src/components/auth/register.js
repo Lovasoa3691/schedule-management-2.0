@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import Logo from "../../assets/calendar.png";
-import { FaLock, FaUser, FaEnvelope } from "react-icons/fa";
-import axios from "axios";
 import { FileWarning } from "lucide-react";
+import api from "../../hooks/api";
 
 const Register = () => {
   const [showInfo, setShowInfo] = useState(false);
@@ -46,11 +45,8 @@ const Register = () => {
       return;
     }
 
-    axios
-      .post(
-        "http://localhost:8000/api/utilisateur/responsable/register",
-        formData
-      )
+    api
+      .post("/utilisateur/responsable/register", formData)
       .then((rep) => {
         setShowInfo(true);
       })

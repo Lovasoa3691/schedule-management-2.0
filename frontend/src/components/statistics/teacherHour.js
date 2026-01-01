@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
 import SimpleBarChart from "../chart/bar";
-import axios from "axios";
+import api from "../../hooks/api";
 
 const TeacherHour = () => {
   const [enseignants, setEnseignants] = useState([]);
@@ -9,16 +9,16 @@ const TeacherHour = () => {
   const [filter, setFilter] = useState([]);
 
   const loadAll = () => {
-    axios
-      .get("http://localhost:5142/api/utilisateur/teacher/info/all")
+    api
+      .get("utilisateur/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:5142/api/utilisateur/teacher")
+    api
+      .get("utilisateur/teacher")
       .then((res) => {
         setEnseignants(res.data);
       })

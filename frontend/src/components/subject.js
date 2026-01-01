@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import axios from "axios";
 import { MdPrint } from "react-icons/md";
 import { FaEdit, FaFileExcel, FaTrashAlt } from "react-icons/fa";
 import SubjectForm from "./forms/subject-form";
 import Confirm from "./notification/confirm";
 import AlertInfo from "./notification/alert";
+import api from "../hooks/api";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
 
   const loadSubject = () => {
-    axios
-      .get("http://localhost:8000/api/matiere")
+    api
+      .get("/matiere")
       .then((res) => setMatieres(res.data))
       .catch((err) => console.error("Erreur de chargement:", err));
   };
@@ -44,15 +44,9 @@ const Subject = () => {
   const [enseignants, setEnseignants] = useState([]);
 
   const loadData = () => {
-    axios
-      .get("http://localhost:8000/api/mention")
-      .then((res) => setMentions(res.data));
-    axios
-      .get("http://localhost:8000/api/niveau")
-      .then((res) => setNiveaux(res.data));
-    axios
-      .get("http://localhost:8000/api/utilisateur/teacher")
-      .then((res) => setEnseignants(res.data));
+    api.get("/mention").then((res) => setMentions(res.data));
+    api.get("/niveau").then((res) => setNiveaux(res.data));
+    api.get("/utilisateur/teacher").then((res) => setEnseignants(res.data));
   };
 
   useEffect(() => {
@@ -80,7 +74,7 @@ const Subject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      axios.post("http://localhost:8000/api/matiere", formData).then((rep) => {
+      api.post("/matiere", formData).then((rep) => {
         loadSubject();
         setFormData({
           id: "",
@@ -107,8 +101,8 @@ const Subject = () => {
       );
       return;
     }
-    axios
-      .put(`http://localhost:8000/api/matiere/${formData.id}`, formData)
+    api
+      .put(`/matiere/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -146,8 +140,8 @@ const Subject = () => {
   };
 
   const handleDelete = () => {
-    axios
-      .delete(`http://localhost:8000/api/matiere/${deleteId}`)
+    api
+      .delete(`/matiere/${deleteId}`)
       .then(() => {
         loadSubject();
         setShowAlert(true);
@@ -288,11 +282,9 @@ const Subject = () => {
                     ENSEIGNANT
                   </th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    MENTION
+                    CLASSE
                   </th>
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    NIVEAU
-                  </th>
+
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     ACTIONS
                   </th>
@@ -309,8 +301,9 @@ const Subject = () => {
                       <td className="px-4 py-3">
                         {mat.nomEns} {mat.prenomEns}
                       </td>
-                      <td className="px-4 py-3">{mat.mention}</td>
-                      <td className="px-4 py-3">{mat.niveau.join(" / ")}</td>
+                      <td className="px-4 py-3">
+                        {mat.mention} {mat.niveau.join(" / ")}
+                      </td>
                       <td className="px-4 py-3">
                         <button
                           className="text-blue-600 text-sm"
@@ -342,8 +335,6 @@ const Subject = () => {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 };

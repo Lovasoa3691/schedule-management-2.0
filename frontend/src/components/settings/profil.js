@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { MdSave, MdSend } from "react-icons/md";
+import api from "../../hooks/api";
 
 const Profil = () => {
   const [user, setUser] = useState(null);
@@ -22,8 +22,8 @@ const Profil = () => {
   });
 
   const getUser = (key) => {
-    axios
-      .get(`http://localhost:5142/api/utilisateur/${key}`)
+    api
+      .get(`/utilisateur/${key}`)
       .then((res) => setUser(res.data))
       .catch((err) => console.error("Erreur de recuperation: ", err));
   };
@@ -46,9 +46,7 @@ const Profil = () => {
   return (
     <main className="flex flex flex-col h-screen">
       <header className="p-4 bg-slate-100 border-b flex items-center">
-        <div className="w-10 h-10  text-white flex items-center justify-center text-lg font-bold">
-          
-        </div>
+        <div className="w-10 h-10  text-white flex items-center justify-center text-lg font-bold"></div>
       </header>
 
       <div className="h-[600px] p-14  bg-white">

@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        // On définit la chaîne de connexion pour les tests
+        CONNECTION_STRING = "Server=schedule-mysql;Port=3306;Database=db_edt_p;Uid=orion;Pwd=orion3691;"
+    }
+
+    stages {
+        stage('Nettoyage') {
+            steps {
+                echo 'Nettoyage des anciens conteneurs...'
+                sh 'docker compose down --volumes --remove-orphans'
+            }
+        }
+
+        stage('Build & Start Services') {
+            steps {
+                echo 'Lancement des services Docker...'
+                sh 'docker compose up -d --build mysql'
+                // On attend que MySQL soit prêt avant de lancer le backend
+                echo 'Attente de l\'initialisation de MySQL...'
+                sleep 15 
+                sh 'docker compose up -d --build backend frontend'
+            }
+        }
+
+        stage('Tests Backend') {
+            steps {
+                echo 'Exécution des tests unitaires et d\'intégration...'
+                // Jenkins exécute les tests à l'intérieur du conteneur backend
+                sh 'docker exec schedule-backend-dev dotnet test'
+            }
+        }
+
+        stage('Tests Frontend') {
+            steps {
+                echo 'Exécution des tests Frontend...'
+                // Exemple si vous avez des tests npm
+                // sh 'docker exec schedule-frontend-dev npm test'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Arrêt des services...'
+            sh 'docker compose down'
+        }
+        success {
+            echo 'Pipeline réussi !'
+        }
+        failure {
+            echo 'Le pipeline a échoué. Vérifiez les logs.'
+        }
+    }
+}

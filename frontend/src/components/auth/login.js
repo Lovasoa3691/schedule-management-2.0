@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/calendar.png";
 import { useState } from "react";
-import axios from "axios";
 import { FileWarning } from "lucide-react";
+import api from "../../hooks/api";
 
 const Login = ({ setIsAuthentificated }) => {
   const [showAlert, setShowAlert] = useState(false);
@@ -18,24 +18,23 @@ const Login = ({ setIsAuthentificated }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    axios
-      .post("http://localhost:8000/api/utilisateur/login", user, {
-        withCredentials: true,
-      })
+    api
+      .post("/utilisateur/login", user)
       .then((rep) => {
+        console.log(rep.data);
         setIsAuthentificated(true);
         navigate("/dashboard");
       })
       .catch((err) => {
         if (err.response) {
-          // console.error("Status:", err.response.status);
-          // console.error("Erreur serveur:", err.response.data);
+          console.error("Status:", err.response.status);
+          console.error("Erreur serveur:", err.response.data);
           setError(err.response.data);
           setShowAlert(true);
         } else {
-          // console.error("Erreur:", err.message);
+          console.error("Erreur:", err.message);
           setError(err.message);
-          setShowAlert(true)
+          setShowAlert(true);
         }
       });
   };

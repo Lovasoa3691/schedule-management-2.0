@@ -1,15 +1,16 @@
-import axios from "axios";
+
 import { use, useEffect, useState } from "react";
 import { MdBarChart, MdExpandMore } from "react-icons/md";
 import { Link } from "react-router-dom";
+import api from "../../hooks/api";
 
 const Disponibility = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const [disponibilites, setDisponibilites] = useState([]);
 
   const loadDisponibilites = () => {
-    axios
-      .get("http://localhost:5142/api/disponibilite/all")
+    api
+      .get("/disponibilite/all")
       .then((res) => setDisponibilites(res.data))
       .catch((err) => console.error("Erreur de chargement:", err));
   };

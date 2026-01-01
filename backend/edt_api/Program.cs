@@ -22,6 +22,16 @@ builder.Services.AddCors(options =>
     });
 });
 
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion)
+);
+
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+// );
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,14 +65,6 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
-
-// builder.Services.AddDbContext<AppDbContext>(options =>
-//     options.UseNpgsql(connectionString)
-// );
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-);
 
 // builder.Services.AddOpenApi();
 builder.Services.AddAutoMapper(typeof(Program));

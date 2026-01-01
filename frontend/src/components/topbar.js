@@ -7,8 +7,8 @@ import {
 import { useEffect, useState } from "react";
 import { MdMenu } from "react-icons/md";
 import { Toast } from "./notification/toast";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../hooks/api";
 
 const TopBar = ({ setIsAuthenticated }) => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -21,8 +21,8 @@ const TopBar = ({ setIsAuthenticated }) => {
   });
 
   const getUser = (key) => {
-    axios
-      .get(`http://localhost:8000/api/utilisateur/${key}`)
+    api
+      .get(`/utilisateur/${key}`)
       .then((res) => setUser(res.data))
       .catch((err) => console.error("Erreur de recuperation: ", err));
   };
@@ -38,14 +38,9 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "http://localhost:8000/api/utilisateur/logout",
-        "responsable",
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      await api.post("/utilisateur/logout", "responsable", {
+        headers: { "Content-Type": "application/json" },
+      });
 
       setIsAuthenticated(false);
       localStorage.removeItem("user");

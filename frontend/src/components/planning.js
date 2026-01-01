@@ -4,10 +4,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import fr from "date-fns/locale/fr";
 import React, { use, useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
-import { FiSearch } from "react-icons/fi";
 import Select from "react-select";
-import axios from "axios";
 import { FaFileExcel, FaTimes } from "react-icons/fa";
 import PlanningForm from "./forms/planning-form";
 import { MdPrint } from "react-icons/md";
@@ -19,6 +16,7 @@ import * as XLSX from "xlsx";
 import AlertInfo from "./notification/alert";
 import ErrorDialog from "./notification/error";
 import Confirm from "./notification/confirm";
+import api from "../hooks/api";
 const locales = {
   fr: fr,
 };
@@ -117,43 +115,43 @@ const Planning = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   const loadAll = () => {
-    axios
-      .get("http://localhost:8000/api/utilisateur/teacher")
+    api
+      .get("/utilisateur/teacher")
       .then((res) => {
         setEnsignants(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:8000/api/mention")
+    api
+      .get("/mention")
       .then((res) => {
         setMentions(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:8000/api/niveau")
+    api
+      .get("/niveau")
       .then((res) => {
         setNiveaux(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:8000/api/salle")
+    api
+      .get("/salle")
       .then((res) => {
         setSalles(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:8000/api/matiere")
+    api
+      .get("/matiere")
       .then((res) => {
         setMatieres(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
-    axios
-      .get("http://localhost:8000/api/disponibilite/all")
+    api
+      .get("/disponibilite/all")
       .then((res) => {
         setDisponibilite(res.data);
       })
@@ -161,8 +159,8 @@ const Planning = () => {
   };
 
   const loadSchedule = () => {
-    axios
-      .get("http://localhost:8000/api/edt/all", {
+    api
+      .get("/edt/all", {
         params: { startDate: null, endDate: null },
       })
       .then((res) => {
@@ -313,8 +311,8 @@ const Planning = () => {
       hFin: `${formData.hFin}:00`,
     };
 
-    axios
-      .post("http://localhost:8000/api/edt", data)
+    api
+      .post("/edt", data)
       .then((rep) => {
         loadSchedule();
         setFormData({
@@ -449,8 +447,8 @@ const Planning = () => {
   };
 
   const handleDelete = () => {
-    axios
-      .delete(`http://localhost:8000/api/utilisateur/teacher/${deleteId}`)
+    api
+      .delete(`/utilisateur/teacher/${deleteId}`)
       .then(() => {
         loadSchedule();
         setShowAlert(true);

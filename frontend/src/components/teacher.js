@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import axios from "axios";
 import { MdPrint } from "react-icons/md";
 import { FaEdit, FaFileExcel, FaTrash, FaTrashAlt } from "react-icons/fa";
 import TeacherForm from "./forms/teacher-form";
@@ -10,6 +9,7 @@ import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
+import api from "../hooks/api";
 // import { saveAs } from "file-saver";
 
 const Teacher = () => {
@@ -26,8 +26,8 @@ const Teacher = () => {
   });
 
   const loadData = () => {
-    axios
-      .get("http://localhost:8000/api/utilisateur/teacher")
+    api
+      .get("/utilisateur/teacher")
       .then((res) => {
         setEnseignant(res.data);
         setFiltered(res.data);
@@ -42,7 +42,6 @@ const Teacher = () => {
   const [showModal, setShowModal] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [searchfield, setSearchfiled] = useState("");
-  const [actionMode, setActionMode] = useState("");
   const [alert, setAlert] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
@@ -66,8 +65,8 @@ const Teacher = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:8000/api/utilisateur/add/teacher", formData)
+    api
+      .post("/utilisateur/add/teacher", formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -92,9 +91,9 @@ const Teacher = () => {
       console.error("ID de l'enseignant manquant pour la mise à jour");
       return;
     }
-    axios
+    api
       .put(
-        `http://localhost:8000/api/utilisateur/teacher/${formData.id}`,
+        `/utilisateur/teacher/${formData.id}`,
         formData
       )
       .then((res) => {
@@ -124,8 +123,8 @@ const Teacher = () => {
   };
 
   const handleDelete = () => {
-    axios
-      .delete(`http://localhost:8000/api/utilisateur/teacher/${deleteId}`)
+    api
+      .delete(`/utilisateur/teacher/${deleteId}`)
       .then(() => {
         loadData();
         setShowAlert(true);

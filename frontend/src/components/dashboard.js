@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaChalkboardTeacher,
-  FaDoorOpen,
-  FaCalendarAlt,
-  FaChartBar,
-  FaVenusMars,
-  FaEdit,
-  FaTrashAlt,
-} from "react-icons/fa";
+import { FaChalkboardTeacher, FaDoorOpen, FaCalendarAlt } from "react-icons/fa";
 import { PieChart, Pie, Cell } from "recharts";
 import PieChartComponent from "./chart/pie";
 import PieCard from "./chart/pie";
 import Select from "react-select";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 import { tr } from "date-fns/locale";
+import api from "../hooks/api";
 
 const genderData = [
   { name: "Masculin", value: 60 },
@@ -48,18 +40,16 @@ const Dashboard = () => {
   const [filter, setFilter] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/api/mention").then((rep) => {
+    api.get("/mention").then((rep) => {
       setMentions(rep.data);
     });
 
-    axios.get("http://localhost:8000/api/niveau").then((rep) => {
+    api.get("/niveau").then((rep) => {
       setNiveaux(rep.data);
     });
 
-    axios
-      .get("http://localhost:8000/api/utilisateur/profile", {
-        withCredentials: true,
-      })
+    api
+      .get("/utilisateur/profile")
       .then((rep) => {
         setUserId(rep.data);
       })
@@ -67,20 +57,20 @@ const Dashboard = () => {
         console.error(err.message);
       });
 
-    axios.get("http://localhost:8000/api/utilisateur/teacher").then((rep) => {
+    api.get("/utilisateur/teacher").then((rep) => {
       setEnseignants(rep.data);
     });
 
-    axios.get("http://localhost:8000/api/edt/all").then((rep) => {
+    api.get("/edt/all").then((rep) => {
       setPlanning(rep.data);
     });
 
-    axios.get("http://localhost:8000/api/salle").then((rep) => {
+    api.get("/salle").then((rep) => {
       setSalles(rep.data);
     });
 
-    axios
-      .get("http://localhost:8000/api/utilisateur/teacher/info/all")
+    api
+      .get("/utilisateur/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
@@ -312,7 +302,7 @@ const Dashboard = () => {
         <div className="bg-white shadow rounded-lg p-5 xl:col-span-2">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Enseignants
+              Suivie des activites des enseignants
             </h2>
           </div>
 

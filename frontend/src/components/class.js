@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import axios from "axios"; // assure-toi que axios est installé
 import { MdPrint } from "react-icons/md";
 import { FaEdit, FaFileExcel, FaTrashAlt } from "react-icons/fa";
 import ClassForm from "./forms/class-form";
 import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
+import api from "../hooks/api";
 
 const ClassRoom = () => {
   const [salles, setSalles] = useState([]);
@@ -20,8 +20,8 @@ const ClassRoom = () => {
   });
 
   const loadData = () => {
-    axios
-      .get("http://localhost:8000/api/salle")
+    api
+      .get("/salle")
       .then((res) => {
         setSalles(res.data);
         setFiltered(res.data);
@@ -58,8 +58,8 @@ const ClassRoom = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:8000/api/salle", formData)
+    api
+      .post("/salle", formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -82,8 +82,8 @@ const ClassRoom = () => {
       console.error("ID de l'enseignant manquant pour la mise à jour");
       return;
     }
-    axios
-      .put(`http://localhost:8000/api/salle/${formData.id}`, formData)
+    api
+      .put(`/salle/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -109,8 +109,8 @@ const ClassRoom = () => {
   };
 
   const handleDelete = () => {
-    axios
-      .delete(`http://localhost:8000/api/salle/${deleteId}`)
+    api
+      .delete(`/salle/${deleteId}`)
       .then(() => {
         loadData();
         setShowAlert(true);

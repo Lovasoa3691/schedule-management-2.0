@@ -1,17 +1,20 @@
 import { FiLogOut, FiCalendar } from "react-icons/fi";
 import {
-  MdDashboard,
   MdPerson,
   MdMenuBook,
   MdMeetingRoom,
   MdAnalytics,
-  MdArrowDropDown,
-  MdMessage,
   MdSettings,
   MdBarChart,
   MdExpandMore,
+  MdGroup,
 } from "react-icons/md";
-import { FaChalkboardTeacher, FaBook, FaDoorOpen } from "react-icons/fa";
+import {
+  FaChalkboardTeacher,
+  FaBook,
+  FaDoorOpen,
+  FaUser,
+} from "react-icons/fa";
 import { FiGrid, FiUser, FiHome } from "react-icons/fi";
 import { GiBookshelf } from "react-icons/gi";
 import { useEffect, useState } from "react";
@@ -84,7 +87,7 @@ const Navbar = ({ setLoading }) => {
                         : " text-gray-800"
                     }`}
                   >
-                    <MdPerson className="w-5 h-5 mr-3 text-gray-800" />
+                    <MdGroup className="w-5 h-5 mr-3 text-gray-800" />
                     Enseignants
                   </Link>
                 </li>
@@ -190,15 +193,29 @@ const Navbar = ({ setLoading }) => {
               <h4 className="text-xs px-4 text-gray-800 uppercase tracking-wide mb-2">
                 Fonctionnalités avancées
               </h4>
+              <ul>
+                <li>
+                  <Link
+                    onClick={() => menuClick("users", "/users")}
+                    className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
+                      active === "users"
+                        ? " bg-slate-100 text-blue-600"
+                        : " text-gray-800"
+                    }`}
+                  >
+                    <MdPerson className="w-5 h-5 mr-3 text-gray-800" />
+                    Utilisateurs
+                  </Link>
+                </li>
+              </ul>
               <ul className="space-y-2">
-
                 <li>
                   <button
                     onClick={() => setOpenSettings(!openSettings)}
                     className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold text-left"
                   >
                     <div className="flex items-center">
-                      <MdBarChart className="w-5 h-5 mr-3 text-gray-800" />
+                      <MdSettings className="w-5 h-5 mr-3 text-gray-800" />
                       <span>Paramètres</span>
                     </div>
                     <MdExpandMore

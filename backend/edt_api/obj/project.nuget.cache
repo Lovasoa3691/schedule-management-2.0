@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "V+RmIfYr6eZqd2OpHJUj/A+OHEGXkjPUNkYXjpimDrSVjbGDbQd3ACxcW8G6OUHoqOi+h4A+thaHDoishQqedg==",
+  "dgSpecHash": "hb7lGOVqO0RC9b10vWhmDZfLb4CMv2LHWqDNqWLHxpaTObFKn3R/50h+H/0aZY/UkrCIYCgeB9sEDmnSMat8Fg==",
   "success": true,
   "projectFilePath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
   "expectedPackageFiles": [
