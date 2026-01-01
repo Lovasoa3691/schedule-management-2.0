@@ -1,18 +1,4 @@
 services:
-  # mysql:
-  #   image: mysql:8.0
-  #   container_name: schedule-mysql
-  #   restart: always
-  #   ports:
-  #     - "3307:3306"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #     MYSQL_DATABASE: db_edt_p
-  #     MYSQL_USER: orion
-  #     MYSQL_PASSWORD: orion3691
-  #   volumes:
-  #     - mysql_data:/var/lib/mysql
-
   backend:
     build:
       context: ./backend
@@ -23,9 +9,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8000
-      - ConnectionStrings__DefaultConnection=Server=mysql-fa8f43c-hghjbjjkhjhuifhjg.g.aivencloud.com;Port=11328;Database=db_edt_p;User=avnadmin;Password=AVNS_kN0s7eSogKTNZ_uQEl8;SslMode=Required;
-    # depends_on:
-    #   - mysql
+      - ConnectionStrings__DefaultConnection=Server=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD};SslMode=Required;
 
   frontend:
     build: ./frontend
@@ -36,5 +20,3 @@ services:
       - NODE_ENV=development
     depends_on:
       - backend
-# volumes:
-#   mysql_data:
