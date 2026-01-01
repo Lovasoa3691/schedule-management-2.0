@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import axios from "axios";
 // import Animated from 'react-native-reanimated';
 
 type coursesList = {
@@ -29,13 +30,12 @@ type coursesList = {
   status: string;
   matiere: string;
   completed: boolean;
+  statusEns: boolean;
 };
 
 export default function courses(): React.JSX.Element {
-  const [subject, setSubject] = useState<string>("");
-  const [notes, setNotes] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [courses, setCourses] = useState<coursesList[]>([]);
 
   const formatdate = (date: Date) => {
     let hour = date.getHours();
@@ -44,60 +44,65 @@ export default function courses(): React.JSX.Element {
 
     return `${hour}:${minutes}`.padStart(2, "0");
   };
-  const [courses, setCourses] = useState<coursesList[]>([
-    {
-      id: "1",
-      hDeb: formatdate(date),
-      hFin: formatdate(date),
-      status: "En cours",
-      mention: "INFO",
-      niveau: "M1",
-      salle: "7A",
-      localisation: "1er etage",
-      matiere: "Java Web",
-      jour: date.toISOString().split("T")[0],
-      completed: false,
-    },
-    {
-      id: "2",
-      hDeb: formatdate(date),
-      hFin: formatdate(date),
-      status: "En cours",
-      mention: "INFO",
-      niveau: "M1",
-      salle: "7A",
-      localisation: "1er etage",
-      matiere: "CAE",
-      jour: date.toISOString().split("T")[0],
-      completed: false,
-    },
-    {
-      id: "3",
-      hDeb: formatdate(date),
-      hFin: formatdate(date),
-      status: "Terminé",
-      mention: "INFO",
-      niveau: "M1",
-      salle: "7A",
-      localisation: "1er etage",
-      matiere: "C#",
-      jour: date.toISOString().split("T")[0],
-      completed: false,
-    },
-    {
-      id: "4",
-      hDeb: formatdate(date),
-      hFin: formatdate(date),
-      status: "Terminé",
-      mention: "INFO",
-      niveau: "M1",
-      salle: "7A",
-      localisation: "1er etage",
-      matiere: "UML",
-      jour: date.toISOString().split("T")[0],
-      completed: false,
-    },
-  ]);
+
+  const getCurrentWeek = (date: Date) => {
+    const day = date.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + diffToMonday);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return { monday, sunday };
+  };
+
+  const loadCourses = () => {
+    const today = new Date();
+    const { monday, sunday } = getCurrentWeek(today);
+
+    const start = monday.toISOString().split("T")[0];
+    const end = sunday.toISOString().split("T")[0];
+
+    axios
+      .get(
+        "http://localhost:5142/api/edt/6911ce47-c01d-4741-9486-2238cadcda0e",
+        { params: { start, end } }
+      )
+      .then((rep) => {
+        if (rep.data.length > 0) {
+          const cours: coursesList[] = rep.data.map((c: any) => ({
+            id: c.numEd,
+            hDeb: c.hDeb,
+            hFin: c.hFin,
+            jour: c.jour,
+            matiere: c.nomMatiere,
+            status: c.dispo,
+            mention: c.mention,
+            niveau: c.niveau,
+            salle: c.nomSalle,
+            localisation: "",
+            completed: c.dispo === "Terminé" ? true : false,
+            statusEns: c.status === "Accompli" ? true : false,
+          }));
+          setCourses(cours);
+        }
+        setCourses((prev) =>
+          prev.map((cours) => ({
+            ...cours,
+            jour: new Date(cours.jour).toLocaleDateString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            }),
+          }))
+        );
+      });
+  };
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(500)).current;
@@ -118,32 +123,6 @@ export default function courses(): React.JSX.Element {
       }).start();
     }
   }, [modalVisible]);
-
-  // const addcours = () => {
-  //   if (!subject || !notes) {
-  //     Alert.alert("Champs requis", "Sujet et notes sont obligatoires.");
-  //     return;
-  //   }
-
-  //   const newcours: coursesList = {
-  //     id: "1",
-  //     hDeb: notes,
-  //     hFin: notes,
-  //     status: notes,
-  //     mention: notes,
-  //     niveau: notes,
-  //     salle: notes,
-  //     matiere: notes,
-  //     jour: date.toISOString().split("T")[0],
-  //     completed: false,
-  //   };
-
-  //   setCourses((prev) => [...prev, newcours]);
-  //   setSubject("");
-  //   setNotes("");
-  //   setDate(new Date());
-  //   Alert.alert("Ajouté", "Tâche de révision ajoutée.");
-  // };
 
   const toggleComplete = (id: string) => {
     setCourses((prev) =>
@@ -166,7 +145,7 @@ export default function courses(): React.JSX.Element {
   };
 
   const cancelCours = (id: string) => {
-    Alert.alert("Annulation", "Voulez-vous annuler cette courses ?", [
+    Alert.alert("Annulation", "Voulez-vous annuler cette cours ?", [
       { text: "Non", style: "cancel" },
       {
         text: "Oui",
@@ -176,6 +155,14 @@ export default function courses(): React.JSX.Element {
       },
     ]);
   };
+
+  // if (courses.length === 0) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text style={styles.title}>Chargement des donnees...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <KeyboardAvoidingView
@@ -189,7 +176,7 @@ export default function courses(): React.JSX.Element {
         keyExtractor={(item) => item.id}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            Vous n'avez pas du courses cette semaine.
+            Vous n'avez pas du cours cette semaine.
           </Text>
         }
         renderItem={({ item }) => {
@@ -212,22 +199,24 @@ export default function courses(): React.JSX.Element {
                 <Text style={styles.coursTitle}>
                   {item.hDeb} à {item.hFin} ({item.matiere})
                 </Text>
-                <TouchableOpacity onPress={() => cancelCours(item.id)}>
-                  <Text
-                    style={{
-                      color: "white",
-                      padding: 5,
-                      backgroundColor: "#e53935",
-                      borderRadius: 5,
-                    }}
-                  >
-                    Annuler
-                  </Text>
-                  {/* <Ionicons name="trash-outline" size={20} color="#f14d4aff" /> */}
-                </TouchableOpacity>
+                {!item.completed && (
+                  <TouchableOpacity onPress={() => cancelCours(item.id)}>
+                    <Text
+                      style={{
+                        color: "white",
+                        padding: 5,
+                        backgroundColor: "#e53935",
+                        borderRadius: 5,
+                      }}
+                    >
+                      Annuler
+                    </Text>
+                    {/* <Ionicons name="trash-outline" size={20} color="#f14d4aff" /> */}
+                  </TouchableOpacity>
+                )}
               </View>
               <Text style={styles.coursNotes}>
-                {item.mention} {item.niveau} | Salle {item.salle} au {item.localisation}
+                {item.mention} {item.niveau} | Salle {item.salle}
               </Text>
               <Text style={styles.coursDate}> {item.jour} </Text>
               <Text style={[styles.coursestatus, { color: statusColor }]}>
@@ -235,10 +224,11 @@ export default function courses(): React.JSX.Element {
                 {status}
               </Text>
 
-              {!item.completed && (
+              {!item.statusEns && (
                 <TouchableOpacity
                   onPress={() => toggleComplete(item.id)}
-                  style={styles.completeButton}>
+                  style={styles.completeButton}
+                >
                   <Ionicons name="checkmark-done" size={18} color="#fff" />
                   <Text style={styles.completeText}>Marquer comme fait</Text>
                 </TouchableOpacity>
@@ -247,81 +237,6 @@ export default function courses(): React.JSX.Element {
           );
         }}
       />
-
-      {/* <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setModalVisible(true)}>
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity> */}
-
-      {/* <Modal
-        transparent
-        visible={modalVisible}
-        animationType="none"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setModalVisible(false)}
-          />
-
-          <Animated.View
-            style={[
-              styles.modalContent,
-              {transform: [{translateY: slideAnim}]},
-            ]}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-              <Text style={styles.title}>Ajouter une Révision</Text>
-
-              <TextInput
-                style={styles.input}
-                placeholderTextColor={'#999'}
-                placeholder="Sujet"
-                value={subject}
-                onChangeText={setSubject}
-              />
-              <TextInput
-                style={styles.input}
-                placeholderTextColor={'#999'}
-                placeholder="Notes / Objectifs"
-                value={notes}
-                onChangeText={setNotes}
-              />
-
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={styles.dateButton}>
-                <Text style={styles.dateText}>
-                  Date cible : {date.toDateString()}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="default"
-                  onChange={(_, selectedDate) => {
-                    setShowDatePicker(false);
-                    if (selectedDate) setDate(selectedDate);
-                  }}
-                />
-              )}
-
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => {
-                  addcours();
-                  setModalVisible(false);
-                }}>
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </KeyboardAvoidingView>
-          </Animated.View>
-        </View>
-      </Modal> */}
     </KeyboardAvoidingView>
   );
 }
@@ -362,7 +277,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 10,
   },
-  coursTitle: { fontWeight: "bold",color:"#555", fontSize: 18 },
+  coursTitle: { fontWeight: "bold", color: "#555", fontSize: 18 },
   coursNotes: { fontSize: 14, color: "#555" },
   doneText: { color: "green", fontWeight: "bold", marginTop: 5 },
 

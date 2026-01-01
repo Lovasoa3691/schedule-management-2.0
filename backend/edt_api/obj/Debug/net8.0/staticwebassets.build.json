@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "4Vm0s7979jqQkqgVs9vkHuHpOuVHTd5Yhk2m1fDvJug=",
+  "Hash": "9h40Yu2BRpzkgVD5k0AX/J27fBsDVohh4q2ajhGtWHw=",
   "Source": "edt_api",
   "BasePath": "_content/edt_api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }

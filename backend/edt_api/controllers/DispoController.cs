@@ -15,11 +15,11 @@ public class DispoController: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll()
-        => Ok(await _service.GetAllAsync());
-
     [HttpGet("{id}")]
+    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll(string id)
+        => Ok(await _service.GetAllAsync(id));
+
+    [HttpGet("filter/{id}")]
     public async Task<ActionResult<DispoDto>> GetById(string id)
     {
         var res = await _service.GetByIdAsync(id);
@@ -27,22 +27,10 @@ public class DispoController: ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<DispoDto>> Create()
+    public async Task<ActionResult<DispoDto>> Create([FromBody] CreateDispoDto dto)
     {
-        var dto = new CreateDispoDto(
-            dateDispo: new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
-            hDeb: new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
-            hFin: new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
-            codeEns: "91361154-ca8c-46d4-beac-1d75c0a415c4"
-        );
-        
         var created = await _service.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.idDispo }, created);
-
-        // return Ok();
-
-        // created = await _service.addAsync(dto);
-        // return CreatedAtAction(nameof(GetById), new { id = created.idMent }, created);
     }
     
     [HttpPut("{id}")]

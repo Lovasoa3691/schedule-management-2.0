@@ -37,15 +37,30 @@ public class ImUtilisateur : IUtilisateur
         return _mapper.Map<IEnumerable<EnseignantDto>>(enseignant);
     }
 
-    public async Task<IEnumerable<EnseignantInfoDto>> getInfoTeacherAsync()
+    public async Task<IEnumerable<EnseignantInfoDto>> getInfoTeacherAsync(string id)
     {
-        var enseignants = await _db.Enseignants
-            .Include(e => e.enseignements)
-            .ThenInclude(ens => ens.matiere)
-            .Include(e => e.Authentifications)
-            .ToListAsync();
+        List<Enseignant> info = new List<Enseignant>();
+        
+        if (id == "all")
+        {
+            info = await _db.Enseignants
+                .Include(e => e.enseignements)
+                .ThenInclude(ens => ens.matiere)
+                .Include(e => e.Authentifications)
+                .ToListAsync();
+        }
+        else
+        {
+            info = await _db.Enseignants
+                .Include(e => e.enseignements)
+                .ThenInclude(ens => ens.matiere)
+                .Include(e => e.Authentifications)
+                .Where(e => e.idUt == id)
+                .ToListAsync();
+        }
+        
 
-        var grouped = enseignants.Select(e =>
+        var grouped = info.Select(e =>
             new EnseignantInfoDto
             (
                 nom: e.nom,
@@ -68,7 +83,7 @@ public class ImUtilisateur : IUtilisateur
 
     public async Task<ResponsableDto?> getByIdAsync(string id)
     {
-        var res = await _db.Responsables.FindAsync(id);
+        var res = await _db.Responsables.Include(a => a.Authentifications).Where(e=> e.idUt == id).FirstOrDefaultAsync();
         return res == null ? null : _mapper.Map<ResponsableDto>(res);
     }
 
@@ -112,9 +127,9 @@ public class ImUtilisateur : IUtilisateur
         {
             nom = dto.nom,
             prenom = dto.prenom,
-            telephone = null,
-            adresse = null,
-            genre = null,
+            telephone = "+261345416063",
+            adresse = "fenomanana",
+            genre = "Masculin",
             fonction = "Responsable EDT",
         };
         
@@ -157,40 +172,43 @@ public class ImUtilisateur : IUtilisateur
 
     public async Task<EnseignantDto> registerAsync(RegisterEnseignantDto dto)
     {
-        var res = new Enseignant
-        {
-            nom = dto.nom,
-            prenom = dto.prenom,
-            telephone = dto.phone,
-            grade = dto.grade,
-        };
+        List<EnseignantDto> res = new List<EnseignantDto>();
         
-        _db.Enseignants.Add(res);
-        await _db.SaveChangesAsync();
-
-        var hasher = new PasswordHasher<Utilisateur>();
-        string hashedPass = hasher.HashPassword(res, dto.mdp);
-
-        var auth = new Authentification
+        var checked_info =  _db.Enseignants
+            .Where(e=> e.telephone == dto.phone && e.nom == dto.nom)
+            .FirstOrDefault();
+        if (checked_info != null)
         {
-            email = dto.email,
-            mdp = hashedPass,
-            utilisateurId = res.idUt
-        };
-        
-        _db.Authentifications.Add(auth);
-        await _db.SaveChangesAsync();
+            var hasher = new PasswordHasher<Utilisateur>();
+            string hashedPass = hasher.HashPassword(checked_info, dto.mdp);
+    
+            var auth = new Authentification
+            {
+                email = dto.email,
+                mdp = hashedPass,
+                utilisateurId = checked_info.idUt
+            };
+            
+            _db.Authentifications.Add(auth);
+            await _db.SaveChangesAsync();
+            
+            res.Add(new EnseignantDto(
+                checked_info.idUt,
+                checked_info.nom,
+                checked_info.prenom,
+                checked_info.telephone,
+                checked_info.grade,
+                checked_info.genre,
+                checked_info.adresse,
+                auth.email
+            ));
+        }
+        else
+        {
+            return null;
+        }
 
-        return new EnseignantDto(
-            res.idUt,
-            res.nom,
-            res.prenom,
-            res.telephone,
-            res.grade,
-            res.genre,
-            res.adresse,
-            auth.email
-        );
+        return res.First();
     }
 
     public async Task<bool> updateAsync(string id, UpdateResponsableDto dto)

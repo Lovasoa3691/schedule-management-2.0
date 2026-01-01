@@ -19,19 +19,42 @@ public class ImEdt : IEdt
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<EdtDto>> GetAllAsync()
+    public async Task<IEnumerable<EdtDto>> GetAllAsync(
+        string id,
+        DateOnly? startDate = null,
+        DateOnly? endDate = null)
     {
-        var mat = await _db.Edts
+        IQueryable<Edt> query = _db.Edts
             .AsNoTracking()
             .Include(e => e.enseignant)
+            .ThenInclude(ee => ee.enseignements)
             .Include(a => a.matiere)
             .Include(m => m.mention)
             .Include(n => n.niveau)
             .Include(s => s.salle)
-            .Include(a => a.anneeScolaire)
-            .ToListAsync();
-        return _mapper.Map<IEnumerable<EdtDto>>(mat);
+            .Include(a => a.anneeScolaire);
+
+        if (id != "all")
+        {
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                query = query.Where(e => e.enseignantId == id && e.jour >= startDate.Value && e.jour <= endDate.Value);
+            }
+            else
+            {
+                query = query.Where(e => e.enseignantId == id);
+            }
+        }
+
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            query = query.Where(e => e.jour >= startDate.Value && e.jour <= endDate.Value);
+        }
+
+        var result = await query.ToListAsync();
+        return _mapper.Map<IEnumerable<EdtDto>>(result);
     }
+
 
     public async Task<EdtDto?> GetByIdAsync(string id)
     {

@@ -15,12 +15,22 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:3000","http://localhost:5142")
+        policy.WithOrigins("http://localhost:3000","http://localhost:8000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
+
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion)
+);
+
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+// );
 
 builder.Services.AddAuthentication(options =>
     {
@@ -37,7 +47,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key configuration is missing")))
         };
 
         options.Events = new JwtBearerEvents
@@ -55,11 +65,6 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
-
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-);
 
 // builder.Services.AddOpenApi();
 builder.Services.AddAutoMapper(typeof(Program));
@@ -82,6 +87,8 @@ var app = builder.Build();
 //     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 //     db.Database.Migrate();
 // }
+
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

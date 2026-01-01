@@ -15,11 +15,18 @@ public class EdtController: ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<EdtDto>>> GetAll()
-        => Ok(await _service.GetAllAsync());
-
     [HttpGet("{id}")]
+    public async Task<ActionResult<IEnumerable<EdtDto>>> GetAll(
+        string id,
+        [FromQuery] DateOnly? startDate,
+        [FromQuery] DateOnly? endDate)
+    {
+        var result = await _service.GetAllAsync(id, startDate, endDate);
+        return Ok(result);
+    }
+
+
+    [HttpGet("filter/{id}")]
     public async Task<ActionResult<EdtDto>> GetById(string id)
     {
         var res = await _service.GetByIdAsync(id);
@@ -29,7 +36,7 @@ public class EdtController: ControllerBase
     [HttpPost]
     public async Task<ActionResult<EdtDto>> Create([FromBody] CreateEdtDto dto)
     {
-        // Console.WriteLine("Jour : "+dto.jour);
+        // Console.WriteLine("Id : "+dto.responsableId);
         // return Ok();
         var created = await _service.AddAsync(dto);
          return CreatedAtAction(nameof(GetById), new { id = created.numEd }, created);

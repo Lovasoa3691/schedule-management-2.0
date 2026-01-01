@@ -31,9 +31,16 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Enseignement>()
+            .HasKey(m => new { m.enseignantId, m.matiereId});
 
         modelBuilder.Entity<Enseignement>()
-            .HasKey(e => new { e.enseignantId, e.matiereId });
+            .Property(m => m.numero)
+            .HasDefaultValueSql("(UUID())");
+
+        modelBuilder.Entity<Enseignement>()
+            .HasIndex(n => n.numero)
+            .IsUnique();
         
         modelBuilder.Entity<MatiereMention>()
             .HasKey(m => new { m.matiereId, m.mentionId});
@@ -82,7 +89,7 @@ public class AppDbContext : DbContext
             .WithMany(m => m.messages)
             .HasForeignKey(r => r.enseignantId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         modelBuilder.Entity<Edt>()
             .HasOne(e => e.responsable)
             .WithMany(r => r.edts)
