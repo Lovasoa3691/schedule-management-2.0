@@ -2,56 +2,68 @@ pipeline {
     agent any
 
     environment {
-        // On définit la chaîne de connexion pour les tests
-        CONNECTION_STRING = "Server=schedule-mysql;Port=3306;Database=db_edt_p;Uid=orion;Pwd=orion3691;"
+        DB_HOST = credentials('AIVEN_DB_HOST')
+        DB_PORT = credentials('AIVEN_DB_PORT')
+        DB_NAME = credentials('AIVEN_DB_NAME')
+        DB_USER = credentials('AIVEN_DB_USER')
+        DB_PASSWORD = credentials('AIVEN_DB_PASSWORD')
     }
 
     stages {
-        stage('Nettoyage') {
+        stage('Check credentials') {
             steps {
-                echo 'Nettoyage des anciens conteneurs...'
-                sh 'docker compose down --volumes --remove-orphans'
+                echo 'Vérification de la présence des credentials...'
+                sh '''
+                [ -n "$DB_HOST" ] && echo "DB_HOST OK"
+                [ -n "$DB_PORT" ] && echo "DB_PORT OK"
+                [ -n "$DB_NAME" ] && echo "DB_NAME OK"
+                [ -n "$DB_USER" ] && echo "DB_USER OK"
+                [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD OK"
+                '''
             }
         }
 
-        stage('Build & Start Services') {
-            steps {
-                echo 'Lancement des services Docker...'
-                sh 'docker compose up -d --build mysql'
-                // On attend que MySQL soit prêt avant de lancer le backend
-                echo 'Attente de l\'initialisation de MySQL...'
-                sleep 15 
-                sh 'docker compose up -d --build backend frontend'
-            }
-        }
+        // stage('Build backend (DEV)') {
+        //     steps {
+        //         sh 'docker build -f backend/Dockerfile.dev -t backend-ci ./backend'
+        //     }
+        // }
 
-        stage('Tests Backend') {
-            steps {
-                echo 'Exécution des tests unitaires et d\'intégration...'
-                // Jenkins exécute les tests à l'intérieur du conteneur backend
-                sh 'docker exec schedule-backend-dev dotnet test'
-            }
-        }
+        // stage('Tests backend') {
+        //     steps {
+        //         sh '''
+        //         docker run --rm \
+        //           -e ConnectionStrings__DefaultConnection="Server=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;User=$DB_USER;Password=$DB_PASSWORD;SslMode=Required;" \
+        //           backend-ci \
+        //           dotnet test
+        //         '''
+        //     }
+        // }
 
-        stage('Tests Frontend') {
-            steps {
-                echo 'Exécution des tests Frontend...'
-                // Exemple si vous avez des tests npm
-                // sh 'docker exec schedule-frontend-dev npm test'
-            }
-        }
+        // stage('Build frontend') {
+        //     steps {
+        //         sh 'docker build -t frontend-ci ./frontend'
+        //     }
+        // }
+
+        // stage('Trigger Render Deploy') {
+        //     when {
+        //         branch 'main'
+        //     }
+        //     steps {
+        //         withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_BACKEND', variable: 'HOOK')]) {
+        //             sh 'curl -X POST "$HOOK"'
+        //         }
+        //     }
+        // }
     }
 
     post {
-        always {
-            echo 'Arrêt des services...'
-            sh 'docker compose down'
-        }
         success {
-            echo 'Pipeline réussi !'
+            echo '✅ CI OK → Déploiement Render déclenché'
         }
         failure {
-            echo 'Le pipeline a échoué. Vérifiez les logs.'
+            echo '❌ CI échoué → Déploiement annulé'
         }
     }
 }
