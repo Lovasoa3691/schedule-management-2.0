@@ -10,60 +10,55 @@ pipeline {
     }
 
     stages {
-        stage('Check credentials') {
+
+        stage('Build backend (DEV)') {
             steps {
-                echo 'Vérification de la présence des credentials...'
+                sh 'docker build -f backend/Dockerfile.dev -t backend-ci ./backend'
+            }
+        }
+
+        stage('Tests backend') {
+            steps {
                 sh '''
-                [ -n "$DB_HOST" ] && echo "DB_HOST OK"
-                [ -n "$DB_PORT" ] && echo "DB_PORT OK"
-                [ -n "$DB_NAME" ] && echo "DB_NAME OK"
-                [ -n "$DB_USER" ] && echo "DB_USER OK"
-                [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD OK"
+                docker run --rm \
+                  -e ConnectionStrings__DefaultConnection="Server=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;User=$DB_USER;Password=$DB_PASSWORD;SslMode=Required;" \
+                  backend-ci \
+                  dotnet test
                 '''
             }
         }
 
-        // stage('Build backend (DEV)') {
-        //     steps {
-        //         sh 'docker build -f backend/Dockerfile.dev -t backend-ci ./backend'
-        //     }
-        // }
+        stage('Build frontend (local check)') {
+            steps {
+                sh 'docker build -t frontend-ci ./frontend'
+            }
+        }
 
-        // stage('Tests backend') {
-        //     steps {
-        //         sh '''
-        //         docker run --rm \
-        //           -e ConnectionStrings__DefaultConnection="Server=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;User=$DB_USER;Password=$DB_PASSWORD;SslMode=Required;" \
-        //           backend-ci \
-        //           dotnet test
-        //         '''
-        //     }
-        // }
+        stage('Deploy Backend to Render') {
+            when { branch 'main' }
+            steps {
+                withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_BACKEND', variable: 'HOOK')]) {
+                    sh 'curl -X POST "$HOOK"'
+                }
+            }
+        }
 
-        // stage('Build frontend') {
-        //     steps {
-        //         sh 'docker build -t frontend-ci ./frontend'
-        //     }
-        // }
-
-        // stage('Trigger Render Deploy') {
-        //     when {
-        //         branch 'main'
-        //     }
-        //     steps {
-        //         withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_BACKEND', variable: 'HOOK')]) {
-        //             sh 'curl -X POST "$HOOK"'
-        //         }
-        //     }
-        // }
+        stage('Deploy Frontend to Render') {
+            when { branch 'main' }
+            steps {
+                withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_FRONTEND', variable: 'HOOK')]) {
+                    sh 'curl -X POST "$HOOK"'
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo '✅ CI OK → Déploiement Render déclenché'
+            echo 'CI OK → Backend & Frontend déployés sur Render'
         }
         failure {
-            echo '❌ CI échoué → Déploiement annulé'
+            echo 'CI échoué → Aucun déploiement Render'
         }
     }
 }
