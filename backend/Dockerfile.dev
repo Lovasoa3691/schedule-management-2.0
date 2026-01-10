@@ -5,10 +5,9 @@ EXPOSE 8000
 RUN dotnet tool install --global dotnet-watch
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# Copier la solution et le projet pour le build initial
+
 COPY edt_api.sln .
 COPY edt_api/ edt_api/
 RUN dotnet restore
 
-# Commande pour démarrer dotnet watch en pointant explicitement le projet
 CMD ["dotnet", "watch", "run", "--project", "edt_api/edt_api.csproj", "--urls", "http://0.0.0.0:8000"]
