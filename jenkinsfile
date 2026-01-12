@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DB_HOST = credentials('AIVEN_DB_HOST')
-        DB_PORT = credentials('AIVEN_DB_PORT')
-        DB_NAME = credentials('AIVEN_DB_NAME')
-        DB_USER = credentials('AIVEN_DB_USER')
+        DB_HOST     = credentials('AIVEN_DB_HOST')
+        DB_PORT     = credentials('AIVEN_DB_PORT')
+        DB_NAME     = credentials('AIVEN_DB_NAME')
+        DB_USER     = credentials('AIVEN_DB_USER')
         DB_PASSWORD = credentials('AIVEN_DB_PASSWORD')
     }
 
@@ -13,7 +13,9 @@ pipeline {
 
         stage('Build backend (DEV)') {
             steps {
-                sh 'docker build -f backend/Dockerfile.dev -t backend-ci ./backend'
+                dir('backend') {
+                    sh 'docker build -f Dockerfile.dev -t backend-ci .'
+                }
             }
         }
 
@@ -30,7 +32,9 @@ pipeline {
 
         stage('Build frontend (local check)') {
             steps {
-                sh 'docker build -t frontend-ci ./frontend'
+                dir('frontend') {
+                    sh 'docker build -t frontend-ci .'
+                }
             }
         }
 
