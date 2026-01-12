@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        pollSCM('* * * * *')
+    }
+
     environment {
         DB_HOST     = credentials('AIVEN_DB_HOST')
         DB_PORT     = credentials('AIVEN_DB_PORT')
@@ -12,6 +16,12 @@ pipeline {
     stages {
 
         stage('Build backend (DEV)') {
+            agent {
+                docker {
+                    image 'docker:24.0.5-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 dir('backend') {
                     sh 'docker build -f Dockerfile.dev -t backend-ci .'
@@ -20,6 +30,12 @@ pipeline {
         }
 
         stage('Tests backend') {
+            agent {
+                docker {
+                    image 'docker:24.0.5-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 sh '''
                 docker run --rm \
@@ -31,6 +47,12 @@ pipeline {
         }
 
         stage('Build frontend (local check)') {
+            agent {
+                docker {
+                    image 'docker:24.0.5-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
                 dir('frontend') {
                     sh 'docker build -t frontend-ci .'
