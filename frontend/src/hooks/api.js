@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "https://schedule-backend-wlx0.onrender.com/api",
   withCredentials: true,
 });
 
