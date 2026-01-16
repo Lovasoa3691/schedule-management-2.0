@@ -49,7 +49,7 @@ pipeline {
         }
 
         stage('Deploy Backend to Render') {
-            when { branch 'main' }
+            // when { branch 'main' }
             steps {
                 withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_BACKEND', variable: 'HOOK')]) {
                     sh 'curl -X POST "$HOOK"'
@@ -58,7 +58,7 @@ pipeline {
         }
 
         stage('Deploy Frontend to Render') {
-            when { branch 'main' }
+            // when { branch 'main' }
             steps {
                 withCredentials([string(credentialsId: 'RENDER_DEPLOY_HOOK_FRONTEND', variable: 'HOOK')]) {
                     sh 'curl -X POST "$HOOK"'
