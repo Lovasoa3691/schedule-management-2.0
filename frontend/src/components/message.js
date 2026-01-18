@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import MessageBox from "./messageBox";
 import { MdSend } from "react-icons/md";
 
 const Messagerie = ({ currentUserId }) => {

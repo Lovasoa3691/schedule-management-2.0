@@ -1,4 +1,4 @@
-import { FiLogOut, FiCalendar } from "react-icons/fi";
+import {  FiCalendar } from "react-icons/fi";
 import {
   MdPerson,
   MdMenuBook,
@@ -9,14 +9,6 @@ import {
   MdExpandMore,
   MdGroup,
 } from "react-icons/md";
-import {
-  FaChalkboardTeacher,
-  FaBook,
-  FaDoorOpen,
-  FaUser,
-} from "react-icons/fa";
-import { FiGrid, FiUser, FiHome } from "react-icons/fi";
-import { GiBookshelf } from "react-icons/gi";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import nProgress from "nprogress";
@@ -31,7 +23,7 @@ const Navbar = ({ setLoading }) => {
   const [currentPage, setCurrentPage] = useState("Tableau de bord");
 
   useEffect(() => {
-    document.title = `Sched.Connect | ${currentPage}`;
+    document.title = `SchedConnect | ${currentPage}`;
   });
 
   const menuClick = (menu, path) => {

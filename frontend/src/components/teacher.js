@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
 import { MdPrint } from "react-icons/md";
-import { FaEdit, FaFileExcel, FaTrash, FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaFileExcel,  FaTrashAlt } from "react-icons/fa";
 import TeacherForm from "./forms/teacher-form";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";

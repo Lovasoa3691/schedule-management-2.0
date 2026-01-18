@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import { MdPrint } from "react-icons/md";
-import { FaEdit, FaFileExcel, FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import ClassForm from "./forms/class-form";
 import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";

@@ -1,12 +1,7 @@
 import {
-  FiMessageSquare,
-  FiBell,
   FiChevronDown,
-  FiSearch,
 } from "react-icons/fi";
 import { useEffect, useState } from "react";
-import { MdMenu } from "react-icons/md";
-import { Toast } from "./notification/toast";
 import { useNavigate } from "react-router-dom";
 import api from "../hooks/api";
 

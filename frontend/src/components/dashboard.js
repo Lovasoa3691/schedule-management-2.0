@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChalkboardTeacher, FaDoorOpen, FaCalendarAlt } from "react-icons/fa";
-import { PieChart, Pie, Cell } from "recharts";
-import PieChartComponent from "./chart/pie";
 import PieCard from "./chart/pie";
 import Select from "react-select";
-import { jwtDecode } from "jwt-decode";
 import { tr } from "date-fns/locale";
 import api from "../hooks/api";
 
