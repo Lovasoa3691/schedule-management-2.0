@@ -15,7 +15,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("https://schedule-frontend-gxaj.onrender.com/","https://schedule-backend-wlx0.onrender.com/")
+        policy.WithOrigins("https://schedule-frontend-gxaj.onrender.com","https://schedule-backend-wlx0.onrender.com")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
