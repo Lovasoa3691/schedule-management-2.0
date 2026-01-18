@@ -141,7 +141,7 @@ const Register = () => {
       <div className="flex flex-col items-center justify-center">
         <div className="logo mb-6">
           <div className="p-4 text-center text-white flex flex-col items-center justify-center w-full h-20 mb-8 text-3xl">
-            <img src={Logo} className="w-24 h-24 mb-2" alt="Logo" />
+            <img src={Logo} className="w-32 h-32 mb-2" alt="Logo" />
             <span className="text-gray-900 font-bold">
               Sched.<span className="text-blue-600">Connect</span>
             </span>
