@@ -20,7 +20,7 @@ pipeline {
                 sh '''
                 docker version
                 kubectl version --client
-                minikube status
+                minikube status || minikube start --driver=docker
                 '''
             }
         }
