@@ -71,19 +71,23 @@ pipeline {
 
         stage('Deploy Backend to Minikube') {
             steps {
-                sh '''
-                kubectl apply -f k8s/backend.yaml
-                kubectl rollout status deployment/backend-api
-                '''
+                // sh '''
+                // kubectl apply -f k8s/backend.yaml
+                // kubectl rollout status deployment/backend-api
+                // '''
+                withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+                    sh 'kubectl apply -f k8s/backend.yaml'
+                    sh 'kubectl rollout status deployment/backend-api'
+                }
             }
         }
 
         stage('Deploy Frontend to Minikube') {
             steps {
-                sh '''
-                kubectl apply -f k8s/frontend.yaml
-                kubectl rollout status deployment/frontend-react
-                '''
+                withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+                    sh 'kubectl apply -f k8s/frontend.yaml'
+                    sh 'kubectl rollout status deployment/frontend-react'
+                }
             }
         }
 
