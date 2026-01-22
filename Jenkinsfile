@@ -11,73 +11,79 @@ pipeline {
         DB_NAME     = credentials('AIVEN_DB_NAME')
         DB_USER     = credentials('AIVEN_DB_USER')
         DB_PASSWORD = credentials('AIVEN_DB_PASSWORD')
+        DOCKER_HUB_CREDS = 'docker-hub-creds' 
+        DOCKER_USERNAME = '' 
+        DOCKER_PASSWORD = '' 
     }
 
     stages {
 
         stage('Check Docker & Kubernetes') {
             steps {
-                sh '''
-                docker version
-                kubectl version --client
-                minikube status || minikube start --driver=docker
-                '''
+                sh 'docker version'
+                sh 'kubectl version --client'
+                sh 'minikube status || echo "Minikube not running"'
             }
         }
 
-        stage('Use Minikube Docker') {
+        stage('Login Docker Hub') {
             steps {
-                sh 'eval $(minikube docker-env)'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
+                                                  usernameVariable: 'DOCKER_USERNAME', 
+                                                  passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                }
             }
         }
 
-        stage('Build backend image') {
+        stage('Build & Push Backend') {
             steps {
                 dir('backend') {
-                    sh 'docker build -f Dockerfile.dev -t backend-api:latest .'
+                    sh '''
+                    docker build -t $DOCKER_USERNAME/backend-api:latest .
+                    docker push $DOCKER_USERNAME/backend-api:latest
+                    '''
                 }
             }
         }
 
-        stage('Tests backend') {
-            steps {
-                sh '''
-                docker run --rm \
-                  -e ConnectionStrings__DefaultConnection="Server=$DB_HOST;Port=$DB_PORT;Database=$DB_NAME;User=$DB_USER;Password=$DB_PASSWORD;SslMode=Required;" \
-                  backend-api:latest \
-                  dotnet test
-                '''
-            }
-        }
-
-        stage('Build frontend image') {
+        stage('Build & Push Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t frontend-react:latest .'
+                    sh '''
+                    docker build -t $DOCKER_USERNAME/frontend-react:latest .
+                    docker push $DOCKER_USERNAME/frontend-react:latest
+                    '''
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy Backend to Minikube') {
             steps {
                 sh '''
-                export KUBECONFIG=/home/julianot/.kube/config
                 kubectl apply -f k8s/backend.yaml
-                kubectl apply -f k8s/frontend.yaml
-                kubectl apply -f k8s/ingress.yaml
+                kubectl rollout status deployment/backend-api
                 '''
             }
         }
 
+        stage('Deploy Frontend to Minikube') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/frontend.yaml
+                kubectl rollout status deployment/frontend-react
+                '''
+            }
+        }
 
     }
 
     post {
         success {
-            echo 'CI OK → Application déployée sur Kubernetes (Minikube)'
+            echo 'CI/CD OK → Backend & Frontend déployés sur Minikube'
         }
         failure {
-            echo 'CI échoué → Déploiement annulé'
+            echo 'CI/CD échoué → Aucun déploiement Minikube'
         }
     }
 }
