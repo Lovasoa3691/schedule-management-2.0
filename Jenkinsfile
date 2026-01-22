@@ -77,7 +77,7 @@ pipeline {
                 // '''
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh 'kubectl apply -f k8s/backend.yaml'
-                    sh 'kubectl rollout status deployment/backend-api'
+                    // sh 'kubectl rollout status deployment/backend-api'
                 }
             }
         }
@@ -86,7 +86,7 @@ pipeline {
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh 'kubectl apply -f k8s/frontend.yaml'
-                    sh 'kubectl rollout status deployment/frontend-react'
+                    // sh 'kubectl rollout status deployment/frontend-react'
                 }
             }
         }
