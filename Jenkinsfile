@@ -26,34 +26,45 @@ pipeline {
             }
         }
 
-        stage('Login Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
-                                                  usernameVariable: 'DOCKER_USERNAME', 
-                                                  passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                }
-            }
-        }
+        // stage('Login Docker Hub') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
+        //                                           usernameVariable: 'DOCKER_USERNAME', 
+        //                                           passwordVariable: 'DOCKER_PASSWORD')]) {
+        //             sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+        //         }
+        //     }
+        // }
 
         stage('Build & Push Backend') {
             steps {
                 dir('backend') {
-                    sh '''
-                    docker build -t ${env.DOCKER_USERNAME}/backend-api:latest .
-                    docker push ${env.DOCKER_USERNAME}/backend-api:latest
-                    '''
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
+                                                    usernameVariable: 'DOCKER_USERNAME', 
+                                                    passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''#!/bin/bash
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker build -t $DOCKER_USERNAME/backend-api:latest .
+                        docker push $DOCKER_USERNAME/backend-api:latest
+                        '''
+                    }
                 }
+
             }
         }
 
         stage('Build & Push Frontend') {
             steps {
                 dir('frontend') {
-                    sh '''
-                    docker build -t ${env.DOCKER_USERNAME}/frontend-react:latest .
-                    docker push ${env.DOCKER_USERNAME}/frontend-react:latest
-                    '''
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
+                                                    usernameVariable: 'DOCKER_USERNAME', 
+                                                    passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''#!/bin/bash
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker build -t $DOCKER_USERNAME/frontend-react:latest .
+                        docker push $DOCKER_USERNAME/frontend-react:latest
+                        '''
+                    }
                 }
             }
         }
