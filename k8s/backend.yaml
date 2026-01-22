@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: backend-api
-          image: backend-api:latest
-          imagePullPolicy: Never
+          image: julianot3691/backend-api:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
@@ -24,6 +24,9 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: db-connection
+      imagePullSecrets:
+        - name: regcred
+
 ---
 apiVersion: v1
 kind: Service
@@ -35,3 +38,4 @@ spec:
   ports:
     - port: 80
       targetPort: 8080
+  type: NodePort 

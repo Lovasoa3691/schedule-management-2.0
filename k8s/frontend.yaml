@@ -14,10 +14,13 @@ spec:
     spec:
       containers:
         - name: frontend-react
-          image: frontend-react:latest
-          imagePullPolicy: Never
+          image: julianot3691/frontend-react:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
+      imagePullSecrets:
+        - name: regcred  # Secret créé pour Docker Hub
+
 ---
 apiVersion: v1
 kind: Service
@@ -29,3 +32,4 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+  type: NodePort
