@@ -60,11 +60,15 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply --insecure-skip-tls-verify -f k8s/backend.yaml'
-                sh 'kubectl apply --insecure-skip-tls-verify -f k8s/frontend.yaml'
-                sh 'kubectl apply --insecure-skip-tls-verify -f k8s/ingress.yaml'
+                sh '''
+                export KUBECONFIG=/home/julianot/.kube/config
+                kubectl apply -f k8s/backend.yaml
+                kubectl apply -f k8s/frontend.yaml
+                kubectl apply -f k8s/ingress.yaml
+                '''
             }
         }
+
 
     }
 
