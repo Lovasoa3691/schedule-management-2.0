@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend-api
-          image: orion@3691/backend-api:latest
+          image: juliannot3691/backend-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
