@@ -40,8 +40,8 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                    docker build -t $DOCKER_USERNAME/backend-api:latest .
-                    docker push $DOCKER_USERNAME/backend-api:latest
+                    docker build -t ${env.DOCKER_USERNAME}/backend-api:latest .
+                    docker push ${env.DOCKER_USERNAME}/backend-api:latest
                     '''
                 }
             }
@@ -51,8 +51,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     sh '''
-                    docker build -t $DOCKER_USERNAME/frontend-react:latest .
-                    docker push $DOCKER_USERNAME/frontend-react:latest
+                    docker build -t ${env.DOCKER_USERNAME}/frontend-react:latest .
+                    docker push ${env.DOCKER_USERNAME}/frontend-react:latest
                     '''
                 }
             }
