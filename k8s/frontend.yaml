@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend-react
-          image: julianot3691/frontend-react:latest
+          image: orion@3691/frontend-react:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
