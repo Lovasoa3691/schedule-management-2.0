@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://schedule-backend-wlx0.onrender.com/api",
+  baseURL: "http://192.168.49.2:31758/api",
   withCredentials: true,
 });
 
@@ -16,7 +16,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

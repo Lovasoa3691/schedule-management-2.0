@@ -15,21 +15,23 @@ var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var dbUser = Environment.GetEnvironmentVariable("DB_USER");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-var connectionString =
-    $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
+// var connectionString =
+//     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    )
-);
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseMySql(
+//         connectionString,
+//         ServerVersion.AutoDetect(connectionString)
+//     )
+// );
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("https://schedule-frontend-gxaj.onrender.com","https://schedule-backend-wlx0.onrender.com")
+        policy.WithOrigins("http://192.168.49.2:31128","http://192.168.49.2:31758/")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
