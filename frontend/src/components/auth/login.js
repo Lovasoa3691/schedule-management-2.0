@@ -45,7 +45,7 @@ const Login = ({ setIsAuthentificated }) => {
   };
 
   return (
-    <div className="login-container h-screen flex flex-col items-center justify-center bg-slate-100">
+    <div className="login-container h-screen flex flex-col items-center justify-center bg-slate-400">
       {showAlert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl p-8 w-[420px] text-center animate-[fadeIn_0.3s_ease-out]">
