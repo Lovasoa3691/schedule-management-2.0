@@ -84,8 +84,8 @@ public class UtilisateurController : ControllerBase
             Response.Cookies.Append("jwt_ens", user.token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.Now.AddHours(2),
                 Path = "/"
             });
@@ -101,8 +101,8 @@ public class UtilisateurController : ControllerBase
             Response.Cookies.Delete("jwt", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.None,
+                Secure = false, 
+                SameSite = SameSiteMode.Lax,
                 Path = "/"
             });
         }
@@ -111,8 +111,8 @@ public class UtilisateurController : ControllerBase
             Response.Cookies.Delete("jwt_ens", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.None,
+                Secure = false, 
+                SameSite = SameSiteMode.Lax,
                 Path = "/"
             });
         }

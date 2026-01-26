@@ -26,16 +26,6 @@ pipeline {
             }
         }
 
-        // stage('Login Docker Hub') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
-        //                                           usernameVariable: 'DOCKER_USERNAME', 
-        //                                           passwordVariable: 'DOCKER_PASSWORD')]) {
-        //             sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-        //         }
-        //     }
-        // }
-
         stage('Build & Push Backend') {
             steps {
                 dir('backend') {
@@ -71,13 +61,12 @@ pipeline {
 
         stage('Deploy Backend to Minikube') {
             steps {
-                // sh '''
-                // kubectl apply -f k8s/backend.yaml
-                // kubectl rollout status deployment/backend-api
-                // '''
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                    sh 'kubectl apply -f k8s/backend.yaml'
-                    // sh 'kubectl rollout status deployment/backend-api'
+                    sh '''
+                    kubectl apply -f k8s/backend.yaml
+                    kubectl rollout restart deployment/backend-api
+                    kubectl rollout status deployment/backend-api
+                    '''
                 }
             }
         }
@@ -85,12 +74,14 @@ pipeline {
         stage('Deploy Frontend to Minikube') {
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                    sh 'kubectl apply -f k8s/frontend.yaml'
-                    // sh 'kubectl rollout status deployment/frontend-react'
+                    sh '''
+                    kubectl apply -f k8s/frontend.yaml
+                    kubectl rollout restart deployment/frontend-react
+                    kubectl rollout status deployment/frontend-react
+                    '''
                 }
             }
         }
-
     }
 
     post {
