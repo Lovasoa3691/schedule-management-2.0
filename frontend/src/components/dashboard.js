@@ -109,7 +109,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const filtered = progressPlan.filter(
-      (p) => p.jour === formatDate(Date.now())
+      (p) => p.jour === formatDate(Date.now()),
     );
     setFilteredProgressPlan(filtered);
   }, [progressPlan]);
@@ -128,7 +128,7 @@ const Dashboard = () => {
     const filtered = filteredProgressPlan.filter(
       (item) =>
         (!mention || item.mention === mention.value) &&
-        (!niveau || item.niveau === niveau.value)
+        (!niveau || item.niveau === niveau.value),
     );
     setFilteredProgressPlan(filtered);
   };
@@ -146,7 +146,7 @@ const Dashboard = () => {
   return (
     <div className="dash-container">
       <h2 className="text-2xl text-gray-700">
-        Bienvenue sur{" "}
+        Bonjour! Bienvenue sur{" "}
         <span className="font-bold">
           Sched.<span className="text-gray-700">Connect</span>
         </span>
@@ -318,11 +318,11 @@ const Dashboard = () => {
                   infoEnseignants.map((ens, index) => {
                     const totalPrevue = ens.matiereInfo.reduce(
                       (sum, mat) => sum + mat.hPrevue,
-                      0
+                      0,
                     );
                     const totalEffectue = ens.matiereInfo.reduce(
                       (sum, mat) => sum + mat.hEffectue,
-                      0
+                      0,
                     );
                     const performance =
                       totalPrevue > 0
