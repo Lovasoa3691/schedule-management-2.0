@@ -146,9 +146,9 @@ const Dashboard = () => {
   return (
     <div className="dash-container">
       <h2 className="text-2xl text-gray-700">
-        Bonjour! Bienvenue sur{" "}
+        Bienvenue sur{" "}
         <span className="font-bold">
-          Sched.<span className="text-gray-700">Connect</span>
+          Sched<span className="text-blue-700">Connect</span>
         </span>
       </h2>
       <div className=" h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
