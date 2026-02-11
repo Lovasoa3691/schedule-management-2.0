@@ -20,6 +20,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
+import api from "../hooks/api";
 
 export default function ScheduleCalendar() {
   interface Planning {
@@ -83,20 +84,18 @@ export default function ScheduleCalendar() {
 
   const getAllPlanning = async () => {
     try {
-      const response = await axios.get(
-        "http://192.168.137.43:5000/api/planning"
-      );
+      const response = await api.get("/planning");
       setSchedule(response.data);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(
           "Erreur",
-          "Impossible de récupérer les plannings. Veuillez réessayer plus tard."
+          "Impossible de récupérer les plannings. Veuillez réessayer plus tard.",
         );
       } else {
         Alert.alert(
           "Erreur",
-          "Une erreur inconnue est survenue. Veuillez réessayer plus tard."
+          "Une erreur inconnue est survenue. Veuillez réessayer plus tard.",
         );
       }
     }
@@ -135,10 +134,7 @@ export default function ScheduleCalendar() {
       hfin: heureFin,
     };
 
-    const rep = axios.post(
-      "http://192.168.137.43:5000/api/planning",
-      newPlanning
-    );
+    const rep = api.post("/planning", newPlanning);
     rep
       .then((response) => {
         console.log("Planning ajouté avec succès:", response.data);

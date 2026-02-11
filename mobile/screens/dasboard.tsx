@@ -11,6 +11,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import api from "../hooks/api";
 
 interface Semaine {
   jour: string;
@@ -64,11 +65,10 @@ const Dashboard: React.FC = () => {
       return `${year}-${month}-${day}`;
     };
 
-    axios
-      .get(
-        "http://localhost:5142/api/edt/98421799-1f02-4c1a-9bfe-ebe00d327004",
-        { params: { start, end } }
-      )
+    api
+      .get("/edt/98421799-1f02-4c1a-9bfe-ebe00d327004", {
+        params: { start, end },
+      })
       .then((rep) => {
         if (rep.data.length > 0) {
           const today = dateFormat(new Date());
@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
             joursSemaine.map((j) => ({
               jour: j,
               cours: resumeMap[j],
-            }))
+            })),
           );
         }
       });

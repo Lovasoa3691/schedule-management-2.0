@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
 import axios from "axios";
+import api from "../hooks/api";
 
 export default function RegisterScreen() {
   const [rememberMe, setRememberMe] = React.useState(false);
@@ -37,8 +38,8 @@ export default function RegisterScreen() {
       role: role,
     };
     // Alert.alert(data.nom);
-    axios
-      .post("http://localhost:5142/api/utilisateur/register", data)
+    api
+      .post("/utilisateur/register", data)
       .then((rep) => {
         Alert.alert("Compte cree avec sucees");
       })

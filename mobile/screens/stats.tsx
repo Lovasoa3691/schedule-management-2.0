@@ -10,8 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { Icon } from "react-native-vector-icons/Icon";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import api from "../hooks/api";
 
 interface MatiereInfo {
   matiere: string;
@@ -31,10 +30,8 @@ export default function App() {
   const [subjectData, setSubjectData] = useState<Enseignant[]>([]);
 
   const loadStates = () => {
-    axios
-      .get(
-        "http://localhost:5142/api/utilisateur/teacher/info/98421799-1f02-4c1a-9bfe-ebe00d327004"
-      )
+    api
+      .get("/utilisateur/teacher/info/98421799-1f02-4c1a-9bfe-ebe00d327004")
       .then((rep) => {
         setSubjectData(rep.data);
       })

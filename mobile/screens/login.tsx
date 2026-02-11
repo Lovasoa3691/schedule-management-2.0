@@ -7,14 +7,12 @@ import {
   StyleSheet,
   Image,
   Alert,
-  //   CheckBox,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
-import axios from "axios";
-import CookieManager from "@react-native-cookies/cookies";
+import api from "../hooks/api";
 
 type Props = {
   onLoginSucces: () => void;
@@ -29,19 +27,17 @@ export default function LoginScreen({ onLoginSucces }: Props) {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleLogin = () => {
-    axios
+    api
       .post(
-        "http://localhost:5142/api/utilisateur/login",
-        { email: email, mdp: mdp, role: "enseignant" },
-        { withCredentials: true }
+        "/utilisateur/login",
+        { email: email, mdp: mdp, role: "enseignant" }
       )
       .then((rep) => {
-        axios
-          .get("http://localhost:5142/api/utilisateur/profile", {
-            withCredentials: true,
-          })
+        api
+          .get("/utilisateur/profile")
           .then((rep) => {
             console.log(rep.data);
+            onLoginSucces();
           })
           .catch((err) => {
             console.error(err.message);

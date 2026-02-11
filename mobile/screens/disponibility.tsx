@@ -20,6 +20,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
+import api from "../hooks/api";
 
 type Event = {
   title: string;
@@ -49,17 +50,15 @@ export default function DisponibilityCalendar() {
   const slideAnim = useRef(new Animated.Value(500)).current;
 
   const [pickerMode, setPickerMode] = useState<"debut" | "fin" | "date" | null>(
-    null
+    null,
   );
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
 
   const [dispoData, setDispoData] = useState<Event[]>([]);
 
   const loadDispo = () => {
-    axios
-      .get(
-        "http://localhost:5142/api/disponibilite/98421799-1f02-4c1a-9bfe-ebe00d327004"
-      )
+    api
+      .get("/disponibilite/98421799-1f02-4c1a-9bfe-ebe00d327004")
       .then((rep) => {
         const events: Event[] = rep.data.map((d: any) => ({
           title: "Disponible",
@@ -138,8 +137,8 @@ export default function DisponibilityCalendar() {
       codeEns: "98421799-1f02-4c1a-9bfe-ebe00d327004",
     };
 
-    axios
-      .post("http://localhost:5142/api/disponibilite", newDispo)
+    api
+      .post("/disponibilite", newDispo)
       .then((rep) => {
         Alert.alert("Programme ajoute avec sucess");
         loadDispo();
@@ -163,7 +162,7 @@ export default function DisponibilityCalendar() {
         <TouchableOpacity
           onPress={() =>
             setDate(
-              new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1)
+              new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1),
             )
           }
         >
@@ -181,7 +180,7 @@ export default function DisponibilityCalendar() {
         <TouchableOpacity
           onPress={() =>
             setDate(
-              new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
+              new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1),
             )
           }
         >

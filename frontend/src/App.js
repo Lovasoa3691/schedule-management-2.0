@@ -80,7 +80,7 @@ function App() {
                   <Route path="/users" element={<Teacher />} />
                 </Routes>
               </div>
-              <AssistantFloatingForm />
+              {/* <AssistantFloatingForm /> */}
             </div>
           </>
         ) : (

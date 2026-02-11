@@ -8,13 +8,9 @@ import {
 } from "@react-navigation/drawer";
 import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
 import { Text, TouchableOpacity, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import Dashboard from "./dasboard";
 import StatsScreen from "./stats";
-import ScheduleCalendar from "./schedule";
 import Revision from "./cours";
-import ChatScreen from "./chat";
-import Icon from "react-native-vector-icons/Ionicons";
 import DisponibilityCalendar from "./disponibility";
 
 type RootTabParamList = {

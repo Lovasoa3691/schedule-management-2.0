@@ -16,6 +16,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+import api from "../hooks/api";
 // import Animated from 'react-native-reanimated';
 
 type coursesList = {
@@ -64,11 +65,10 @@ export default function courses(): React.JSX.Element {
     const start = monday.toISOString().split("T")[0];
     const end = sunday.toISOString().split("T")[0];
 
-    axios
-      .get(
-        "http://localhost:5142/api/edt/6911ce47-c01d-4741-9486-2238cadcda0e",
-        { params: { start, end } }
-      )
+    api
+      .get("/edt/6911ce47-c01d-4741-9486-2238cadcda0e", {
+        params: { start, end },
+      })
       .then((rep) => {
         if (rep.data.length > 0) {
           const cours: coursesList[] = rep.data.map((c: any) => ({
@@ -95,7 +95,7 @@ export default function courses(): React.JSX.Element {
               day: "numeric",
               month: "long",
             }),
-          }))
+          })),
         );
       });
   };
@@ -127,13 +127,13 @@ export default function courses(): React.JSX.Element {
   const toggleComplete = (id: string) => {
     setCourses((prev) =>
       prev.map((cours) =>
-        cours.id === id ? { ...cours, completed: !cours.completed } : cours
-      )
+        cours.id === id ? { ...cours, completed: !cours.completed } : cours,
+      ),
     );
   };
 
   const getStatus = (
-    cours: coursesList
+    cours: coursesList,
   ): "À venir" | "En cours" | "Terminé" => {
     if (cours.completed) return "Terminé";
 
