@@ -27,8 +27,6 @@ public class ImDisponibilite : IDisponibilite
                 .Include(e => e.disponibilites)
                 .ToListAsync();
 
-            
-
             foreach (var enseignant in enseignants)
             {
            
@@ -67,16 +65,19 @@ public class ImDisponibilite : IDisponibilite
                 .Include(e => e.disponibilites)
                 .Where(d => d.idUt == id)
                 .FirstOrDefaultAsync();
-            
-            result.Add(new DispoDto(
-                idDispo: res.disponibilites.Select(i => i.numDispo).FirstOrDefault(),
-                dateDispo: res.disponibilites.Select(d => d.dateDispo).FirstOrDefault(),
-                hDeb: res.disponibilites.Select(h => h.hDeb).FirstOrDefault(),
-                hFin: res.disponibilites.Select(h => h.hFin).FirstOrDefault(),
-                nomEns: res.nom,
-                prenomEns: res.prenom,
-                grade:res.grade
-            ));
+
+            foreach (var ens in res.disponibilites)
+            {
+                result.Add(new DispoDto(
+                    idDispo: res.disponibilites.Select(i => i.numDispo).FirstOrDefault(),
+                    dateDispo: res.disponibilites.Select(d => d.dateDispo).FirstOrDefault(),
+                    hDeb: res.disponibilites.Select(h => h.hDeb).FirstOrDefault(),
+                    hFin: res.disponibilites.Select(h => h.hFin).FirstOrDefault(),
+                    nomEns: res.nom,
+                    prenomEns: res.prenom,
+                    grade:res.grade
+                ));
+            }
         }
         return result;
     }

@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import api from "../hooks/api";
@@ -31,11 +32,15 @@ export default function App() {
 
   const loadStates = () => {
     api
-      .get("/utilisateur/teacher/info/98421799-1f02-4c1a-9bfe-ebe00d327004")
+      .get("/utilisateur/teacher/info/1fe7cfa1-27b3-4c1c-8a9f-97dd33f0e809")
       .then((rep) => {
+        Alert.alert("Données chargées!", JSON.stringify(rep.data));
         setSubjectData(rep.data);
       })
-      .catch((err) => console.error("Erreur: ", err.message));
+      .catch((err) => {
+        // console.error("Erreur: ", err.message);
+        Alert.alert("Erreur de chargement", err.message);
+      });
   };
 
   useEffect(() => {
@@ -50,72 +55,88 @@ export default function App() {
     );
   }
 
-  const labels = subjectData[0]?.matiereInfo?.map((s) => s.matiere);
-  const dataDone = subjectData[0]?.matiereInfo?.map((s) => s.hEffectue);
+  const matiereInfo = Array.isArray(subjectData[0]?.matiereInfo)
+    ? subjectData[0].matiereInfo
+    : [];
+
+  const safeChartData = matiereInfo
+    .map((s) => ({
+      label: s.matiere ?? "Inconnu",
+      value: typeof s.hEffectue === "number" ? s.hEffectue : 0,
+      hPrevue: typeof s.hPrevue === "number" ? s.hPrevue : 0,
+    }))
+    .filter((s) => s.value > 0);
+
+  const labels = safeChartData.map((s) => s.label);
+  const dataDone = safeChartData.map((s) => s.value);
+
+  // const labels = subjectData[0]?.matiereInfo?.map((s) => s.matiere);
+  // const dataDone = subjectData[0]?.matiereInfo?.map((s) => s.hEffectue);
 
   return (
     <ScrollView style={styles.container}>
       <View style={{ padding: 8 }}>
         <Text style={styles.title}>Performance hebdomadaire</Text>
 
-        <LineChart
-          data={{
-            labels,
-            datasets: [{ data: dataDone }],
-          }}
-          width={Dimensions.get("window").width - 16}
-          height={300}
-          yAxisSuffix="h"
-          chartConfig={{
-            backgroundColor: "#fff",
-            backgroundGradientFrom: "#f9f9f9",
-            backgroundGradientTo: "#f1f1f1",
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-            labelColor: () => "#333",
-            propsForDots: {
-              r: "3",
-              strokeWidth: "1",
-              stroke: "#007bff",
-            },
-            style: { borderRadius: 16 },
-          }}
-          style={styles.chart}
-          bezier
-        />
+        {/* 📊 Graphique sécurisé */}
+        {dataDone.length > 0 ? (
+          <LineChart
+            data={{
+              labels,
+              datasets: [{ data: dataDone }],
+            }}
+            width={Dimensions.get("window").width - 16}
+            height={300}
+            yAxisSuffix="h"
+            chartConfig={{
+              backgroundColor: "#fff",
+              backgroundGradientFrom: "#f9f9f9",
+              backgroundGradientTo: "#f1f1f1",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
+              labelColor: () => "#333",
+              propsForDots: {
+                r: "3",
+                strokeWidth: "1",
+                stroke: "#007bff",
+              },
+            }}
+            style={styles.chart}
+            bezier
+          />
+        ) : (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            Données insuffisantes pour afficher le graphique
+          </Text>
+        )}
 
-        {subjectData[0]?.matiereInfo?.map((s, index) => {
-          const remaining = s.hPrevue - s.hEffectue;
-          const completed = s.hEffectue >= s.hPrevue;
+        {/* 📋 Cartes matières */}
+        {matiereInfo.length === 0 && (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            Aucune matière disponible
+          </Text>
+        )}
+
+        {matiereInfo.map((s, index) => {
+          const hEffectue = typeof s.hEffectue === "number" ? s.hEffectue : 0;
+          const hPrevue = typeof s.hPrevue === "number" ? s.hPrevue : 0;
+
+          const remaining = hPrevue - hEffectue;
+          const completed = hEffectue >= hPrevue && hPrevue > 0;
 
           return (
             <View key={index} style={styles.card}>
               <View style={[styles.colorBar, { backgroundColor: "#ab5" }]} />
+
               <View style={{ flex: 1 }}>
-                <Text style={styles.subjectName}>{s.matiere}</Text>
-                <Text style={styles.details}>Crédit total : {s.hPrevue}h</Text>
+                <Text style={styles.subjectName}>{s.matiere ?? "Inconnu"}</Text>
+                <Text style={styles.details}>Crédit total : {hPrevue}h</Text>
                 <Text style={styles.details}>
-                  Accompli : {s.hEffectue}h | Restant : {remaining}h
+                  Accompli : {hEffectue}h | Restant : {remaining}h
                 </Text>
               </View>
 
-              <View>
-                {completed && (
-                  <Text
-                    style={{
-                      backgroundColor: "#2ecc71",
-                      padding: 3,
-                      borderRadius: 6,
-                      color: "white",
-                      width: 90,
-                      textAlign: "center",
-                    }}
-                  >
-                    {" "}
-                    Complete
-                  </Text>
-                )}
-              </View>
+              {completed && <Text style={styles.completeBadge}>Complété</Text>}
             </View>
           );
         })}
@@ -142,6 +163,14 @@ const styles = StyleSheet.create({
   chart: {
     marginVertical: 16,
     borderRadius: 16,
+  },
+  completeBadge: {
+    backgroundColor: "#2ecc71",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    color: "white",
+    fontSize: 12,
   },
   card: {
     flexDirection: "row",

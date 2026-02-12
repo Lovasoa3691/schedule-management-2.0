@@ -18,9 +18,11 @@ web-build/
 
 
 # React Native
-android/app/build/
+mobile/android/app/build/
 ios/Pods/
 ios/build/
+mobile/.expo/
+mobile/android/.gradle/ android/.kotlin/
 
 # Expo
 .expo/

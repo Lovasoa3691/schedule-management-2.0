@@ -23,6 +23,7 @@ import axios from "axios";
 import api from "../hooks/api";
 
 type Event = {
+  id: string;
   title: string;
   start: Date;
   end: Date;
@@ -39,7 +40,7 @@ interface Dispo {
 
 export default function DisponibilityCalendar() {
   const [mode, setMode] = useState<Mode>("week");
-  const [date, setDate] = useState(new Date(2025, 7, 18));
+  const [date, setDate] = useState(new Date());
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
@@ -56,17 +57,21 @@ export default function DisponibilityCalendar() {
 
   const [dispoData, setDispoData] = useState<Event[]>([]);
 
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+
   const loadDispo = () => {
     api
-      .get("/disponibilite/98421799-1f02-4c1a-9bfe-ebe00d327004")
+      .get("/disponibilite/7765de68-4e92-4c2f-ab7d-90b1a02c250c")
       .then((rep) => {
         const events: Event[] = rep.data.map((d: any) => ({
+          id: d.idDispo,
           title: "Disponible",
           start: new Date(`${d.dateDispo}T${d.hDeb}`),
           end: new Date(`${d.dateDispo}T${d.hFin}`),
           color: "green",
         }));
-
+        Alert.alert("Disponibilités chargées!", JSON.stringify(rep.data));
         setDispoData(events);
       })
       .catch((err) => console.error("Erreur de chargement dispo", err));
@@ -134,7 +139,7 @@ export default function DisponibilityCalendar() {
       dateDispo: dateDispo,
       hdeb: heureDebut,
       hfin: heureFin,
-      codeEns: "98421799-1f02-4c1a-9bfe-ebe00d327004",
+      codeEns: "7765de68-4e92-4c2f-ab7d-90b1a02c250c",
     };
 
     api
@@ -145,6 +150,21 @@ export default function DisponibilityCalendar() {
       })
       .catch((err) => {
         console.error("Erreur: ", err.response.data);
+      });
+  };
+
+  const cancelDispo = () => {
+    if (!selectedEvent) return;
+
+    api
+      .patch(`/disponibilite/${selectedEvent.id}/annuler`)
+      .then(() => {
+        Alert.alert("Disponibilité annulée");
+        setActionModalVisible(false);
+        loadDispo();
+      })
+      .catch(() => {
+        Alert.alert("Erreur", "Impossible d'annuler la disponibilité");
       });
   };
 
@@ -203,8 +223,12 @@ export default function DisponibilityCalendar() {
         height={600}
         mode={mode}
         date={date}
-        swipeEnabled={true}
+        swipeEnabled
         weekStartsOn={1}
+        onPressEvent={(event) => {
+          setSelectedEvent(event);
+          setActionModalVisible(true);
+        }}
       />
 
       <TouchableOpacity
@@ -288,13 +312,54 @@ export default function DisponibilityCalendar() {
                 style={styles.addButton}
                 onPress={() => {
                   saveDispo();
-                  //   setModalVisible(false);
+                  setModalVisible(false);
                 }}
               >
                 <Text style={styles.addButtonText}>Ajouter</Text>
               </TouchableOpacity>
             </KeyboardAvoidingView>
           </Animated.View>
+        </View>
+      </Modal>
+
+      <Modal
+        transparent
+        visible={actionModalVisible}
+        animationType="fade"
+        onRequestClose={() => setActionModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.actionModal}>
+            <Text style={styles.modalTitle}>Disponibilité</Text>
+
+            <Text style={{ marginBottom: 10 }}>
+              {selectedEvent?.start.toLocaleString("fr-FR")} -{" "}
+              {selectedEvent?.end.toLocaleTimeString("fr-FR")}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: "#e74c3c" }]}
+              onPress={() => {
+                Alert.alert("Confirmation", "Annuler cette disponibilité ?", [
+                  { text: "Non", style: "cancel" },
+                  {
+                    text: "Oui",
+                    style: "destructive",
+                    onPress: () => cancelDispo(),
+                  },
+                ]);
+              }}
+            >
+              <Text style={styles.actionBtnText}>Annuler la disponibilité</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setActionModalVisible(false)}
+              style={[styles.actionBtn, { backgroundColor: "#ccc" }]}
+            >
+              <Text>Fermer</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </View>
@@ -396,5 +461,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
+  },
+  actionModal: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    marginHorizontal: 40,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  actionBtn: {
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 6,
+    alignItems: "center",
+  },
+  actionBtnText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

@@ -26,22 +26,22 @@ pipeline {
             }
         }
 
-        // stage('Build & Push Backend') {
-        //     steps {
-        //         dir('backend') {
-        //             withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
-        //                                             usernameVariable: 'DOCKER_USERNAME', 
-        //                                             passwordVariable: 'DOCKER_PASSWORD')]) {
-        //                 sh '''#!/bin/bash
-        //                 echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        //                 docker build -t $DOCKER_USERNAME/backend-api:latest .
-        //                 docker push $DOCKER_USERNAME/backend-api:latest
-        //                 '''
-        //             }
-        //         }
+        stage('Build & Push Backend') {
+            steps {
+                dir('backend') {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
+                                                    usernameVariable: 'DOCKER_USERNAME', 
+                                                    passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh '''#!/bin/bash
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker build -t $DOCKER_USERNAME/backend-api:latest .
+                        docker push $DOCKER_USERNAME/backend-api:latest
+                        '''
+                    }
+                }
 
-        //     }
-        // }
+            }
+        }
 
         stage('Build & Push Frontend') {
             steps {
@@ -59,17 +59,17 @@ pipeline {
             }
         }
 
-        // stage('Deploy Backend to Minikube') {
-        //     steps {
-        //         withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-        //             sh '''
-        //             kubectl apply -f k8s/backend.yaml
-        //             kubectl rollout restart deployment/backend-api
-        //             kubectl rollout status deployment/backend-api
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Deploy Backend to Minikube') {
+            steps {
+                withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+                    sh '''
+                    kubectl apply -f k8s/backend.yaml
+                    kubectl rollout restart deployment/backend-api
+                    kubectl rollout status deployment/backend-api
+                    '''
+                }
+            }
+        }
 
         stage('Deploy Frontend to Minikube') {
             steps {

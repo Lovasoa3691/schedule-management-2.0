@@ -27,25 +27,32 @@ export default function LoginScreen({ onLoginSucces }: Props) {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleLogin = () => {
+    // if (email === "admin@gmail.com" && mdp === "orion3691") {
+    //   onLoginSucces();
+    // } else {
+    //   Alert.alert("Email ou mot de passe invalide!");
+    // }
     api
-      .post(
-        "/utilisateur/login",
-        { email: email, mdp: mdp, role: "enseignant" }
-      )
+      .post("/utilisateur/login", {
+        email: email,
+        mdp: mdp,
+        role: "enseignant",
+      })
       .then((rep) => {
-        api
-          .get("/utilisateur/profile")
-          .then((rep) => {
-            console.log(rep.data);
-            onLoginSucces();
-          })
-          .catch((err) => {
-            console.error(err.message);
-          });
+        Alert.alert("Connexion réussie!", JSON.stringify(rep.data));
+        onLoginSucces();
+        // api
+        //   .get("/utilisateur/profile")
+        //   .then((rep) => {
+        //     Alert.alert("Connexion réussie!", JSON.stringify(rep.data));
+        //     onLoginSucces();
+        //   })
+        //   .catch((err) => {
+        //     Alert.alert("Erreur", err.message);
+        //   });
       })
       .catch((err) => {
         Alert.alert(err.response.data);
-        console.log("Erreur: ", err);
       });
   };
 
