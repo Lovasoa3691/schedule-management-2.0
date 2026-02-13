@@ -89,7 +89,7 @@ const Planning = () => {
 
     while (hour < endHour || (hour === endHour && minute <= endMinute)) {
       const formatted = `${String(hour).padStart(2, "0")}:${String(
-        minute
+        minute,
       ).padStart(2, "0")}`;
       result.push({ heure: formatted });
 
@@ -103,7 +103,7 @@ const Planning = () => {
   }
 
   const [horaire, setHoraire] = useState(() =>
-    generateHoraire("07:00", "18:00", 30)
+    generateHoraire("07:00", "18:00", 30),
   );
 
   const [filteredHoraire, setFilteredHoarire] = useState([]);
@@ -179,7 +179,7 @@ const Planning = () => {
             type: event.type,
             salle: event.nomSalle,
             status: event.dispo,
-          }))
+          })),
         );
       })
       .catch((err) => console.error("Erreur de chargement:", err));
@@ -207,7 +207,7 @@ const Planning = () => {
 
     if (slotWeekStart.isBefore(currentWeekStart)) {
       setAlert(
-        "Impossible de créer un événement dans une semaine déjà passée."
+        "Impossible de créer un événement dans une semaine déjà passée.",
       );
       setShowAlert(true);
       return;
@@ -278,7 +278,7 @@ const Planning = () => {
       (item) =>
         (!mention || item.mention === mention.value) &&
         (!niveau || item.niveau === niveau.value) &&
-        (!type || item.type === type.value)
+        (!type || item.type === type.value),
     );
     setFilteredEvents(filtered);
   };
@@ -353,53 +353,73 @@ const Planning = () => {
 
     if (name === "enseignantId") {
       const selectedEns = ensignants.find(
-        (ens) => ens.id.toString() === value.toString()
+        (ens) => ens.id.toString() === value.toString(),
       );
 
       if (selectedEns) {
-        const dispo = disponibilite.filter((dispo) =>
-          selectedEns.nom.includes(dispo.nomEns)
+        // 1️⃣ Filtrer les disponibilités par enseignant
+        const dispoEns = disponibilite.filter((d) =>
+          selectedEns.nom.includes(d.nomEns),
         );
-        setFilteredDispo(dispo);
 
-        console.log("Dispo: ", dispo);
+        setFilteredDispo(dispoEns);
+        console.log("Dispos enseignant:", dispoEns);
 
-        if (dispo.length > 0) {
-          const { hDeb, hFin, dateDispo } = dispo[0];
+        // 2️⃣ Filtrer les disponibilités pour la date sélectionnée
+        const dispoDuJour = dispoEns.filter(
+          (d) => formatDate(d.dateDispo) === formatDate(selectedDate),
+        );
 
-          if (formatDate(dateDispo) === formatDate(selectedDate)) {
-            const toMinutes = (time) => {
-              const [hh, mm] = time.split(":").map(Number);
-              return hh * 60 + mm;
-            };
-
-            const start = toMinutes(hDeb);
-            const end = toMinutes(hFin);
-
-            const hours = horaire.filter((h) => {
-              const t = toMinutes(h.heure);
-              return t >= start && t <= end;
-            });
-
-            setFilteredHoarire(hours);
-          } else {
-            setFilteredHoarire([]);
-            console.log("Desole, enseignant non disponible!");
-            setShowForm(false);
-            setshowError(true);
-          }
+        // 3️⃣ Si aucune disponibilité ce jour-là
+        if (dispoDuJour.length === 0) {
+          setFilteredHoarire([]);
+          setShowForm(false);
+          setshowError(true);
+          console.log("Désolé, enseignant non disponible ce jour !");
+          return;
         }
+
+        // 4️⃣ Fonction utilitaire : heure -> minutes
+        const toMinutes = (time) => {
+          const [hh, mm] = time.split(":").map(Number);
+          return hh * 60 + mm;
+        };
+
+        // 5️⃣ Récupérer tous les créneaux horaires disponibles
+        let hours = [];
+
+        dispoDuJour.forEach(({ hDeb, hFin }) => {
+          const start = toMinutes(hDeb);
+          const end = toMinutes(hFin);
+
+          const h = horaire.filter((ho) => {
+            const t = toMinutes(ho.heure);
+            return t >= start && t <= end;
+          });
+
+          hours = [...hours, ...h];
+        });
+
+        // 6️⃣ Supprimer les doublons d'heures
+        const uniqueHours = [
+          ...new Map(hours.map((h) => [h.heure, h])).values(),
+        ];
+
+        // 7️⃣ Mise à jour des états
+        setFilteredHoarire(uniqueHours);
+        setShowForm(true);
+        setshowError(false);
       }
 
       const ens = ensignants.filter((ens) =>
-        ens.id.toString().includes(value.toString())
+        ens.id.toString().includes(value.toString()),
       );
 
       setFilteredEns(ens);
 
       if (ens.length > 0) {
         const mat = matieres.filter((mat) =>
-          mat.nomEns.toLowerCase().includes(ens[0].nom.toLowerCase())
+          mat.nomEns.toLowerCase().includes(ens[0].nom.toLowerCase()),
         );
         setFilteredMat(mat);
       } else {
@@ -407,17 +427,17 @@ const Planning = () => {
       }
     } else if (name === "matiereId") {
       const selectedMat = filteredMat.find(
-        (mat) => mat.id.toString() === value.toString()
+        (mat) => mat.id.toString() === value.toString(),
       );
 
       if (selectedMat) {
         const ment = mentions.filter((mnt) =>
-          selectedMat.mentionId.includes(mnt.idMent)
+          selectedMat.mentionId.includes(mnt.idMent),
         );
         setFilteredMent(ment);
 
         const niv = niveaux.filter((nv) =>
-          selectedMat.niveauId.includes(nv.idNiv)
+          selectedMat.niveauId.includes(nv.idNiv),
         );
         setFilteredNiv(niv);
       } else {
