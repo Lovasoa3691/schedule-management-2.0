@@ -9,11 +9,11 @@ public class AnneeScolaire
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int idAnnee{get;set;}
-    [Column(TypeName = "nvarchar(4)")]
+    [Column(TypeName = "varchar(4)")]
     public string dateDebutAnnee { get; set; } = string.Empty;
-    [Column(TypeName = "nvarchar(4)")]
+    [Column(TypeName = "varchar(4)")]
     public string dateFinAnnee {get;set;} = string.Empty;
-    [Column(TypeName = "nvarchar(4)")]
+    [Column(TypeName = "varchar(10)")]
     public string status {get;set;}
     
     public ICollection<Edt> edts { get; set; } = new List<Edt>();

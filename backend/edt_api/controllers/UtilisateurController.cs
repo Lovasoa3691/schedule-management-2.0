@@ -28,6 +28,10 @@ public class UtilisateurController : ControllerBase
     [HttpGet("teacher")]
     public async Task<ActionResult<IEnumerable<EnseignantDto>>> GetAllTeacher()
         => Ok(await _service.getAllTeacherAsync());
+    
+    [HttpGet("teacher/actif")]
+    public async Task<ActionResult<IEnumerable<EnseignantActiviteDto>>> GetSpecificTeacher()
+        => Ok(await _service.getSpecificTeacher());
 
     [HttpGet("{id}")]
     public async Task<ActionResult<IEnumerable<ResponsableDto>>> GetById(string id)
@@ -40,7 +44,7 @@ public class UtilisateurController : ControllerBase
     [HttpGet("profile")]
     public IActionResult GetProfile()
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var id = User.FindFirst("userId")?.Value;
         return Ok(id);
     }
 
@@ -57,66 +61,50 @@ public class UtilisateurController : ControllerBase
         var created = await _service.registerAsync(dto);
         if (created == null)
         {
-            return NotFound(new {message= "Enseignants non trouvee."});
+            return NotFound(new {message= $"Email {dto.email} introuvable dans le systeme."});
         }
         return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
     }
     
     [HttpPost("login")]
-    public async Task<ActionResult<ResponsableDto>> Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        
         var user = await _service.getUserConnected(dto);
-        if (user == null) return Unauthorized("Email ou mot de passe invalide");
-        if (dto.role == "responsable")
+        if (user == null)
+            return Unauthorized("Email ou mot de passe invalide");
+        
+        if (dto.client == "web")
         {
             Response.Cookies.Append("jwt", user.token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.Now.AddHours(2),
-                Path = "/"
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(2)
             });
-        }
-        else
-        {
-            Response.Cookies.Append("jwt_ens", user.token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.Now.AddHours(2),
-                Path = "/"
-            });
-        }
-        return Ok(new { email = user.email });
-    }
 
-    [HttpPost("logout")]
-    public IActionResult Logout([FromBody] string role)
-    {
-        if (role == "responsable")
-        {
-            Response.Cookies.Delete("jwt", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, 
-                SameSite = SameSiteMode.Lax,
-                Path = "/"
-            });
-        }
-        else
-        {
-            Response.Cookies.Delete("jwt_ens", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, 
-                SameSite = SameSiteMode.Lax,
-                Path = "/"
-            });
+            return Ok(new { email = user.email, role = user.role });
         }
         
+        return Ok(new
+        {
+            token = user.token,
+            email = user.email,
+            role = user.role
+        });
+    }
+    
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("jwt", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
+        });
+
         return Ok(new { message = "Déconnecté avec succès" });
     }
 

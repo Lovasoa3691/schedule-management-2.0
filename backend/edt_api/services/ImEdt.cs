@@ -27,7 +27,7 @@ public class ImEdt : IEdt
         IQueryable<Edt> query = _db.Edts
             .AsNoTracking()
             .Include(e => e.enseignant)
-            .ThenInclude(ee => ee.enseignements)
+            .ThenInclude(ee => ee.activites)
             .Include(a => a.matiere)
             .Include(m => m.mention)
             .Include(n => n.niveau)
@@ -45,11 +45,27 @@ public class ImEdt : IEdt
                 query = query.Where(e => e.enseignantId == id);
             }
         }
-
         if (startDate.HasValue && endDate.HasValue)
         {
             query = query.Where(e => e.jour >= startDate.Value && e.jour <= endDate.Value);
         }
+
+        var result = await query.ToListAsync();
+        return _mapper.Map<IEnumerable<EdtDto>>(result);
+    }
+
+    public async Task<IEnumerable<EdtDto>> GetEdtByWeek(string id, string week)
+    {
+        IQueryable<Edt> query = _db.Edts
+            .AsNoTracking()
+            .Include(e => e.enseignant)
+            .ThenInclude(ee => ee.activites)
+            .Include(a => a.matiere)
+            .Include(m => m.mention)
+            .Include(n => n.niveau)
+            .Include(s => s.salle)
+            .Include(a => a.anneeScolaire)
+            .Where(e => e.anneeScolaire.status == "Active" && e.enseignantId == id && e.semaine == week);
 
         var result = await query.ToListAsync();
         return _mapper.Map<IEnumerable<EdtDto>>(result);
@@ -70,49 +86,103 @@ public class ImEdt : IEdt
                 (e.hDeb < dto.hFin && e.hFin > dto.hDeb)
                 &&
                 (
-                    
                     e.enseignantId == dto.enseignantId ||
-                   
                     e.salleId == dto.idSalle
-                    
                 )
             )
             .FirstOrDefaultAsync();
-
         return conflit != null;
     }
 
     public async Task<EdtDto> AddAsync(CreateEdtDto dto)
     {
+        var now = DateTime.Now;
         
         var conflict = await CheckConflitAsync(dto);
         if (conflict)
         {
-            throw new InvalidOperationException("Chevuachement detecte: la salle ou l'enseignant est déjà occupé.");
+            throw new InvalidOperationException("Chevauchement detecté: la salle ou l'enseignant est déjà occupé.");
         }
-        
-        var data = _mapper.Map<Edt>(dto);
-        await _db.Edts.AddAsync(data);
+        var edt = new Edt
+        {
+            anneeId = dto.anneeId,
+            hDeb = dto.hDeb,
+            hFin = dto.hFin,
+            jour = dto.jour,
+            type = dto.type,
+            disponibilite = dto.dispo,
+            created_at = now,
+            mentionId = dto.mentionId,
+            niveauId = dto.niveauId,
+            matiereId = dto.matiereId,
+            enseignantId = dto.enseignantId,
+            responsableId = dto.responsableId,
+            salleId = dto.idSalle,
+        };
+        await _db.Edts.AddAsync(edt);
         await _db.SaveChangesAsync();
         
         TimeOnly deb = TimeOnly.Parse(dto.hDeb.ToString());
         TimeOnly fin = TimeOnly.Parse(dto.hFin.ToString());
-        
         TimeSpan diff = fin.ToTimeSpan() -  deb.ToTimeSpan();
-
-        var enseignement = new Enseignement
+        
+        var activite = await _db.Activites
+            .FirstOrDefaultAsync(a =>
+                a.enseignantId == dto.enseignantId &&
+                a.matiereId == dto.matiereId &&
+                a.statusActivite == ""
+            );
+        
+        if (activite != null)
         {
-            enseignantId = dto.enseignantId,
-            matiereId = dto.matiereId,
-            heureEffectue = Double.Parse(diff.TotalHours.ToString()),
-            ststusEnseignement = "En cours"
-        };
+            activite.heureEffectue = Double.Parse(diff.TotalHours.ToString());
+            activite.statusActivite = "En attente";
+            activite.updated_at =  now;
+            activite.created_at = now;
+            await _db.SaveChangesAsync();
+        }
+        else
+        {
+            var activites = new Activite
+            {
+                enseignantId = dto.enseignantId,
+                matiereId = dto.matiereId,
+                heureEffectue = Double.Parse(diff.TotalHours.ToString()),
+                statusActivite = "En attente",
+                created_at = now,
+            };
+            await _db.Activites.AddAsync(activites);
+            await _db.SaveChangesAsync();
+        }
         
-        await _db.Enseignements.AddAsync(enseignement);
-        await _db.SaveChangesAsync();
-        
-        return _mapper.Map<EdtDto>(data);
+        return _mapper.Map<EdtDto>(edt);
     }
+
+    public async Task<bool> UpdateStatusAsync(string id)
+    {
+        var res = await _db.Edts
+            .Include(e => e.enseignant)
+            .FirstOrDefaultAsync(e => e.numEd == id);
+
+        if (res == null)
+            return false;
+
+        var acts = await _db.Activites.FirstOrDefaultAsync(a =>
+            a.enseignantId == res.enseignantId &&
+            a.created_at == res.created_at);
+        
+        res.disponibilite = "Terminé";
+        
+        if (acts != null)
+        {
+            acts.statusActivite = "Accompli";
+            acts.updated_at = DateTime.Now;
+        }
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
 
     public async Task<bool> UpdateAsync(string id, UpdateEdtDto dto)
     {

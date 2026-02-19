@@ -23,16 +23,48 @@ public class ImDisponibilite : IDisponibilite
         var result = new List<DispoDto>();
         if (id == "all")
         {
+            // var enseignants = await _db.Enseignants
+            //     .Include(e => e.disponibilites)
+            //     .ToListAsync();
+            //
+            // foreach (var enseignant in enseignants)
+            // {
+            //     var disposActives = enseignant.disponibilites?
+            //         .Where(d => d.statusDispo == "ACTIVE")
+            //         .ToList();
+            //
+            //     if (disposActives != null && disposActives.Any())
+            //     {
+            //         foreach (var dispo in disposActives)
+            //         {
+            //             result.Add(new DispoDto(
+            //                 idDispo: dispo.numDispo,
+            //                 dateDispo: dispo.dateDispo,
+            //                 hDeb: dispo.hDeb,
+            //                 hFin: dispo.hFin,
+            //                 nomEns: enseignant.nom,
+            //                 prenomEns: enseignant.prenom,
+            //                 grade: enseignant.grade
+            //             ));
+            //         }
+            //     }
+            // }
+            
             var enseignants = await _db.Enseignants
-                .Include(e => e.disponibilites)
+                .Include(e => e.disponibilites
+                    .Where(d => d.statusDispo == "ACTIVE"))
                 .ToListAsync();
 
             foreach (var enseignant in enseignants)
             {
-           
-                if (enseignant.disponibilites != null && enseignant.disponibilites.Any())
+                var disposTriees = enseignant.disponibilites?
+                    .OrderBy(d => d.dateDispo)
+                    .ThenBy(d => d.hDeb)
+                    .ToList();
+
+                if (disposTriees != null && disposTriees.Any())
                 {
-                    foreach (var dispo in enseignant.disponibilites)
+                    foreach (var dispo in disposTriees)
                     {
                         result.Add(new DispoDto(
                             idDispo: dispo.numDispo,
@@ -41,7 +73,7 @@ public class ImDisponibilite : IDisponibilite
                             hFin: dispo.hFin,
                             nomEns: enseignant.nom,
                             prenomEns: enseignant.prenom,
-                            grade:enseignant.grade
+                            grade: enseignant.grade
                         ));
                     }
                 }
@@ -54,31 +86,50 @@ public class ImDisponibilite : IDisponibilite
                         hFin: default,
                         nomEns: enseignant.nom,
                         prenomEns: enseignant.prenom,
-                        grade:enseignant.grade
+                        grade: enseignant.grade
                     ));
                 }
             }
+
         }
         else
         {
             var res = await _db.Enseignants
                 .Include(e => e.disponibilites)
-                .Where(d => d.idUt == id)
-                .FirstOrDefaultAsync();
-
-            foreach (var ens in res.disponibilites)
+                .FirstOrDefaultAsync(e => e.idUt == id);
+            
+            if (res == null)
+                return Enumerable.Empty<DispoDto>();
+            
+            if (res.disponibilites == null || !res.disponibilites.Any())
+            {
+                return new List<DispoDto>
+                {
+                    new DispoDto(
+                        idDispo: null,
+                        dateDispo: default,
+                        hDeb: default,
+                        hFin: default,
+                        nomEns: res.nom,
+                        prenomEns: res.prenom,
+                        grade: res.grade
+                    )
+                };
+            }
+            foreach (var dispo in res.disponibilites)
             {
                 result.Add(new DispoDto(
-                    idDispo: res.disponibilites.Select(i => i.numDispo).FirstOrDefault(),
-                    dateDispo: res.disponibilites.Select(d => d.dateDispo).FirstOrDefault(),
-                    hDeb: res.disponibilites.Select(h => h.hDeb).FirstOrDefault(),
-                    hFin: res.disponibilites.Select(h => h.hFin).FirstOrDefault(),
+                    idDispo: dispo.numDispo,
+                    dateDispo: dispo.dateDispo,
+                    hDeb: dispo.hDeb,
+                    hFin: dispo.hFin,
                     nomEns: res.nom,
                     prenomEns: res.prenom,
-                    grade:res.grade
+                    grade: res.grade
                 ));
             }
         }
+
         return result;
     }
     
@@ -95,9 +146,9 @@ public class ImDisponibilite : IDisponibilite
             dateDispo = dto.dateDispo,
             hDeb = dto.hDeb,
             hFin = dto.hFin,
-            enseignantId = dto.codeEns
+            enseignantId = dto.codeEns,
+            statusDispo = "ACTIVE"
         };
-        
         _db.Disponibilites.Add(data);
         await _db.SaveChangesAsync();
         return _mapper.Map<DispoDto>(data);

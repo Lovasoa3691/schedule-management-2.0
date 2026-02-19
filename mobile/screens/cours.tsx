@@ -12,12 +12,17 @@ import {
   Animated,
   Easing,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
 import api from "../hooks/api";
+import { getUserIdFromToken } from "../decode";
 // import Animated from 'react-native-reanimated';
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { usePlanning } from "./utils/PlanningContext";
 
 type coursesList = {
   id: string;
@@ -37,6 +42,10 @@ type coursesList = {
 export default function courses(): React.JSX.Element {
   const [date, setDate] = useState<Date>(new Date());
   const [courses, setCourses] = useState<coursesList[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { showActionSheetWithOptions } = useActionSheet();
+  const [refreshing, setRefreshing] = useState(false);
+  const { selectedWeek } = usePlanning();
 
   const formatdate = (date: Date) => {
     let hour = date.getHours();
@@ -58,18 +67,29 @@ export default function courses(): React.JSX.Element {
     return { monday, sunday };
   };
 
-  const loadCourses = () => {
-    const today = new Date();
+  useEffect(() => {
+    loadCourses();
+  }, [selectedWeek]);
+
+  const loadCourses = async () => {
+    const today = new Date(selectedWeek);
     const { monday, sunday } = getCurrentWeek(today);
 
     const start = monday.toISOString().split("T")[0];
     const end = sunday.toISOString().split("T")[0];
+    const data = await getUserIdFromToken();
+    if (!data || !data.userId) {
+      Alert.alert("Erreur", "Utilisateur non authentifié");
+      return;
+    }
+    setLoading(true);
 
     api
-      .get("/edt/6911ce47-c01d-4741-9486-2238cadcda0e", {
+      .get(`/edt/${data.userId}/week_${monday.getDate()}-${sunday.getDate()}`, {
         params: { start, end },
       })
       .then((rep) => {
+        console.log("Cours chargés: ", rep.data);
         if (rep.data.length > 0) {
           const cours: coursesList[] = rep.data.map((c: any) => ({
             id: c.numEd,
@@ -97,7 +117,14 @@ export default function courses(): React.JSX.Element {
             }),
           })),
         );
-      });
+      })
+      .catch((err) =>
+        console.error(
+          "Erreur de chargement des cours: ",
+          err.response?.data || err.message,
+        ),
+      )
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -123,6 +150,19 @@ export default function courses(): React.JSX.Element {
       }).start();
     }
   }, [modalVisible]);
+
+  const done = (id: string) => {
+    setLoadingDone(true);
+    api
+      .put(`/edt/status/${id}/done`)
+      .then(() => {
+        loadCourses();
+      })
+      .catch((err) => {
+        console.error("Erreur lors de la mise à jour du cours:", err);
+      })
+      .finally(() => setLoadingDone(false));
+  };
 
   const toggleComplete = (id: string) => {
     setCourses((prev) =>
@@ -156,88 +196,146 @@ export default function courses(): React.JSX.Element {
     ]);
   };
 
-  // if (courses.length === 0) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <Text style={styles.title}>Chargement des donnees...</Text>
-  //     </View>
-  //   );
-  // }
+  const openCourseMenu = (item: coursesList) => {
+    const options = ["⏸ Arrêter le cours", "❌ Annuler le cours", "Fermer"];
+    const cancelButtonIndex = 2;
+    const destructiveButtonIndex = 1;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+      },
+      (index?: number) => {
+        if (index === 0) {
+          // TODO: logique arrêter le cours
+          Alert.alert("Info", "Cours arrêté (à implémenter côté API)");
+        }
+        if (index === 1) {
+          cancelCours(item.id);
+        }
+      },
+    );
+  };
+
+  const [loadingDone, setLoadingDone] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadCourses();
+    setRefreshing(false);
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3a5dd9" />
+        <Text style={{ marginTop: 10, textAlign: "center" }}>
+          Chargement en cours...
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
-    >
-      <Text style={styles.title}>Liste de mes cours</Text>
+    <ActionSheetProvider>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.container}
+      >
+        <Text style={styles.title}>Liste de mes cours</Text>
 
-      <FlatList
-        data={courses}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Vous n'avez pas du cours cette semaine.
-          </Text>
-        }
-        renderItem={({ item }) => {
-          const status = getStatus(item);
-          const statusColor =
-            status === "Terminé"
-              ? "#4caf50"
-              : status === "En cours"
-              ? "#ff9800"
-              : "#2196f3";
+        <FlatList
+          data={courses}
+          keyExtractor={(item) => item.id}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              Vous n'avez pas du cours cette semaine.
+            </Text>
+          }
+          renderItem={({ item }) => {
+            const status = getStatus(item);
+            const statusColor =
+              status === "Terminé"
+                ? "#4caf50"
+                : status === "En cours"
+                  ? "#ff9800"
+                  : "#2196f3";
 
-          return (
-            <View
-              style={[
-                styles.coursItem,
-                item.completed && { backgroundColor: "#e6f4ea" },
-              ]}
-            >
-              <View style={styles.coursHeader}>
-                <Text style={styles.coursTitle}>
-                  {item.hDeb} à {item.hFin} ({item.matiere})
+            return (
+              <View
+                style={[
+                  styles.coursItem,
+                  item.completed && { backgroundColor: "#e6f4ea" },
+                ]}
+              >
+                <View style={styles.coursHeader}>
+                  <Text style={styles.coursTitle}>
+                    {item.hDeb.slice(0, 5)} à {item.hFin.slice(0, 5)} (
+                    {item.matiere})
+                  </Text>
+                </View>
+                <Text style={styles.coursNotes}>
+                  {item.mention} {item.niveau} | Salle {item.salle}
                 </Text>
-                {!item.completed && (
-                  <TouchableOpacity onPress={() => cancelCours(item.id)}>
-                    <Text
-                      style={{
-                        color: "white",
-                        padding: 5,
-                        backgroundColor: "#e53935",
-                        borderRadius: 5,
-                      }}
-                    >
-                      Annuler
-                    </Text>
-                    {/* <Ionicons name="trash-outline" size={20} color="#f14d4aff" /> */}
-                  </TouchableOpacity>
-                )}
-              </View>
-              <Text style={styles.coursNotes}>
-                {item.mention} {item.niveau} | Salle {item.salle}
-              </Text>
-              <Text style={styles.coursDate}> {item.jour} </Text>
-              <Text style={[styles.coursestatus, { color: statusColor }]}>
-                {status === "Terminé" ? "✔" : status === "En cours" ? "" : ""}{" "}
-                {status}
-              </Text>
+                <Text style={styles.coursDate}> {item.jour} </Text>
+                <Text style={[styles.coursestatus, { color: statusColor }]}>
+                  {status === "Terminé" ? (
+                    <Ionicons name="checkmark-done" size={16} color="#4caf50" />
+                  ) : status === "En cours" ? (
+                    <Ionicons
+                      name="play-circle-outline"
+                      size={16}
+                      color="#ff9800"
+                    />
+                  ) : (
+                    <Ionicons name="time-outline" size={16} color="#2196f3" />
+                  )}{" "}
+                  {status}
+                </Text>
 
-              {!item.statusEns && (
-                <TouchableOpacity
-                  onPress={() => toggleComplete(item.id)}
-                  style={styles.completeButton}
-                >
-                  <Ionicons name="checkmark-done" size={18} color="#fff" />
-                  <Text style={styles.completeText}>Marquer comme fait</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          );
-        }}
-      />
-    </KeyboardAvoidingView>
+                <View style={{ flexDirection: "row", marginTop: 10 }}>
+                  {!item.completed && (
+                    <TouchableOpacity
+                      onPress={() => done(item.id)}
+                      style={styles.completeButton}
+                      disabled={loadingDone}
+                    >
+                      {loadingDone ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="checkmark-done"
+                            size={18}
+                            color="#fff"
+                          />
+                          <Text style={styles.completeText}>
+                            Marquer comme fait
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  )}
+
+                  {!item.completed && (
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => cancelCours(item.id)}
+                    >
+                      <Text style={styles.cancelText}>Annuler</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            );
+          }}
+        />
+      </KeyboardAvoidingView>
+    </ActionSheetProvider>
   );
 }
 
@@ -343,6 +441,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
+  },
+  cancelButton: {
+    marginTop: 10,
+    backgroundColor: "#e53935",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    marginLeft: 10,
+  },
+  stopButton: {
+    marginTop: 10,
+    backgroundColor: "#ff9800",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    marginLeft: 10,
+  },
+  stopText: {
+    color: "#fff",
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  cancelText: {
+    color: "#fff",
+    marginLeft: 8,
+    fontSize: 14,
   },
   completeText: {
     color: "#fff",

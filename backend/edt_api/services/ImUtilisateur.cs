@@ -37,6 +37,15 @@ public class ImUtilisateur : IUtilisateur
         return _mapper.Map<IEnumerable<EnseignantDto>>(enseignant);
     }
 
+    public async Task<IEnumerable<EnseignantActiviteDto>> getSpecificTeacher()
+    {
+        var activites = await _db.Activites
+            .Include(a => a.enseignant)
+            .Include(a => a.matiere)
+            .ToListAsync();
+        return _mapper.Map<IEnumerable<EnseignantActiviteDto>>(activites);
+    }
+    
     public async Task<IEnumerable<EnseignantInfoDto>> getInfoTeacherAsync(string id)
     {
         List<Enseignant> info = new List<Enseignant>();
@@ -44,7 +53,7 @@ public class ImUtilisateur : IUtilisateur
         if (id == "all")
         {
             info = await _db.Enseignants
-                .Include(e => e.enseignements)
+                .Include(e => e.activites)
                 .ThenInclude(ens => ens.matiere)
                 .Include(e => e.Authentifications)
                 .ToListAsync();
@@ -52,13 +61,12 @@ public class ImUtilisateur : IUtilisateur
         else
         {
             info = await _db.Enseignants
-                .Include(e => e.enseignements)
+                .Include(e => e.activites)
                 .ThenInclude(ens => ens.matiere)
                 .Include(e => e.Authentifications)
                 .Where(e => e.idUt == id)
                 .ToListAsync();
         }
-        
 
         var grouped = info.Select(e =>
             new EnseignantInfoDto
@@ -67,14 +75,14 @@ public class ImUtilisateur : IUtilisateur
                 prenom: e.prenom,
                 grade: e.grade,
                 email: e.Authentifications?.FirstOrDefault()?.email ?? "N/A",
-                matiereInfo: e.enseignements
+                matiereInfo: e.activites
                     .GroupBy(ens => ens.matiere?.nomMat ?? "N/A")
                     .Select(g => new MatiereInfoDto
                     (
                         matiere: g.Key,
                         hPrevue: g.FirstOrDefault()?.matiere?.nbHor ?? 0,
                         hEffectue: g
-                            .Where(ens => ens.ststusEnseignement == "Accompli")
+                            .Where(ens => ens.statusActivite == "Accompli")
                             .Sum(ens => ens.heureEffectue)
                     )).ToList()
             ));
@@ -89,18 +97,34 @@ public class ImUtilisateur : IUtilisateur
 
     public async Task<AuthDto> getUserConnected(LoginDto dto)
     {
-        var res = await _db.Authentifications.Where(e => e.email == dto.email).FirstOrDefaultAsync();
+        var res = await _db.Authentifications
+            .Where(e => e.email == dto.email)
+            .FirstOrDefaultAsync();
+        
         if (res == null) return null;
-
+        
         var hasher = new PasswordHasher<Authentification>();
         var result = hasher.VerifyHashedPassword(res, res.mdp, dto.mdp);
 
         if (result != PasswordVerificationResult.Success) return null;
 
+        var users = await _db.Utilisateurs
+            .FirstOrDefaultAsync(i => i.idUt == res.utilisateurId);
+
+        if (users == null) return null;
+
+        string role = users switch
+        {
+            Responsable => "responsable",
+            Enseignant => "enseignant",
+            _ => "utilisateur"
+        };
+        
         var claims = new[]
         {
-            new Claim(ClaimTypes.Email, res.email),
-            new Claim(ClaimTypes.NameIdentifier, res.utilisateurId)
+            new Claim("userId", res.utilisateurId),
+            new Claim("email", res.email),
+            new Claim("role", role)
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -116,13 +140,11 @@ public class ImUtilisateur : IUtilisateur
         
         string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
         
-        return new AuthDto(res.email, res.mdp, jwtToken);
-
+        return new AuthDto(res.email, role, jwtToken);
     }
 
     public async Task<ResponsableDto> createAsync(CreateResponsableDto dto)
     {
-        
         var res = new Responsable
         {
             nom = dto.nom,
@@ -130,7 +152,7 @@ public class ImUtilisateur : IUtilisateur
             telephone = "+261345416063",
             adresse = "fenomanana",
             genre = "Masculin",
-            fonction = "Responsable EDT",
+            role = "Responsable EDT",
         };
         
         _db.Responsables.Add(res);
@@ -143,7 +165,8 @@ public class ImUtilisateur : IUtilisateur
         {
             email = dto.email,
             mdp = hashedPass,
-            utilisateurId = res.idUt
+            utilisateurId = res.idUt,
+            isActive = true
         };
         
         _db.Authentifications.Add(auth);
@@ -154,7 +177,7 @@ public class ImUtilisateur : IUtilisateur
             res.nom,
             res.prenom,
             res.telephone,
-            res.fonction,
+            res.role,
             res.genre,
             res.adresse,
             auth.email
@@ -163,50 +186,80 @@ public class ImUtilisateur : IUtilisateur
     
     public async Task<EnseignantDto> addAsync(CreateEnseignantDto dto)
     {
+        // var res = _mapper.Map<Enseignant>(dto);
+        // await _db.Enseignants.AddAsync(res);
+        // await _db.SaveChangesAsync();
+        // return _mapper.Map<EnseignantDto>(res);
+        var res = new Enseignant()
+        {
+            nom = dto.nom,
+            prenom = dto.prenom,
+            telephone = dto.phone,
+            adresse = dto.adresse,
+            genre = dto.genre,
+            grade = dto.grade,
+        };
         
-        var res = _mapper.Map<Enseignant>(dto);
-        await _db.Enseignants.AddAsync(res);
+        _db.Enseignants.Add(res);
         await _db.SaveChangesAsync();
-        return _mapper.Map<EnseignantDto>(res);
+
+        var auth = new Authentification
+        {
+            email = dto.email,
+            mdp = "",
+            utilisateurId = res.idUt,
+            isActive = false
+        };
+        
+        _db.Authentifications.Add(auth);
+        await _db.SaveChangesAsync();
+
+        return new EnseignantDto(
+            res.idUt,
+            res.nom,
+            res.prenom,
+            res.telephone,
+            res.grade,
+            res.genre,
+            res.adresse,
+            auth.email
+        );
     }
 
-    public async Task<EnseignantDto> registerAsync(RegisterEnseignantDto dto)
+    public async Task<EnseignantDto?> registerAsync(RegisterEnseignantDto dto)
     {
         List<EnseignantDto> res = new List<EnseignantDto>();
         
-        var checked_info =  _db.Enseignants
-            .Where(e=> e.telephone == dto.phone && e.nom == dto.nom)
-            .FirstOrDefault();
-        if (checked_info != null)
-        {
-            var hasher = new PasswordHasher<Utilisateur>();
-            string hashedPass = hasher.HashPassword(checked_info, dto.mdp);
-    
-            var auth = new Authentification
-            {
-                email = dto.email,
-                mdp = hashedPass,
-                utilisateurId = checked_info.idUt
-            };
-            
-            _db.Authentifications.Add(auth);
-            await _db.SaveChangesAsync();
-            
-            res.Add(new EnseignantDto(
-                checked_info.idUt,
-                checked_info.nom,
-                checked_info.prenom,
-                checked_info.telephone,
-                checked_info.grade,
-                checked_info.genre,
-                checked_info.adresse,
-                auth.email
-            ));
-        }
-        else
-        {
-            return null;
-        }
+        var auth = await _db.Authentifications
+            .FirstOrDefaultAsync(a => a.email == dto.email);
+        
+        if (auth == null)
+            return null; 
+        
+        if (!string.IsNullOrEmpty(auth.mdp))
+            throw new Exception("Compte déjà activé");
+        
+        var hasher = new PasswordHasher<Utilisateur>();
+        var hashedPassword = hasher.HashPassword(null!, dto.mdp);
+        
+        auth.mdp = hashedPassword;
+        auth.isActive = true;
+        
+        await _db.SaveChangesAsync();
+         
+        var enseignant = await _db.Enseignants.FirstAsync(e => e.idUt == auth.utilisateurId);
+        res.Add(new EnseignantDto(
+            enseignant.idUt,
+            enseignant.nom,
+            enseignant.prenom,
+            enseignant.telephone,
+            enseignant.grade,
+            enseignant.genre,
+            enseignant.adresse,
+            ""
+            // checked_info.Authentifications.Select(e => e.email)
+            // auth.email
+        ));
 
         return res.First();
     }

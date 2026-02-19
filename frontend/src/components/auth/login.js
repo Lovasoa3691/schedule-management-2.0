@@ -10,7 +10,7 @@ const Login = ({ setIsAuthentificated }) => {
   const [user, setUser] = useState({
     email: "",
     mdp: "",
-    role: "responsable",
+    client: "web",
   });
 
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Login = ({ setIsAuthentificated }) => {
     api
       .post("/utilisateur/login", user)
       .then((rep) => {
-        console.log(rep.data);
+        // console.log(rep.data);
         setIsAuthentificated(true);
         navigate("/dashboard");
       })
@@ -80,7 +80,7 @@ const Login = ({ setIsAuthentificated }) => {
           <div className="p-4 text-center text-white flex flex-col items-center justify-center w-full h-20 mb-8 text-3xl">
             <img src={Logo} className="w-32 h-32 mb-2 text-white" />
             <span className="text-gray-900 font-bold">
-              Sched.<span className="text-blue-600">Connect</span>
+              Sched<span className="text-blue-600">Connect</span>
             </span>
           </div>
         </div>

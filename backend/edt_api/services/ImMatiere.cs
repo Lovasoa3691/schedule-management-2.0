@@ -23,7 +23,8 @@ public class ImMatiere : IMatiere
     {
         var mat = await _db.Matieres
             .AsNoTracking()
-            .Include(e => e.enseignant)
+            .Include(e => e.activites)
+                .ThenInclude(ee => ee.enseignant)
             .Include(m => m.matiereMention)
                 .ThenInclude(mm => mm.mention)
             .Include(n => n.matiereNiveau)
@@ -40,33 +41,79 @@ public class ImMatiere : IMatiere
 
     public async Task<MatiereDto> AddAsync(CreateMatiereDto dto)
     {
-        var res = _mapper.Map<Matiere>(dto);
-        await _db.Matieres.AddAsync(res);
+        var mat = new Matiere
+        {
+            nomMat = dto.nomMat,
+            nbHor = dto.nbH,
+            coefficient = dto.coeff
+        };
+
+        await _db.Matieres.AddAsync(mat);
         await _db.SaveChangesAsync();
+
+        var act = new Activite
+        {
+            matiereId = mat.codeMat,
+            enseignantId = dto.enseignantId,
+            heureEffectue = 0,
+            statusActivite = "",
+            created_at = DateTime.Now.ToLocalTime()
+        };
+
+        await _db.Activites.AddAsync(act);
 
         foreach (var mentionId in dto.mentionId)
         {
-            var matMention = new MatiereMention
+            _db.MatiereMentions.Add(new MatiereMention
             {
-                matiereId = res.codeMat,
+                matiereId = mat.codeMat,
                 mentionId = mentionId
-            };
-            _db.MatiereMentions.Add(matMention);
+            });
         }
-        
+
         foreach (var niveauId in dto.niveauId)
         {
-            var matNiveau = new MatiereNiveau
+            _db.MatiereNiveaux.Add(new MatiereNiveau
             {
-                matiereId = res.codeMat,
+                matiereId = mat.codeMat,
                 niveauId = niveauId
-            };
-            _db.MatiereNiveaux.Add(matNiveau);
+            });
         }
         await _db.SaveChangesAsync();
-        return _mapper.Map<MatiereDto>(res);
-    }
 
+        var matiere = await _db.Matieres
+            .Include(m => m.activites)
+                .ThenInclude(a => a.enseignant)
+            .Include(m => m.matiereMention)
+                .ThenInclude(mm => mm.mention)
+            .Include(m => m.matiereNiveau)
+                .ThenInclude(mn => mn.niveau)
+            .FirstAsync(m => m.codeMat == mat.codeMat);
+
+        return new MatiereDto(
+            matiere.codeMat,
+            matiere.nomMat,
+            matiere.nbHor,
+            matiere.coefficient,
+            matiere.activites
+                .Select(a => $"{a.enseignant.nom} {a.enseignant.prenom}")
+                .Distinct()
+                .ToList(),
+            matiere.matiereMention
+                .Select(mm => mm.mention.nomMent)
+                .ToList(),
+            matiere.matiereNiveau
+                .Select(mn => mn.niveau.intitule)
+                .ToList(),
+            matiere.matiereMention
+                .Select(mm => mm.mentionId)
+                .ToList(),
+            matiere.matiereNiveau
+                .Select(mn => mn.niveauId)
+                .ToList()
+        );
+    }
+    
     public async Task<bool> UpdateAsync(string id, UpdateMatiereDto dto)
     {
         var res = await _db.Matieres.FindAsync(id);
@@ -117,11 +164,13 @@ public class ImMatiere : IMatiere
     //     return true;
     // }
 
-
     public async Task<bool> DeleteAsync(string id)
     {
+        var checkPlan = await _db.Edts.Include(e => e.matiere).FirstOrDefaultAsync(e => e.matiereId == id);
+        if ( checkPlan != null || checkPlan.disponibilite == "En cours") return false;
         var res =  await _db.Matieres.FindAsync(id);
-        if (res == null) return false;
+        if (res == null) 
+            _db.Matieres.Remove(res);
         _db.Matieres.Remove(res);
         await _db.SaveChangesAsync();
         return true;

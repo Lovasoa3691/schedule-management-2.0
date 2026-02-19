@@ -13,7 +13,7 @@ public class ResponsableProfile:Profile
             .ForCtorParam("nom", opt => opt.MapFrom(src => src.nom))
             .ForCtorParam("prenom", opt => opt.MapFrom(src => src.prenom))
             .ForCtorParam("phone", opt => opt.MapFrom(src => src.telephone))
-            .ForCtorParam("fonction", opt => opt.MapFrom(src => src.fonction))
+            .ForCtorParam("fonction", opt => opt.MapFrom(src => src.role))
             .ForCtorParam("genre", opt => opt.MapFrom(src => src.genre))
             .ForCtorParam("adresse", opt => opt.MapFrom(src => src.adresse))
             .ForCtorParam("email", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.email));
@@ -22,7 +22,7 @@ public class ResponsableProfile:Profile
             .ForMember(dest => dest.nom, opt => opt.MapFrom(src => src.nom))
             .ForMember(dest => dest.prenom, opt => opt.MapFrom(src => src.prenom))
             .ForMember(dest => dest.telephone, opt => opt.MapFrom(src => src.phone))
-            .ForMember(dest => dest.fonction, opt => opt.MapFrom(src => src.fonction))
+            .ForMember(dest => dest.role, opt => opt.MapFrom(src => src.fonction))
             .ForMember(dest => dest.genre, opt => opt.MapFrom(src => src.genre))
             .ForMember(dest => dest.adresse, opt => opt.MapFrom(src => src.adresse));
 
@@ -30,7 +30,7 @@ public class ResponsableProfile:Profile
             .ForMember(dest => dest.nom, opt => opt.MapFrom(src => src.nom))
             .ForMember(dest => dest.prenom, opt => opt.MapFrom(src => src.prenom))
             .ForMember(dest => dest.telephone, opt => opt.MapFrom(src => src.phone))
-            .ForMember(dest => dest.fonction, opt => opt.MapFrom(src => src.fonction))
+            .ForMember(dest => dest.role, opt => opt.MapFrom(src => src.fonction))
             .ForMember(dest => dest.genre, opt => opt.MapFrom(src => src.genre))
             .ForMember(dest => dest.adresse, opt => opt.MapFrom(src => src.adresse));
     }

@@ -1,1 +1,0 @@
-/home/juliannot/Desktop/Project/schedule-management/mobile/android/app/build/intermediates/cxx/Debug/4ue5n223/obj/arm64-v8a

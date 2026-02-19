@@ -15,7 +15,7 @@ import {
   Alert,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";

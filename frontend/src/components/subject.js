@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
-import { FaEdit,  FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import SubjectForm from "./forms/subject-form";
 import Confirm from "./notification/confirm";
 import AlertInfo from "./notification/alert";
 import api from "../hooks/api";
+import { set } from "date-fns";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
@@ -59,7 +60,7 @@ const Subject = () => {
 
     if (multiple) {
       finalValue = Array.from(selectedOptions, (option) =>
-        parseInt(option.value)
+        parseInt(option.value),
       );
     } else if (name === "nbH" || name === "coeff") {
       finalValue = parseInt(value) || 0;
@@ -86,6 +87,7 @@ const Subject = () => {
         });
         setShowAlert(true);
         setAlert("Données enregistré avec succès!");
+        setShowModal(false);
       });
     } catch (error) {
       console.error("Erreur d'envoie des donnees: ", error.message);
@@ -96,7 +98,7 @@ const Subject = () => {
     e.preventDefault();
     if (!formData.id) {
       console.error(
-        "Identifiant de la matiere est manquante pour la mise à jour"
+        "Identifiant de la matiere est manquante pour la mise à jour",
       );
       return;
     }
@@ -178,7 +180,7 @@ const Subject = () => {
       mt.mention
     )
       .toLowerCase()
-      .includes(searchfield.toLowerCase())
+      .includes(searchfield.toLowerCase()),
   );
 
   return (
@@ -271,15 +273,13 @@ const Subject = () => {
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     MATIERE
                   </th>
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    CREDIT
-                  </th>
+                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">EC</th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     COEFFICIENT
                   </th>
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
+                  {/* <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     ENSEIGNANT
-                  </th>
+                  </th> */}
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     CLASSE
                   </th>
@@ -295,11 +295,11 @@ const Subject = () => {
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3">{index + 1}</td>
                       <td className="px-4 py-3">{mat.nomMat}</td>
-                      <td className="px-4 py-3">{mat.nbH}</td>
+                      <td className="px-4 py-3">{mat.nbH} Heures</td>
                       <td className="px-4 py-3">{mat.coeff}</td>
-                      <td className="px-4 py-3">
+                      {/* <td className="px-4 py-3">
                         {mat.nomEns} {mat.prenomEns}
-                      </td>
+                      </td> */}
                       <td className="px-4 py-3">
                         {mat.mention} {mat.niveau.join(" / ")}
                       </td>

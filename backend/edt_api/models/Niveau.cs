@@ -8,6 +8,7 @@ public class Niveau
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int idNiv { get; set; }
+    [Column(TypeName = "varchar(20)")]
     public string intitule { get; set; } = string.Empty;
     
     public ICollection<Edt> edts { get; set; } = new List<Edt>();

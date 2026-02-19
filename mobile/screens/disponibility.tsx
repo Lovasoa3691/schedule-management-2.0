@@ -13,14 +13,17 @@ import {
   Platform,
   Easing,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Calendar, Mode } from "react-native-big-calendar";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 import api from "../hooks/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUserIdFromToken } from "../decode";
 
 type Event = {
   id: string;
@@ -59,11 +62,25 @@ export default function DisponibilityCalendar() {
 
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [id, setId] = useState<string>("");
 
-  const loadDispo = () => {
+  const loadDispo = async () => {
+    const data = await getUserIdFromToken();
+    if (!data || !data.userId) {
+      Alert.alert("Erreur", "Utilisateur non authentifié");
+      return;
+    }
+    setId(data.userId);
+    setLoading(true);
+
     api
-      .get("/disponibilite/7765de68-4e92-4c2f-ab7d-90b1a02c250c")
+      .get(`/disponibilite/${data.userId}`)
       .then((rep) => {
+        if (!rep.data || rep.data.length === 0) {
+          setDispoData([]);
+          return;
+        }
         const events: Event[] = rep.data.map((d: any) => ({
           id: d.idDispo,
           title: "Disponible",
@@ -71,10 +88,15 @@ export default function DisponibilityCalendar() {
           end: new Date(`${d.dateDispo}T${d.hFin}`),
           color: "green",
         }));
-        Alert.alert("Disponibilités chargées!", JSON.stringify(rep.data));
         setDispoData(events);
       })
-      .catch((err) => console.error("Erreur de chargement dispo", err));
+      .catch((err) =>
+        console.error(
+          "Erreur de chargement dispo",
+          err.response?.data || err.message,
+        ),
+      )
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -139,7 +161,7 @@ export default function DisponibilityCalendar() {
       dateDispo: dateDispo,
       hdeb: heureDebut,
       hfin: heureFin,
-      codeEns: "7765de68-4e92-4c2f-ab7d-90b1a02c250c",
+      codeEns: id,
     };
 
     api
@@ -168,16 +190,59 @@ export default function DisponibilityCalendar() {
       });
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([loadDispo()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3a5dd9" />
+        <Text style={{ marginTop: 10, textAlign: "center" }}>
+          Chargement des disponibilités...
+        </Text>
+      </View>
+    );
+  }
+
   if (dispoData.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Chargement des données...</Text>
+        <Text style={styles.message}>
+          Vous n’avez encore aucune disponibilité enregistrée.
+        </Text>
+        <Text style={{ marginTop: 8, color: "gray", textAlign: "center" }}>
+          Ajoutez vos créneaux pour les voir apparaître ici.
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        onPress={onRefresh}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 10,
+          margin: 10,
+          backgroundColor: "#2f95dc",
+          borderRadius: 8,
+          alignSelf: "flex-end",
+          marginBottom: 10,
+        }}
+      >
+        <Ionicons name="refresh" size={20} color="#fff" />
+        <Text style={{ color: "#fff" }}>Actualiser</Text>
+      </TouchableOpacity>
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() =>
@@ -367,12 +432,18 @@ export default function DisponibilityCalendar() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, marginTop: 10, backgroundColor: "#f8f9fa" },
+  container: { flex: 1, marginTop: 10, backgroundColor: "#f2f6fc" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 10,
   },
   addButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },

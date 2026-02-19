@@ -25,6 +25,13 @@ public class EdtController: ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}/week_{week}")]
+    public async Task<ActionResult<IEnumerable<EdtDto>>> GetEdtByWeek(string id, string week)
+    {
+        var result = await _service.GetEdtByWeek(id, week);
+        return Ok(result);
+    }
+
 
     [HttpGet("filter/{id}")]
     public async Task<ActionResult<EdtDto>> GetById(string id)
@@ -46,6 +53,13 @@ public class EdtController: ControllerBase
     public async Task<IActionResult> Update(string id, UpdateEdtDto dto)
     {
         var ok = await _service.UpdateAsync(id, dto);
+        return ok ? NoContent() : NotFound();
+    }
+
+    [HttpPut("status/{id}/done")]
+    public async Task<IActionResult> UpdateStatus(string id)
+    {
+        var ok = await _service.UpdateStatusAsync(id);
         return ok ? NoContent() : NotFound();
     }
 

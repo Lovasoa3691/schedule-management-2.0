@@ -1,16 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiSearch } from "react-icons/fi";
 import { MdPrint } from "react-icons/md";
-import { FaEdit, FaFileExcel,  FaTrashAlt } from "react-icons/fa";
+import {
+  FaDownload,
+  FaEdit,
+  FaFile,
+  FaFileCsv,
+  FaFileExcel,
+  FaFileExport,
+  FaFileImport,
+  FaFilePdf,
+  FaTrashAlt,
+  FaUpload,
+} from "react-icons/fa";
 import TeacherForm from "./forms/teacher-form";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  LinearProgress,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Papa from "papaparse";
+import { saveAs } from "file-saver";
 
 import * as XLSX from "xlsx";
 import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
-// import { saveAs } from "file-saver";
+import { set } from "date-fns";
 
 const Teacher = () => {
   const [enseignant, setEnseignant] = useState([]);
@@ -23,6 +46,7 @@ const Teacher = () => {
     phone: "",
     genre: "",
     grade: "",
+    email: "",
   });
 
   const loadData = () => {
@@ -59,6 +83,7 @@ const Teacher = () => {
       phone: ens.phone,
       genre: ens.genre,
       grade: ens.grade,
+      email: ens.email,
     });
     setShowModalEdit(true);
   };
@@ -77,6 +102,7 @@ const Teacher = () => {
           phone: "",
           genre: "",
           grade: "",
+          email: "",
         });
         setShowAlert(true);
         setAlert("Données enregistré avec succès!");
@@ -92,10 +118,7 @@ const Teacher = () => {
       return;
     }
     api
-      .put(
-        `/utilisateur/teacher/${formData.id}`,
-        formData
-      )
+      .put(`/utilisateur/teacher/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -106,6 +129,7 @@ const Teacher = () => {
           phone: "",
           genre: "",
           grade: "",
+          email: "",
         });
         setShowAlert(true);
         setAlert("Données modifié avec succès!");
@@ -160,7 +184,7 @@ const Teacher = () => {
       ens.genre
     )
       .toLowerCase()
-      .includes(searchfield.toLowerCase())
+      .includes(searchfield.toLowerCase()),
   );
 
   const openModal = () => {
@@ -172,6 +196,7 @@ const Teacher = () => {
       phone: "",
       genre: "",
       grade: "",
+      email: "",
     });
     setShowModal(true);
   };
@@ -214,11 +239,154 @@ const Teacher = () => {
     setAlert("Desole! Aucun enseignant a exporte pour le moment");
   };
 
+  const [anchorElImport, setAnchorElImport] = useState(null);
+  const openImportMenu = Boolean(anchorElImport);
+  const [anchorElExport, setAnchorElExport] = useState(null);
+  const openExportMenu = Boolean(anchorElExport);
+  const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const handleOpenImportMenu = (event) => {
+    setAnchorElImport(event.currentTarget);
+  };
+
+  const handleOpenExportMenu = (event) => {
+    setAnchorElExport(event.currentTarget);
+  };
+
+  const handleCloseImportMenu = () => {
+    setAnchorElImport(null);
+  };
+
+  const handleCloseExportMenu = () => {
+    setAnchorElExport(null);
+  };
+
+  const downloadCsvTemplate = () => {
+    const headers = [
+      "NOM",
+      "PRENOM",
+      "GENRE",
+      "ADRESSE",
+      "TELEPHONE",
+      "GRADE",
+      "EMAIL",
+    ];
+
+    const exampleRow = [
+      "RAKOTOARIJAONA",
+      "Mahafaly Germain",
+      "Masculin",
+      "Tanambao",
+      "+261385968912",
+      "Professeur Titulaire",
+      "mahafaly.rakoto@gmail.com",
+    ];
+
+    const csvContent = [headers.join(","), exampleRow.join(",")].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    saveAs(blob, "template_enseignants.csv");
+    handleCloseImportMenu();
+  };
+
+  const handleImportCsv = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    setProgress(0);
+
+    let rowCount = 0;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      delimiter: ",",
+      encoding: "UTF-8",
+
+      step: function () {
+        rowCount++;
+      },
+
+      // transformHeader: (header) => header.trim().replace(/\uFEFF/g, ""), // supprime BOM
+      // complete: (results) => {
+      //   console.log("Headers:", results.meta.fields);
+      //   console.log("Données brutes:", results.data);
+      //   // Supprimer lignes vides
+      //   const cleanedData = results.data.filter((row) =>
+      //     Object.values(row).some((v) => v && v.toString().trim() !== ""),
+      //   );
+      //   console.log("Données nettoyées :", cleanedData);
+      // },
+
+      complete: (results) => {
+        const total = results.data.length;
+
+        let current = 0;
+        const interval = setInterval(() => {
+          current += 5;
+          setProgress(current);
+
+          if (current >= 100) {
+            clearInterval(interval);
+            setImporting(false);
+
+            console.log("Données CSV :", results.data);
+
+            // 👉 axios.post("/enseignants/import", results.data)
+          }
+        }, 80);
+      },
+
+      error: () => {
+        setImporting(false);
+        setProgress(0);
+        alert("Erreur lors de l'import CSV");
+      },
+    });
+
+    handleCloseImportMenu();
+    handleCloseExportMenu();
+  };
+
   return (
     <div className="teacher-container h-screen">
       {showAlert && alert && (
         <AlertInfo alert={alert} setShowAlert={setShowAlert} />
       )}
+
+      <Dialog
+        open={importing}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          className: "rounded-xl p-4",
+        }}
+      >
+        <DialogTitle className="text-center font-semibold">
+          Importation en cours…
+        </DialogTitle>
+
+        <DialogContent className="space-y-4">
+          <p className="text-sm text-gray-500 text-center">
+            Veuillez patienter pendant l’analyse du fichier CSV
+          </p>
+
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            className="h-2 rounded-full"
+          />
+
+          <p className="text-center text-sm font-medium text-blue-600">
+            {progress} %
+          </p>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
@@ -251,30 +419,105 @@ const Teacher = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={openModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <FiPlus className="w-5 h-5 text-white" />
-          <span>Nouveau</span>
-        </button>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative">
+            <button
+              onClick={handleOpenExportMenu}
+              className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition hover:bg-emerald-100"
+            >
+              <FaFileExport className="w-5 h-5 " />
+              Export
+            </button>
+
+            <Menu
+              anchorEl={anchorElExport}
+              open={openExportMenu}
+              onClose={handleCloseExportMenu}
+              PaperProps={{
+                className: "rounded-xl shadow-xl border border-gray-100 mt-2",
+              }}
+            >
+              <MenuItem
+                className="flex items-center gap-2 text-sm"
+                onClick={ExportPDF}
+              >
+                <FaFilePdf className="w-5 h-5 text-red-500" />
+                PDF
+              </MenuItem>
+              <MenuItem
+                onClick={ExportExcel}
+                className="flex items-center gap-2 text-sm"
+              >
+                <FaFileExcel className="w-5 h-5 text-green-500" />
+                Excel
+              </MenuItem>
+            </Menu>
+          </div>
+
+          <div className="relative">
+            <button
+              onClick={handleOpenImportMenu}
+              className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition hover:bg-emerald-100"
+            >
+              <FaFileImport className="w-5 h-5" />
+              Import
+            </button>
+
+            <Menu
+              anchorEl={anchorElImport}
+              open={openImportMenu}
+              onClose={handleCloseImportMenu}
+              PaperProps={{
+                className: "rounded-xl shadow-xl border border-gray-100 mt-2",
+              }}
+            >
+              <MenuItem className="text-sm">
+                <label className="flex items-center gap-2 cursor-pointer w-full">
+                  <FaUpload className="w-5 h-5 text-blue-400" />
+                  Importer CSV
+                  <input
+                    type="file"
+                    accept=".csv"
+                    hidden
+                    onChange={handleImportCsv}
+                  />
+                </label>
+              </MenuItem>
+              <MenuItem
+                onClick={downloadCsvTemplate}
+                className="flex items-center gap-2 text-sm"
+              >
+                <FaDownload className="w-5 h-5" />
+                Télécharger template
+              </MenuItem>
+            </Menu>
+          </div>
+        </div>
 
         <button
-          onClick={ExportPDF}
-          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center space-x-2"
+          onClick={openModal}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
         >
-          <MdPrint className="w-5 h-5" />
-          <span>Exporter PDF</span>
+          <FiPlus className="w-5 h-5" />
+          Nouveau
+        </button>
+
+        {/* <button
+          onClick={ExportPDF}
+          className="flex items-center gap-2 rounded-xl bg-red-500/90 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 hover:shadow-md"
+        >
+          <FaFilePdf className="w-5 h-5" />
+          PDF
         </button>
 
         <button
           onClick={ExportExcel}
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 flex items-center space-x-2"
+          className="flex items-center gap-2 rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-600 hover:shadow-md"
         >
           <FaFileExcel className="w-5 h-5" />
-          <span>Exporter Excel</span>
-        </button>
+          Excel
+        </button> */}
       </div>
 
       {showModal && (
@@ -344,7 +587,7 @@ const Teacher = () => {
                       <td className="px-4 py-3">{ens.prenom}</td>
                       <td className="px-4 py-3">{ens.genre}</td>
                       <td className="px-4 py-3">{ens.adresse}</td>
-                      <td className="px-4 py-3">{ens.enail}</td>
+                      <td className="px-4 py-3">{ens.email}</td>
                       <td className="px-4 py-3">{ens.phone}</td>
                       <td className="px-4 py-3">{ens.grade}</td>
                       <td className="px-4 py-3">

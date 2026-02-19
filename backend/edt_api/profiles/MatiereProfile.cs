@@ -13,8 +13,14 @@ public class MatiereProfile:Profile
             .ForCtorParam("nomMat", opt => opt.MapFrom(src => src.nomMat))
             .ForCtorParam("nbH", opt => opt.MapFrom(src => src.nbHor))
             .ForCtorParam("coeff", opt => opt.MapFrom(src => src.coefficient))
-            .ForCtorParam("nomEns", opt => opt.MapFrom(src => src.enseignant!.nom))
-            .ForCtorParam("prenomEns", opt => opt.MapFrom(src => src.enseignant!.prenom))
+            .ForCtorParam(
+                "enseignants",
+                opt => opt.MapFrom(src =>
+                    src.activites
+                        .Select(e => $"{e.enseignant.nom} {e.enseignant.prenom}")
+                        .ToList()
+                )
+            )
             .ForCtorParam("mentionId", opt => opt.MapFrom(src =>
                 src.matiereMention != null
                     ? src.matiereMention
@@ -54,7 +60,6 @@ public class MatiereProfile:Profile
             .ForMember(dest => dest.nomMat, opt => opt.MapFrom(src => src.nomMat))
             .ForMember(dest => dest.nbHor, opt => opt.MapFrom(src => src.nbH))
             .ForMember(dest => dest.coefficient, opt => opt.MapFrom(src => src.coeff))
-            .ForMember(dest => dest.enseignantId, opt => opt.MapFrom(src => src.enseignantId))
             .ForMember(dest => dest.matiereMention, opt => opt.Ignore())
             .ForMember(dest => dest.matiereNiveau, opt => opt.Ignore());
 
@@ -62,7 +67,6 @@ public class MatiereProfile:Profile
             .ForMember(dest => dest.nomMat, opt => opt.MapFrom(src => src.nomMat))
             .ForMember(dest => dest.nbHor, opt => opt.MapFrom(src => src.nbH))
             .ForMember(dest => dest.coefficient, opt => opt.MapFrom(src => src.coeff))
-            .ForMember(dest => dest.enseignantId, opt => opt.MapFrom(src => src.enseignantId))
             .ForMember(dest => dest.matiereMention, opt => opt.Ignore())
             .ForMember(dest => dest.matiereNiveau, opt => opt.Ignore());
 

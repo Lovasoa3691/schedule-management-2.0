@@ -7,9 +7,10 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ActivityIndicator,
   //   CheckBox,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import Icon from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
@@ -17,62 +18,66 @@ import axios from "axios";
 import api from "../hooks/api";
 
 export default function RegisterScreen() {
-  const [rememberMe, setRememberMe] = React.useState(false);
-  const [nom, setNom] = useState("");
-  const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [mdp, setMdp] = useState("");
-  const [role, setRole] = useState("enseignant");
+  const [confirmMdp, setConfirmMdp] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    if (mdp !== confirmMdp) {
+      Alert.alert("Erreur", "Les mots de passe ne correspondent pas");
+      return;
+    }
+
     const data = {
-      nom: nom.split(" ")[0].toUpperCase(),
-      prenom: prenom,
       email: email,
-      phone: phone,
       mdp: mdp,
-      role: role,
     };
-    // Alert.alert(data.nom);
-    api
-      .post("/utilisateur/register", data)
-      .then((rep) => {
-        Alert.alert("Compte cree avec sucees");
-      })
-      .catch((err) => {
-        if (err.response) {
-          console.error("Status:", err.response.status);
-          Alert.alert(err.response.data);
-        } else {
-          console.error("Erreur:", err.message);
-        }
-      });
+
+    try {
+      setLoading(true);
+
+      const rep = await api.post("/utilisateur/register", data);
+
+      Alert.alert(
+        "Votre compte est activé!",
+        "Vous pouvez maintenant vous connecter.",
+      );
+    } catch (err: any) {
+      if (err.response) {
+        console.error("Status:", err.response.status, err.response.data);
+        Alert.alert(
+          "Erreur d'activation",
+          err.response.data?.message || "Une erreur est survenue",
+        );
+      } else {
+        console.error("Erreur:", err.message);
+        Alert.alert("Erreur", "Une erreur est survenue lors de l'inscription.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.logoCard}>
-        <Text style={{ fontSize: 40, fontWeight: "bold", alignSelf: "center" }}>
-          Sched.<Text style={{ color: "blue" }}>Connect</Text>
+        <Image
+          source={require("../assets/image/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.appName}>
+          Sched<Text style={styles.appNameHighlight}>Connect</Text>
         </Text>
       </View>
-      <Text style={styles.title}>Creer votre compte</Text>
 
-      <View style={styles.inputContainer}>
-        <Icon name="person-outline" size={20} color="#666" />
-        <TextInput
-          placeholder="Nom complet"
-          value={nom}
-          onChangeText={setNom}
-          placeholderTextColor={"gray"}
-          style={styles.input}
-          autoCapitalize="none"
-        />
-      </View>
+      <Text style={styles.title}>Activation de compte</Text>
 
       <View style={styles.inputContainer}>
         <Icon name="mail-outline" size={20} color="#666" />
@@ -80,18 +85,6 @@ export default function RegisterScreen() {
           placeholder="Adresse mail"
           value={email}
           onChangeText={setEmail}
-          placeholderTextColor={"gray"}
-          style={styles.input}
-          autoCapitalize="none"
-        />
-      </View>
-
-      <View style={styles.inputContainer}>
-        <Icon name="call-outline" size={20} color="#666" />
-        <TextInput
-          placeholder="Telephone"
-          value={phone}
-          onChangeText={setPhone}
           placeholderTextColor={"gray"}
           style={styles.input}
           autoCapitalize="none"
@@ -115,6 +108,7 @@ export default function RegisterScreen() {
         <Icon name="lock-closed-outline" size={20} color="#666" />
         <TextInput
           placeholder="Confirmation"
+          onChangeText={setConfirmMdp}
           placeholderTextColor={"gray"}
           style={styles.input}
           secureTextEntry
@@ -122,14 +116,20 @@ export default function RegisterScreen() {
         <Icon name="eye-outline" size={20} color="#ccc" />
       </View>
 
-      <TouchableOpacity style={styles.loginButton}>
-        <Text style={styles.loginText} onPress={handleRegister}>
-          Inscrire
-        </Text>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.loginText}>Activer</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.row}>
-        <Text style={styles.signup}>J'ai deja un compte</Text>
+        <Text style={styles.signup}>Déjà un compte ?</Text>
         <TouchableOpacity>
           <Text
             style={styles.link}
@@ -194,8 +194,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
+    marginTop: 20,
     color: "#3a5dd9",
-    fontWeight: "500",
+    fontWeight: "700",
   },
   loginButton: {
     backgroundColor: "#3a5dd9",
@@ -244,10 +245,22 @@ const styles = StyleSheet.create({
     height: 35,
   },
   logoCard: {
-    paddingBottom: 20,
+    alignItems: "center",
+    marginBottom: 30,
   },
+
   logo: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
+    marginBottom: 10,
+  },
+
+  appName: {
+    fontSize: 37,
+    fontWeight: "bold",
+  },
+
+  appNameHighlight: {
+    color: "blue",
   },
 });

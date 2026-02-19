@@ -1,6 +1,4 @@
-import {
-  FiChevronDown,
-} from "react-icons/fi";
+import { FiChevronDown } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../hooks/api";
@@ -86,7 +84,7 @@ const TopBar = ({ setIsAuthenticated }) => {
             SC
           </div>
           <h1 className="text-2xl font-bold text-gray-800">
-            Sched.<span className="text-blue-700">Connect</span>{" "}
+            Sched<span className="text-blue-700">Connect</span>{" "}
           </h1>
         </div>
 

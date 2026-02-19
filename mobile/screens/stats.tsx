@@ -9,9 +9,12 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import api from "../hooks/api";
+import { getUserIdFromToken } from "../decode";
+import { RefreshControl } from "react-native";
 
 interface MatiereInfo {
   matiere: string;
@@ -29,28 +32,64 @@ interface Enseignant {
 
 export default function App() {
   const [subjectData, setSubjectData] = useState<Enseignant[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const loadStates = () => {
+  const loadStates = async () => {
+    setLoading(true);
+    const user = await getUserIdFromToken();
+    if (!user?.userId) {
+      Alert.alert("Erreur", "Utilisateur non authentifié");
+      setLoading(false);
+      return;
+    }
+
     api
-      .get("/utilisateur/teacher/info/1fe7cfa1-27b3-4c1c-8a9f-97dd33f0e809")
+      .get(`/utilisateur/teacher/info/${user.userId}`)
       .then((rep) => {
-        Alert.alert("Données chargées!", JSON.stringify(rep.data));
+        // Alert.alert("Données chargées!", JSON.stringify(rep.data));
         setSubjectData(rep.data);
       })
       .catch((err) => {
-        // console.error("Erreur: ", err.message);
+        console.error("Erreur: ", err.message);
         Alert.alert("Erreur de chargement", err.message);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadStates();
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([loadStates()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#3a5dd9" />
+        <Text style={{ marginTop: 10, textAlign: "center" }}>
+          Chargement en cours...
+        </Text>
+      </View>
+    );
+  }
+
   if (subjectData.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Chargement des données...</Text>
+        <Text style={styles.title}>
+          Vous n’avez encore aucune disponibilité enregistrée.
+        </Text>
+        {/* <Text style={{ marginTop: 8, color: "gray", textAlign: "center" }}>
+          Ajoutez vos créneaux pour les voir apparaître ici.
+        </Text> */}
       </View>
     );
   }
@@ -74,11 +113,20 @@ export default function App() {
   // const dataDone = subjectData[0]?.matiereInfo?.map((s) => s.hEffectue);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#2980b9"]}
+          tintColor="#2980b9"
+        />
+      }
+    >
       <View style={{ padding: 8 }}>
         <Text style={styles.title}>Performance hebdomadaire</Text>
 
-        {/* 📊 Graphique sécurisé */}
         {dataDone.length > 0 ? (
           <LineChart
             data={{
@@ -110,7 +158,6 @@ export default function App() {
           </Text>
         )}
 
-        {/* 📋 Cartes matières */}
         {matiereInfo.length === 0 && (
           <Text style={{ textAlign: "center", marginTop: 20 }}>
             Aucune matière disponible
@@ -130,7 +177,7 @@ export default function App() {
 
               <View style={{ flex: 1 }}>
                 <Text style={styles.subjectName}>{s.matiere ?? "Inconnu"}</Text>
-                <Text style={styles.details}>Crédit total : {hPrevue}h</Text>
+                <Text style={styles.details}>EC : {hPrevue}h</Text>
                 <Text style={styles.details}>
                   Accompli : {hEffectue}h | Restant : {remaining}h
                 </Text>

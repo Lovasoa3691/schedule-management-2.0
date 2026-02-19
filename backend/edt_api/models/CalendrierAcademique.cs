@@ -13,6 +13,4 @@ public class CalendrierAcademique
     public string typeCal{get;set;}
     public string descriptionCal{get;set;}
     
-    public string responsableId { get; set; }
-    public Responsable responsable{get;set;}
 }

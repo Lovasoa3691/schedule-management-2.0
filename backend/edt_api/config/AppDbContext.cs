@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Salle> Salles => Set<Salle>();
     public DbSet<Disponibilite> Disponibilites => Set<Disponibilite>();
     public DbSet<Enseignant> Enseignants => Set<Enseignant>();
+    public DbSet<Administrateur> Administrateurs => Set<Administrateur>();
     public DbSet<Matiere> Matieres => Set<Matiere>();
     public DbSet<Mention> Mentions => Set<Mention>();
     public DbSet<Niveau> Niveaux => Set<Niveau>();
@@ -25,32 +26,41 @@ public class AppDbContext : DbContext
     public DbSet<CalendrierAcademique>  CalendrierAcademiques => Set<CalendrierAcademique>();
     public DbSet<Message>  Messages => Set<Message>();
     public DbSet<AnneeScolaire>  AnneeScolaires => Set<AnneeScolaire>();
-    public DbSet<Enseignement> Enseignements => Set<Enseignement>();
+    public DbSet<Activite> Activites => Set<Activite>();
     public DbSet<MatiereMention> MatiereMentions => Set<MatiereMention>();
     public DbSet<MatiereNiveau> MatiereNiveaux => Set<MatiereNiveau>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Enseignement>()
-            .HasKey(m => new { m.enseignantId, m.matiereId});
+        modelBuilder.Entity<Activite>()
+            .HasKey(e => e.idActivite);
 
-        modelBuilder.Entity<Enseignement>()
-            .Property(m => m.numero)
-            .HasDefaultValueSql("(UUID())");
+        modelBuilder.Entity<Matiere>()
+            .HasKey(m => m.codeMat);
 
-        modelBuilder.Entity<Enseignement>()
-            .HasIndex(n => n.numero)
-            .IsUnique();
+        // modelBuilder.Entity<Activite>()
+        //     .HasOne(e => e.enseignant)
+        //     .WithMany(e => e.activites)
+        //     .HasForeignKey(e => e.enseignantId);
+        //
+        // modelBuilder.Entity<Activite>()
+        //     .HasOne(e => e.matiere)
+        //     .WithMany(m => m.activites)
+        //     .HasForeignKey(e => e.matiereId);
+        
+        // modelBuilder.Entity<Activite>()
+        //     .HasIndex(e => new { e.enseignantId, e.matiereId })
+        //     .IsUnique();
         
         modelBuilder.Entity<MatiereMention>()
             .HasKey(m => new { m.matiereId, m.mentionId});
         
         modelBuilder.Entity<MatiereNiveau>()
             .HasKey(m => new { m.matiereId, m.niveauId});
-        
 
         modelBuilder.Entity<Utilisateur>()
             .HasDiscriminator<string>("typeUtilisateur")
+            .HasValue<Administrateur>("Administrateur")
             .HasValue<Responsable>("Responsable")
             .HasValue<Enseignant>("Enseignant");
 
@@ -60,22 +70,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(a => a.utilisateurId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<Enseignement>()
+        modelBuilder.Entity<Activite>()
             .HasOne(e => e.enseignant)
-            .WithMany(m => m.enseignements)
+            .WithMany(m => m.activites)
             .HasForeignKey(e => e.enseignantId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<Enseignement>()
+        modelBuilder.Entity<Activite>()
             .HasOne(e => e.matiere)
-            .WithMany(m => m.enseignements)
+            .WithMany(m => m.activites)
             .HasForeignKey(e => e.matiereId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
-        modelBuilder.Entity<CalendrierAcademique>()
-            .HasOne(r => r.responsable)
-            .WithMany(m => m.calendrierAcademies)
-            .HasForeignKey(r => r.responsableId)
             .OnDelete(DeleteBehavior.Cascade);
             
         modelBuilder.Entity<Message>()
@@ -136,12 +140,6 @@ public class AppDbContext : DbContext
             .HasOne(d => d.enseignant)
             .WithMany(s => s.disponibilites)
             .HasForeignKey(d => d.enseignantId)
-            .OnDelete(DeleteBehavior.Cascade);
-        
-        modelBuilder.Entity<Matiere>()
-            .HasOne(m => m.enseignant)
-            .WithMany(e => e.matiere)
-            .HasForeignKey(m => m.enseignantId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<MatiereMention>()

@@ -1,5 +1,4 @@
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { RouteProp } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
@@ -12,6 +11,9 @@ import Dashboard from "./dasboard";
 import StatsScreen from "./stats";
 import Revision from "./cours";
 import DisponibilityCalendar from "./disponibility";
+import UserProfile from "./profile";
+import { PlanningProvider } from "./utils/PlanningContext";
+import WeekFilter from "../components/weekfilter";
 
 type RootTabParamList = {
   Dashboard: undefined;
@@ -30,37 +32,17 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={({ navigation }) => ({
-          headerRight: () => (
-            <View style={{ flexDirection: "row", marginRight: 0 }}>
-              <TouchableOpacity
-                // onPress={() => navigation.navigate("Messages")}
-                style={{ marginHorizontal: 10 }}
-              >
-                <Ionicons name="chatbubble-outline" size={24} color={"#000"} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                // onPress={() => navigation.navigate("Notifications")}
-                style={{ marginHorizontal: 10 }}
-              >
-                <Ionicons name="notifications-outline" size={24} color="#000" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                // onPress={() => navigation.navigate("Profile")}
-                style={{ marginHorizontal: 10 }}
-              >
-                <Ionicons name="person-outline" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-          ),
-        })}
-      />
-    </Stack.Navigator>
+    <PlanningProvider>
+      <Stack.Navigator initialRouteName="SchedConnect">
+        <Stack.Screen
+          name="SchedConnect"
+          component={HomeScreen}
+          options={({ navigation }) => ({
+            headerRight: () => <WeekFilter />,
+          })}
+        />
+      </Stack.Navigator>
+    </PlanningProvider>
   );
 }
 
@@ -89,7 +71,7 @@ export function HomeScreen() {
           else if (route.name === "Cours")
             iconName = focused ? "book" : "book-outline";
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#2f95dc",
         tabBarInactiveTintColor: "gray",
@@ -100,9 +82,8 @@ export function HomeScreen() {
       <Tab.Screen name="Disponibilité" component={DisponibilityCalendar} />
       {/* <Tab.Screen name="Messages" component={Revision} />
       <Tab.Screen name="Notifications" component={ChatScreen} /> */}
-
       <Tab.Screen name="Statistiques" component={StatsScreen} />
-      {/* <Tab.Screen name="Historique" component={ChatScreen} /> */}
+      <Tab.Screen name="Profile" component={UserProfile} />
     </Tab.Navigator>
   );
 }

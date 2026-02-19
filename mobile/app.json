@@ -1,4 +1,38 @@
 {
-  "name": "SchedConnect",
-  "displayName": "SchedConnect"
+  "expo": {
+    "name": "SchedConnect",
+    "slug": "SchedConnect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/image/logo.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.julianot_dev01.SchedConnect"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["@react-native-community/datetimepicker", "expo-secure-store"],
+    "extra": {
+      "eas": {
+        "projectId": "245f5c46-1be9-41ae-a18d-77d9f1b042ff"
+      }
+    },
+    "owner": "julianot_dev01"
+  }
 }

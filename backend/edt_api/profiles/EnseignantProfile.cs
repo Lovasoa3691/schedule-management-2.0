@@ -17,6 +17,13 @@ public class EnseignantProfile:Profile
             .ForCtorParam("adresse", opt => opt.MapFrom(src => src.adresse))
             .ForCtorParam("email", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.email));
 
+        CreateMap<Activite, EnseignantActiviteDto>()
+            .ForCtorParam("idAct", opt => opt.MapFrom(src => src.idActivite))
+            .ForCtorParam("codeMat", opt => opt.MapFrom(src => src.matiere.codeMat))
+            .ForCtorParam("idEns", opt => opt.MapFrom(src => src.enseignant.idUt))
+            .ForCtorParam("nom", opt => opt.MapFrom(src => src.enseignant.nom))
+            .ForCtorParam("prenom", opt => opt.MapFrom(src => src.enseignant.prenom));
+        
         CreateMap<CreateEnseignantDto, Enseignant>()
             .ForMember(dest => dest.nom, opt => opt.MapFrom(src => src.nom))
             .ForMember(dest => dest.prenom, opt => opt.MapFrom(src => src.prenom))
@@ -32,5 +39,6 @@ public class EnseignantProfile:Profile
             .ForMember(dest => dest.grade, opt => opt.MapFrom(src => src.grade))
             .ForMember(dest => dest.genre, opt => opt.MapFrom(src => src.genre))
             .ForMember(dest => dest.adresse, opt => opt.MapFrom(src => src.adresse));
+        
     }
 }

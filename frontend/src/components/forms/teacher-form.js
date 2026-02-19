@@ -37,6 +37,18 @@ const TeacherForm = ({
           </div>
 
           <div>
+            <label className="block text-sm font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={data.email}
+              onChange={handleChange}
+              className="w-full mt-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium">Genre</label>
             <select
               name="genre"

@@ -7,61 +7,84 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+import Icon from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../App";
 import api from "../hooks/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useContext } from "react";
+import { AuthContext } from "./utils/AuthContext";
+import { getUserIdFromToken } from "../decode";
+import { jwtDecode } from "jwt-decode";
 
 type Props = {
   onLoginSucces: () => void;
 };
 
-export default function LoginScreen({ onLoginSucces }: Props) {
+export default function LoginScreen() {
+  const { setAuthenticated } = useContext(AuthContext);
+
   const [rememberMe, setRememberMe] = React.useState(false);
   const [email, setEmail] = useState("");
   const [mdp, setMdp] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleLogin = () => {
-    // if (email === "admin@gmail.com" && mdp === "orion3691") {
-    //   onLoginSucces();
-    // } else {
-    //   Alert.alert("Email ou mot de passe invalide!");
-    // }
-    api
-      .post("/utilisateur/login", {
-        email: email,
-        mdp: mdp,
-        role: "enseignant",
-      })
-      .then((rep) => {
-        Alert.alert("Connexion réussie!", JSON.stringify(rep.data));
-        onLoginSucces();
-        // api
-        //   .get("/utilisateur/profile")
-        //   .then((rep) => {
-        //     Alert.alert("Connexion réussie!", JSON.stringify(rep.data));
-        //     onLoginSucces();
-        //   })
-        //   .catch((err) => {
-        //     Alert.alert("Erreur", err.message);
-        //   });
-      })
-      .catch((err) => {
-        Alert.alert(err.response.data);
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const response = await api.post<{
+        email: string;
+        role: string;
+        token: string;
+      }>("/utilisateur/login", {
+        email,
+        mdp,
+        client: "mobile",
       });
+
+      const token = response.data.token;
+      const decoded = jwtDecode<{ userId?: string; role?: string }>(token);
+      if (decoded.role !== "enseignant") {
+        Alert.alert(
+          "Accès refusé",
+          "Seuls les enseignants peuvent se connecter.",
+        );
+        return;
+      }
+
+      await AsyncStorage.setItem("jwt", token);
+
+      const profile = await api.get<string>("/utilisateur/profile");
+      await AsyncStorage.setItem("userId", profile.data);
+
+      setAuthenticated(true);
+      // Alert.alert("Connexion réussie!", `ID utilisateur : ${profile.data}`);
+    } catch (err: any) {
+      const message = err.response?.data || err.message || "Erreur inconnue";
+      Alert.alert("Erreur de connexion", message.toString());
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       {/* <View style={styles.card}> */}
       <View style={styles.logoCard}>
-        <Text style={{ fontSize: 40, fontWeight: "bold", alignSelf: "center" }}>
-          Sched.<Text style={{ color: "blue" }}>Connect</Text>
+        <Image
+          source={require("../assets/image/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.appName}>
+          Sched<Text style={styles.appNameHighlight}>Connect</Text>
         </Text>
       </View>
       <Text style={styles.title}>Connectez-vous à votre compte</Text>
@@ -104,8 +127,16 @@ export default function LoginScreen({ onLoginSucces }: Props) {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginText}>Se connecter</Text>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.loginText}>Se connecter</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.row}>
@@ -119,34 +150,6 @@ export default function LoginScreen({ onLoginSucces }: Props) {
           </Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.divider}>
-        <View style={styles.line} />
-        <Text style={styles.or}>ou connecte avec</Text>
-        <View style={styles.line} />
-      </View>
-
-      <View style={styles.socialRow}>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={require("../assets/image/facebook.png")}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={require("../assets/image/google.png")}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <Image
-            source={require("../assets/image/github.png")}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-      </View>
-      {/* </View> */}
     </View>
   );
 }
@@ -202,8 +205,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
+    marginTop: 20,
     color: "#3a5dd9",
-    fontWeight: "500",
+    fontWeight: "700",
   },
   loginButton: {
     backgroundColor: "#3a5dd9",
@@ -252,10 +256,22 @@ const styles = StyleSheet.create({
     height: 35,
   },
   logoCard: {
-    paddingBottom: 20,
+    alignItems: "center",
+    marginBottom: 30,
   },
+
   logo: {
-    width: 50,
-    height: 50,
+    width: 90,
+    height: 90,
+    marginBottom: 10,
+  },
+
+  appName: {
+    fontSize: 37,
+    fontWeight: "bold",
+  },
+
+  appNameHighlight: {
+    color: "blue",
   },
 });

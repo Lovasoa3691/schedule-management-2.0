@@ -12,6 +12,7 @@ const TeacherHour = () => {
     api
       .get("utilisateur/teacher/info/all")
       .then((res) => {
+        console.log("Info enseignants : ", res.data);
         setInfoEnseignants(res.data);
         setFilter(res.data);
       })
@@ -38,7 +39,7 @@ const TeacherHour = () => {
 
   const filtrerData = (selected) => {
     const filtered = infoEnseignants.filter(
-      (item) => item.nom === selected.value
+      (item) => item.nom === selected.value,
     );
     // console.log("Filtrer : ", filtered);
     setFilter(filtered);

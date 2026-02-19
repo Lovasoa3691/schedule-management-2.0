@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using edt_api.config;
 
 #nullable disable
@@ -18,29 +18,64 @@ namespace edt_api.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.18")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("edt_api.models.Activite", b =>
+                {
+                    b.Property<string>("idActivite")
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<DateTime>("created_at")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("enseignantId")
+                        .IsRequired()
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<double>("heureEffectue")
+                        .HasColumnType("double");
+
+                    b.Property<string>("matiereId")
+                        .IsRequired()
+                        .HasColumnType("varchar(36)");
+
+                    b.Property<string>("statusActivite")
+                        .IsRequired()
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<DateTime>("updated_at")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("idActivite");
+
+                    b.HasIndex("enseignantId");
+
+                    b.HasIndex("matiereId");
+
+                    b.ToTable("Activites");
+                });
 
             modelBuilder.Entity("edt_api.models.AnneeScolaire", b =>
                 {
                     b.Property<int>("idAnnee")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idAnnee"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("idAnnee"));
 
                     b.Property<string>("dateDebutAnnee")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(4)");
 
                     b.Property<string>("dateFinAnnee")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(4)");
 
                     b.Property<string>("status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(10)");
 
                     b.HasKey("idAnnee");
 
@@ -50,19 +85,22 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.Authentification", b =>
                 {
                     b.Property<string>("idAuth")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<string>("email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("isActive")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("mdp")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("utilisateurId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.HasKey("idAuth");
 
@@ -75,9 +113,9 @@ namespace edt_api.Migrations
                 {
                     b.Property<int>("idCal")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idCal"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("idCal"));
 
                     b.Property<DateOnly>("dateDebut")
                         .HasColumnType("date");
@@ -87,19 +125,13 @@ namespace edt_api.Migrations
 
                     b.Property<string>("descriptionCal")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("responsableId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("typeCal")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("idCal");
-
-                    b.HasIndex("responsableId");
 
                     b.ToTable("CalendrierAcademiques");
                 });
@@ -107,20 +139,24 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.Disponibilite", b =>
                 {
                     b.Property<string>("numDispo")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<DateOnly>("dateDispo")
                         .HasColumnType("date");
 
                     b.Property<string>("enseignantId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<TimeOnly>("hDeb")
-                        .HasColumnType("time without time zone");
+                        .HasColumnType("time(6)");
 
                     b.Property<TimeOnly>("hFin")
-                        .HasColumnType("time without time zone");
+                        .HasColumnType("time(6)");
+
+                    b.Property<string>("statusDispo")
+                        .IsRequired()
+                        .HasColumnType("varchar(15)");
 
                     b.HasKey("numDispo");
 
@@ -132,52 +168,55 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.Edt", b =>
                 {
                     b.Property<string>("numEd")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("anneeId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("created_at")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("disponibilite")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("enseignantId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<TimeOnly>("hDeb")
-                        .HasColumnType("time without time zone");
+                        .HasColumnType("time(6)");
 
                     b.Property<TimeOnly>("hFin")
-                        .HasColumnType("time without time zone");
+                        .HasColumnType("time(6)");
 
                     b.Property<DateOnly>("jour")
                         .HasColumnType("date");
 
                     b.Property<string>("matiereId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("mentionId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("niveauId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("responsableId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("salleId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("semaine")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(15)");
 
                     b.Property<string>("type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(30)");
 
                     b.HasKey("numEd");
 
@@ -198,58 +237,22 @@ namespace edt_api.Migrations
                     b.ToTable("Edts");
                 });
 
-            modelBuilder.Entity("edt_api.models.Enseignement", b =>
-                {
-                    b.Property<string>("enseignantId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("matiereId")
-                        .HasColumnType("text");
-
-                    b.Property<double>("heureEffectue")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("numero")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValueSql("(UUID())");
-
-                    b.Property<string>("ststusEnseignement")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("enseignantId", "matiereId");
-
-                    b.HasIndex("matiereId");
-
-                    b.HasIndex("numero")
-                        .IsUnique();
-
-                    b.ToTable("Enseignements");
-                });
-
             modelBuilder.Entity("edt_api.models.Matiere", b =>
                 {
                     b.Property<string>("codeMat")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("coefficient")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("enseignantId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("int");
 
                     b.Property<int>("nbHor")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("nomMat")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("codeMat");
-
-                    b.HasIndex("enseignantId");
 
                     b.ToTable("Matieres");
                 });
@@ -257,10 +260,10 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.MatiereMention", b =>
                 {
                     b.Property<string>("matiereId")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("mentionId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("matiereId", "mentionId");
 
@@ -272,10 +275,10 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.MatiereNiveau", b =>
                 {
                     b.Property<string>("matiereId")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<int>("niveauId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("matiereId", "niveauId");
 
@@ -288,13 +291,13 @@ namespace edt_api.Migrations
                 {
                     b.Property<int>("idMent")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idMent"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("idMent"));
 
                     b.Property<string>("nomMent")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("idMent");
 
@@ -304,26 +307,26 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.Message", b =>
                 {
                     b.Property<string>("idMes")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<DateTime>("dateMes")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("enseignantId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<string>("responsableId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<string>("statusMes")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("texte")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("idMes");
 
@@ -338,13 +341,13 @@ namespace edt_api.Migrations
                 {
                     b.Property<int>("idNiv")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idNiv"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("idNiv"));
 
                     b.Property<string>("intitule")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("idNiv");
 
@@ -355,24 +358,24 @@ namespace edt_api.Migrations
                 {
                     b.Property<int>("idSalle")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idSalle"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("idSalle"));
 
                     b.Property<int>("capacite")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("localisation")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("nomSalle")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("typeSalle")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(40)");
 
                     b.HasKey("idSalle");
 
@@ -382,32 +385,32 @@ namespace edt_api.Migrations
             modelBuilder.Entity("edt_api.models.Utilisateur", b =>
                 {
                     b.Property<string>("idUt")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(36)");
 
                     b.Property<string>("adresse")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("genre")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(15)");
 
                     b.Property<string>("nom")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("prenom")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("telephone")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(15)");
 
                     b.Property<string>("typeUtilisateur")
                         .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
+                        .HasMaxLength(21)
+                        .HasColumnType("varchar(21)");
 
                     b.HasKey("idUt");
 
@@ -418,13 +421,20 @@ namespace edt_api.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("edt_api.models.Administrateur", b =>
+                {
+                    b.HasBaseType("edt_api.models.Utilisateur");
+
+                    b.HasDiscriminator().HasValue("Administrateur");
+                });
+
             modelBuilder.Entity("edt_api.models.Enseignant", b =>
                 {
                     b.HasBaseType("edt_api.models.Utilisateur");
 
                     b.Property<string>("grade")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(50)");
 
                     b.HasDiscriminator().HasValue("Enseignant");
                 });
@@ -433,11 +443,30 @@ namespace edt_api.Migrations
                 {
                     b.HasBaseType("edt_api.models.Utilisateur");
 
-                    b.Property<string>("fonction")
+                    b.Property<string>("role")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(20)");
 
                     b.HasDiscriminator().HasValue("Responsable");
+                });
+
+            modelBuilder.Entity("edt_api.models.Activite", b =>
+                {
+                    b.HasOne("edt_api.models.Enseignant", "enseignant")
+                        .WithMany("activites")
+                        .HasForeignKey("enseignantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("edt_api.models.Matiere", "matiere")
+                        .WithMany("activites")
+                        .HasForeignKey("matiereId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("enseignant");
+
+                    b.Navigation("matiere");
                 });
 
             modelBuilder.Entity("edt_api.models.Authentification", b =>
@@ -451,23 +480,12 @@ namespace edt_api.Migrations
                     b.Navigation("utilisateur");
                 });
 
-            modelBuilder.Entity("edt_api.models.CalendrierAcademique", b =>
-                {
-                    b.HasOne("edt_api.models.Responsable", "responsable")
-                        .WithMany("calendrierAcademies")
-                        .HasForeignKey("responsableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("responsable");
-                });
-
             modelBuilder.Entity("edt_api.models.Disponibilite", b =>
                 {
                     b.HasOne("edt_api.models.Enseignant", "enseignant")
                         .WithMany("disponibilites")
                         .HasForeignKey("enseignantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("enseignant");
@@ -532,36 +550,6 @@ namespace edt_api.Migrations
                     b.Navigation("salle");
                 });
 
-            modelBuilder.Entity("edt_api.models.Enseignement", b =>
-                {
-                    b.HasOne("edt_api.models.Enseignant", "enseignant")
-                        .WithMany("enseignements")
-                        .HasForeignKey("enseignantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("edt_api.models.Matiere", "matiere")
-                        .WithMany("enseignements")
-                        .HasForeignKey("matiereId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("enseignant");
-
-                    b.Navigation("matiere");
-                });
-
-            modelBuilder.Entity("edt_api.models.Matiere", b =>
-                {
-                    b.HasOne("edt_api.models.Enseignant", "enseignant")
-                        .WithMany("matiere")
-                        .HasForeignKey("enseignantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("enseignant");
-                });
-
             modelBuilder.Entity("edt_api.models.MatiereMention", b =>
                 {
                     b.HasOne("edt_api.models.Matiere", "matiere")
@@ -626,9 +614,9 @@ namespace edt_api.Migrations
 
             modelBuilder.Entity("edt_api.models.Matiere", b =>
                 {
-                    b.Navigation("edts");
+                    b.Navigation("activites");
 
-                    b.Navigation("enseignements");
+                    b.Navigation("edts");
 
                     b.Navigation("matiereMention");
 
@@ -661,21 +649,17 @@ namespace edt_api.Migrations
 
             modelBuilder.Entity("edt_api.models.Enseignant", b =>
                 {
+                    b.Navigation("activites");
+
                     b.Navigation("disponibilites");
 
                     b.Navigation("edts");
-
-                    b.Navigation("enseignements");
-
-                    b.Navigation("matiere");
 
                     b.Navigation("messages");
                 });
 
             modelBuilder.Entity("edt_api.models.Responsable", b =>
                 {
-                    b.Navigation("calendrierAcademies");
-
                     b.Navigation("edts");
 
                     b.Navigation("messages");
