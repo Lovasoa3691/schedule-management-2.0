@@ -23,9 +23,9 @@ pipeline {
             }
         }
         stage('Build & Push Backend') {
-            // when {
-            //     changeset "backend/**"
-            // }
+            when {
+                changeset "backend/**"
+            }
             steps {
                 dir('backend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -42,9 +42,9 @@ pipeline {
             }
         }
         stage('Build & Push Frontend') {
-            //  when {
-            //     changeset "frontend/**"
-            // }
+             when {
+                changeset "frontend/**"
+            }
             steps {
                 dir('frontend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -60,25 +60,29 @@ pipeline {
             }
         }
         stage('Deploy Backend to Minikube') {
-            //  when {
-            //     changeset "backend/**"
-            // }
+             when {
+                changeset "backend/**"
+            }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
                     kubectl apply -f k8s/backend.yaml
+                    kubectl rollout restart deployment/backend-api
+                    kubectl rollout status deployment/backend-api
                     '''
                 }
             }
         }
         stage('Deploy Frontend to Minikube') {
-            //  when {
-            //     changeset "frontend/**"
-            // }
+             when {
+                changeset "frontend/**"
+            }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
                     kubectl apply -f k8s/frontend.yaml
+                    kubectl rollout restart deployment/frontend-react
+                    kubectl rollout status deployment/frontend-react
                     '''
                 }
             }

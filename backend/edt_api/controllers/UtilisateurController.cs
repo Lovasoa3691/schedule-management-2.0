@@ -90,7 +90,7 @@ public class UtilisateurController : ControllerBase
             Response.Cookies.Append("jwt", user.token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddHours(2)
             });
