@@ -23,9 +23,9 @@ pipeline {
             }
         }
         stage('Build & Push Backend') {
-            when {
-                changeset "backend/**"
-            }
+            // when {
+            //     changeset "backend/**"
+            // }
             steps {
                 dir('backend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -42,9 +42,9 @@ pipeline {
             }
         }
         stage('Build & Push Frontend') {
-             when {
-                changeset "frontend/**"
-            }
+            //  when {
+            //     changeset "frontend/**"
+            // }
             steps {
                 dir('frontend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -60,9 +60,9 @@ pipeline {
             }
         }
         stage('Deploy Backend to Minikube') {
-             when {
-                changeset "backend/**"
-            }
+            //  when {
+            //     changeset "backend/**"
+            // }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
@@ -72,9 +72,9 @@ pipeline {
             }
         }
         stage('Deploy Frontend to Minikube') {
-             when {
-                changeset "frontend/**"
-            }
+            //  when {
+            //     changeset "frontend/**"
+            // }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
