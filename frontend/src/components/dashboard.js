@@ -189,7 +189,7 @@ const Dashboard = () => {
   return (
     <div className="dash-container">
       <h2 className="text-2xl text-gray-700">
-        Bienvenue sur{" "}
+        Bonjour! Bienvenue sur{" "}
         <span className="font-bold">
           Sched<span className="text-blue-700">Connect</span>
         </span>
