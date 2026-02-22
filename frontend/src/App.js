@@ -27,6 +27,7 @@ import Profil from "./components/settings/profil";
 import Sector from "./components/settings/sector";
 import AssistantFloatingForm from "./components/forms/assistant";
 import api from "./hooks/api";
+import ForgotPassword from "./components/auth/forgetPassword";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,8 +37,6 @@ function App() {
     api
       .get("/utilisateur/profile")
       .then((rep) => {
-        console.log("Data: ", rep.data);
-        localStorage.setItem("user", rep.data);
         setIsAuthenticated(true);
       })
       .catch(() => {
@@ -89,6 +88,7 @@ function App() {
               path="/login"
               element={<Login setIsAuthentificated={setIsAuthenticated} />}
             />
+            <Route path="/forgotPassword" element={<ForgotPassword />} />
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>

@@ -18,6 +18,8 @@ public abstract class Utilisateur
     public string genre{get;set;} = string.Empty;
     [Column(TypeName = "varchar(20)")]
     public string adresse{get;set;} = string.Empty;
+    [Column(TypeName = "varchar(20)")]
+    public string role { get; set; } = string.Empty;
     
     public ICollection<Authentification> Authentifications{get;set;} = new List<Authentification>();
 }

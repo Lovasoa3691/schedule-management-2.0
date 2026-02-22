@@ -38,18 +38,24 @@ public class ImEdt : IEdt
         {
             if (startDate.HasValue && endDate.HasValue)
             {
-                query = query.Where(e => e.enseignantId == id && e.jour >= startDate.Value && e.jour <= endDate.Value);
+                query = query.Where(e => e.enseignantId == id && e.jour >= startDate.Value && e.jour <= endDate.Value && e.anneeScolaire.status == "Active");
             }
             else
             {
-                query = query.Where(e => e.enseignantId == id);
+                query = query.Where(e => e.enseignantId == id && e.anneeScolaire.status == "Active");
             }
         }
-        if (startDate.HasValue && endDate.HasValue)
+        else
         {
-            query = query.Where(e => e.jour >= startDate.Value && e.jour <= endDate.Value);
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                query = query.Where(e => e.jour >= startDate.Value && e.jour <= endDate.Value && e.anneeScolaire.status == "Active");
+            }
+            else
+            {
+                query = query.Where(e => e.anneeScolaire.status == "Active");
+            }
         }
-
         var result = await query.ToListAsync();
         return _mapper.Map<IEnumerable<EdtDto>>(result);
     }
@@ -70,7 +76,6 @@ public class ImEdt : IEdt
         var result = await query.ToListAsync();
         return _mapper.Map<IEnumerable<EdtDto>>(result);
     }
-
 
     public async Task<EdtDto?> GetByIdAsync(string id)
     {
@@ -103,9 +108,14 @@ public class ImEdt : IEdt
         {
             throw new InvalidOperationException("Chevauchement detecté: la salle ou l'enseignant est déjà occupé.");
         }
+
+        var activeAnne = await _db.AnneeScolaires.Where(a => a.status == "Active").FirstOrDefaultAsync();
+        if (activeAnne == null) 
+            throw new(message: "Annee introuvable");
+        
         var edt = new Edt
         {
-            anneeId = dto.anneeId,
+            anneeId = activeAnne.idAnnee,
             hDeb = dto.hDeb,
             hFin = dto.hFin,
             jour = dto.jour,
@@ -118,6 +128,7 @@ public class ImEdt : IEdt
             enseignantId = dto.enseignantId,
             responsableId = dto.responsableId,
             salleId = dto.idSalle,
+            semaine = $"{dto.semaine}"
         };
         await _db.Edts.AddAsync(edt);
         await _db.SaveChangesAsync();

@@ -2700,11 +2700,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
+      "projectUniqueName": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj",
       "projectName": "edt_api",
-      "projectPath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
+      "projectPath": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj",
       "packagesPath": "/home/julianot/.nuget/packages/",
-      "outputPath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/obj/",
+      "outputPath": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/julianot/.nuget/NuGet/NuGet.Config"

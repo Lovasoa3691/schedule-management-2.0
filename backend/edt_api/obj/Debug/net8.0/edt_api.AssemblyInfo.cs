@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("edt_api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c43bb0656aa8feacd0fa3be5d5d612d9af0cd273")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b649d96be239618b2211f981864099f9b4b5906")]
 [assembly: System.Reflection.AssemblyProductAttribute("edt_api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("edt_api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

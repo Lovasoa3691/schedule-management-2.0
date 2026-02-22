@@ -155,38 +155,6 @@ const Register = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block mb-1 text-sm font-medium text-gray-900">
-              Nom
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="nom"
-                value={formData.nom}
-                onChange={handleChange}
-                placeholder="Votre nom"
-                required
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-              />
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <label className="block mb-1 text-sm font-medium text-gray-900">
-              Prénom
-            </label>
-            <input
-              type="text"
-              name="prenom"
-              value={formData.prenom}
-              onChange={handleChange}
-              placeholder="Votre prénom"
-              required
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block mb-1 text-sm font-medium text-gray-900">
               Email
             </label>
             <input

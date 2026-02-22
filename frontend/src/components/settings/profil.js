@@ -1,200 +1,296 @@
 import { useEffect, useState } from "react";
-import { MdSave, MdSend } from "react-icons/md";
 import api from "../../hooks/api";
+import { FiEdit2 } from "react-icons/fi";
+
+import { FiCamera } from "react-icons/fi";
+import { FaUser } from "react-icons/fa";
+
+const Avatar = ({ user, avatar, setAvatar }) => {
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const preview = URL.createObjectURL(file);
+    setAvatar(preview);
+
+    // 👉 plus tard : upload vers backend
+    // const formData = new FormData();
+    // formData.append("avatar", file);
+    // api.post("/utilisateur/avatar", formData);
+  };
+
+  return (
+    <div className="relative w-24 h-24">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleUpload}
+        className="hidden"
+        id="avatar-upload"
+      />
+
+      <label htmlFor="avatar-upload" className="cursor-pointer">
+        {avatar ? (
+          <img
+            src={avatar}
+            alt="Avatar"
+            className="w-24 h-24 rounded-full object-cover border"
+          />
+        ) : (
+          <FaUser className="w-24 h-24 text-gray-300 rounded-full border" />
+          // <div className="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+          //   {user.nom.charAt(0)}
+          //   {user.prenom.charAt(0)}
+          // </div>
+        )}
+
+        {/* Icône modifier */}
+        <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full shadow">
+          <FiCamera className="w-3 h-3 text-gray-600" />
+        </div>
+      </label>
+    </div>
+  );
+};
+
+const TabButton = ({ label, active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex-1 py-3 text-md font-semibold transition
+      ${
+        active
+          ? "text-blue-600 border-b-2 border-blue-600"
+          : "text-gray-500 hover:text-gray-700"
+      }`}
+  >
+    {label}
+  </button>
+);
+
+const InfosPersonnelles = ({ user }) => {
+  const Item = ({ label, value }) => (
+    <div className="flex justify-between py-8 border-b last:border-none">
+      <span className="text-gray-500 text-md">{label}</span>
+      <span className="text-gray-800 text-md font-medium">{value ?? "—"}</span>
+    </div>
+  );
+
+  return (
+    <div>
+      <Item label="Nom" value={user.nom} />
+      <Item label="Prénom" value={user.prenom} />
+      <Item label="Nom d'utilisateur" value={user.username} />
+      <Item label="Genre" value={user.genre} />
+      <Item label="Téléphone" value={user.phone} />
+      <Item label="Adresse" value={user.adresse} />
+    </div>
+  );
+};
+
+const Input = ({ label, editable = false, disabled = false, ...props }) => (
+  <div>
+    <label className="block text-sm text-gray-500 mb-2">{label}</label>
+
+    <div className="relative">
+      <input
+        {...props}
+        disabled={disabled}
+        className={`w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-md
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+          ${disabled ? "cursor-not-allowed text-gray-400" : ""}
+        `}
+      />
+
+      {editable && (
+        <FiEdit2 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+      )}
+    </div>
+  </div>
+);
+
+const Parametres = ({ formData, setFormData, onSave }) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <form className="space-y-6">
+      <h3 className="text-lg font-semibold text-gray-800">
+        Paramètres du compte
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Input
+          label="Nom"
+          name="nom"
+          value={formData.nom}
+          disabled
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Prénom"
+          name="prenom"
+          disabled
+          value={formData.prenom}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Nom d'utilisateur"
+          name="username"
+          value={formData.username ?? ""}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Teléphone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          editable
+        />
+
+        <Input
+          label="E-mail"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          // editable
+          disabled
+        />
+
+        <Input
+          label="Mot de passe"
+          name="password"
+          type="password"
+          value="••••••••"
+          disabled
+          editable
+        />
+      </div>
+
+      <div className="flex items-center gap-6 pt-4">
+        <button
+          type="button"
+          onClick={onSave}
+          className="px-6 py-2 rounded-lg bg-blue-600 text-white text-md font-medium hover:bg-blue-500 transition"
+        >
+          Enregistrer les modifications
+        </button>
+
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="text-md text-gray-500 hover:underline"
+        >
+          Annuler
+        </button>
+      </div>
+    </form>
+  );
+};
 
 const Profil = () => {
   const [user, setUser] = useState(null);
-
-  const [formData, setFormData] = useState({
-    id: "",
-    nom: "",
-    prenom: "",
-    genre: "",
-    phone: "",
-    adresse: "",
-    fonction: "",
-    email: "",
-  });
-
-  const [id, setId] = useState(() => {
-    const storedKey = localStorage.getItem("user");
-    return storedKey ? storedKey : null;
-  });
-
-  const getUser = (key) => {
-    api
-      .get(`/utilisateur/${key}`)
-      .then((res) => setUser(res.data))
-      .catch((err) => console.error("Erreur de recuperation: ", err));
-  };
+  const [id, setId] = useState("");
+  const [role, setRole] = useState("");
+  const [activeTab, setActiveTab] = useState("info");
+  const [formData, setFormData] = useState({});
+  const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      getUser(id);
+    if (user?.avatarUrl) {
+      setAvatar(user.avatarUrl);
     }
-  }, [id]);
+  }, [user]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((res) => {
+        setId(res.data.userId);
+        setRole(res.data.userRole);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (id && role) {
+      api
+        .get(`/utilisateur/${id}/${role}`)
+        .then((res) => setUser(res.data[0]))
+        .catch((err) => console.error(err));
+    }
+  }, [id, role]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        nom: user.nom,
+        prenom: user.prenom,
+        genre: user.genre,
+        phone: user.phone,
+        adresse: user.adresse,
+        email: user.email,
+      });
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      await api.put(`/utilisateur/${id}`, formData);
+      alert("Profil mis à jour");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (!user) {
-    return <div className="text-center">Chargement...</div>;
+    return <div className="text-center mt-10">Chargement...</div>;
   }
 
   return (
-    <main className="flex flex flex-col h-screen">
-      <header className="p-4 bg-slate-100 border-b flex items-center">
-        <div className="w-10 h-10  text-white flex items-center justify-center text-lg font-bold"></div>
-      </header>
+    <main className="flex flex-col h-screen bg-slate-50">
+      <section className="flex-1 overflow-y-auto">
+        <div className="bg-white mx-4 mt-6 p-4 rounded-xl shadow-sm border flex items-center gap-4">
+          <Avatar user={user} avatar={avatar} setAvatar={setAvatar} />
 
-      <div className="h-[600px] p-14  bg-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-16 h-16 mr-4 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
-              {user.nom.charAt(0)}
-              {user.prenom.charAt(0)}
-            </div>
-            <div className="flex flex-col items-start">
-              <span className="text-lg font-bold text-gray-700">
-                {user.nom} {user.prenom}
-              </span>
-              <span className="text-gray-600">{user?.email ?? "N/A"}</span>
-            </div>
-          </div>
-          <div>
-            <button className="text-white bg-blue-600 p-2 w-20 rounded-lg hover:bg-blue-700 transition-colors">
-              Editer
-            </button>
+          <div className="flex-1">
+            <p className="text-gray-600 font-semibold">
+              {user.nom} {user.prenom}
+            </p>
+            <p className="text-sm text-gray-500">{user.email}</p>
           </div>
         </div>
 
-        <form className="mt-8">
-          <div className="grid gap-8 mb-8 md:grid-cols-2">
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Nom
-              </label>
-              <input
-                type="text"
-                name="nom"
-                value={user?.nom}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="John"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Prénom
-              </label>
-              <input
-                type="text"
-                name="prenom"
-                value={user?.prenom}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Doe"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Genre
-              </label>
-
-              <select
-                value={user?.genre ?? "Inconnu"}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                name="genre"
-                id=""
-              >
-                <option value="Masculin">Masculin</option>
-                <option value="Feminin">Feminin</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Adresse
-              </label>
-              <input
-                type="text"
-                name="adresse"
-                value={user?.adresse ?? "Inconnu"}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="123-45-678"
-                pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Numéro de téléphone
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={user.phone}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="123-45-678"
-                pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Rôle
-              </label>
-              <input
-                disabled
-                type="text"
-                id="fonction"
-                name="fonction"
-                value={user.fonction}
-                onChange={handleChange}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="123-45-678"
-                pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
-                required
-              />
-            </div>
-          </div>
-          <div className="">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Adresse mail
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={user?.email}
-              onChange={handleChange}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="exemple@gmail.com"
-              required
+        <div className="mx-4 mt-6 bg-white rounded-xl shadow-sm border">
+          <div className="flex border-b">
+            <TabButton
+              label="Infos personnelles"
+              active={activeTab === "info"}
+              onClick={() => setActiveTab("info")}
+            />
+            <TabButton
+              label="Paramètres"
+              active={activeTab === "settings"}
+              onClick={() => setActiveTab("settings")}
             />
           </div>
 
-          {/* <div className="mt-3">
-                <span className="text-gray-600">Votre</span>
-              </div> */}
-        </form>
-      </div>
-
-      <footer className="p-6 px-14 border-t bg-white flex gap-2">
-        <button
-          //   onClick={sendMessage}
-          className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg"
-        >
-          <MdSave className="inline-block mr-2" />
-          Enregister les modifications
-        </button>
-      </footer>
+          <div className="p-4">
+            {activeTab === "info" && <InfosPersonnelles user={user} />}
+            {activeTab === "settings" && (
+              <Parametres
+                formData={formData}
+                setFormData={setFormData}
+                onSave={handleSave}
+              />
+            )}
+          </div>
+        </div>
+      </section>
     </main>
   );
 };

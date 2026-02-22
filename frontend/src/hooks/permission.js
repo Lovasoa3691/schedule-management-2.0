@@ -1,33 +1,34 @@
 export const permissionsByRole = {
   admin: {
     dashboard: true,
-    classes: true,
-    classroom: true,
-    article: true,
-    boite: true,
+    class: true,
+    teacher: true,
+    subject: true,
+    user: true,
+    stats: true,
+    config: true,
 
     add: true,
     edit: true,
     delete: true,
     view: true,
     export: true,
-    trash: true,
-    log: true,
   },
 
   secretary: {
-    dashboard: false,
-    service: true,
-    stock: true,
-    article: true,
+    dashboard: true,
+    class: true,
+    teacher: true,
+    subject: true,
+    user: false,
+    stats: true,
+    config: false,
 
     add: true,
-    edit: true,
+    edit: false,
     delete: false,
     view: true,
     export: true,
-    trash: false,
-    log: false,
   },
 };
 

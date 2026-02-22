@@ -34,6 +34,8 @@ import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
 import { set } from "date-fns";
+import { Loader } from "./spin/Spinner";
+import Swal from "sweetalert2";
 
 const Teacher = () => {
   const [enseignant, setEnseignant] = useState([]);
@@ -48,15 +50,22 @@ const Teacher = () => {
     grade: "",
     email: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const loadData = () => {
+    setLoading(true);
     api
       .get("/utilisateur/teacher")
       .then((res) => {
         setEnseignant(res.data);
         setFiltered(res.data);
       })
-      .catch((err) => console.error("Erreur de chargement:", err.message));
+      .catch((err) => console.error("Erreur de chargement:", err.message))
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1700);
+      });
   };
 
   useEffect(() => {
@@ -300,49 +309,43 @@ const Teacher = () => {
     setImporting(true);
     setProgress(0);
 
-    let rowCount = 0;
-
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       delimiter: ",",
       encoding: "UTF-8",
-
-      step: function () {
-        rowCount++;
-      },
-
-      // transformHeader: (header) => header.trim().replace(/\uFEFF/g, ""), // supprime BOM
-      // complete: (results) => {
-      //   console.log("Headers:", results.meta.fields);
-      //   console.log("Données brutes:", results.data);
-      //   // Supprimer lignes vides
-      //   const cleanedData = results.data.filter((row) =>
-      //     Object.values(row).some((v) => v && v.toString().trim() !== ""),
-      //   );
-      //   console.log("Données nettoyées :", cleanedData);
-      // },
-
       complete: (results) => {
-        const total = results.data.length;
+        const data = results.data;
 
+        if (data.length === 0) {
+          setImporting(false);
+          alert("Le fichier CSV est vide ou mal formaté !");
+          return;
+        }
+
+        console.log("Données CSV :", data);
+
+        // Exemple simulation de progression
         let current = 0;
         const interval = setInterval(() => {
           current += 5;
           setProgress(current);
-
           if (current >= 100) {
             clearInterval(interval);
             setImporting(false);
+            Swal.fire({
+              title: "Importation terminée !",
+              text: "Les données ont été importées avec succès.",
+              icon: "success",
+            });
 
-            console.log("Données CSV :", results.data);
-
-            // 👉 axios.post("/enseignants/import", results.data)
+            // Ici tu peux envoyer les données au serveur
+            // axios.post("/enseignants/import", data)
           }
-        }, 80);
+        }, 100);
       },
-
-      error: () => {
+      error: (err) => {
+        console.error("Erreur CSV :", err);
         setImporting(false);
         setProgress(0);
         alert("Erreur lors de l'import CSV");
@@ -502,22 +505,6 @@ const Teacher = () => {
           <FiPlus className="w-5 h-5" />
           Nouveau
         </button>
-
-        {/* <button
-          onClick={ExportPDF}
-          className="flex items-center gap-2 rounded-xl bg-red-500/90 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600 hover:shadow-md"
-        >
-          <FaFilePdf className="w-5 h-5" />
-          PDF
-        </button>
-
-        <button
-          onClick={ExportExcel}
-          className="flex items-center gap-2 rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-600 hover:shadow-md"
-        >
-          <FaFileExcel className="w-5 h-5" />
-          Excel
-        </button> */}
       </div>
 
       {showModal && (
@@ -549,9 +536,9 @@ const Teacher = () => {
 
       <div className="shadow rounded-lg mt-6">
         <div className="overflow-x-auto">
-          <div className="max-h-[800px] overflow-y-auto">
+          <div className="max-h-[700px] overflow-y-auto">
             <table className="min-w-full bg-white text-gray-700 table-fixed">
-              <thead className="bg-indigo-100 text-left font-semibold sticky top-0 z-10">
+              <thead className="bg-indigo-100 text-left font-semibold sticky top-0 z-5">
                 <tr>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">#</th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">NOM</th>
@@ -579,7 +566,13 @@ const Teacher = () => {
                 </tr>
               </thead>
               <tbody>
-                {filter.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={9}>
+                      <Loader />
+                    </td>
+                  </tr>
+                ) : filter.length > 0 ? (
                   filter.map((ens, index) => (
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3">{index + 1}</td>

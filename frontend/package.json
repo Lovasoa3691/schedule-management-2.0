@@ -33,6 +33,8 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.10.2",
     "recharts": "^3.1.0",
+    "styled-components": "^6.3.11",
+    "sweetalert2": "^11.26.20",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5",
     "yup": "^1.7.0"

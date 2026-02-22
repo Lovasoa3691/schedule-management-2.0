@@ -32,7 +32,6 @@ public class EdtController: ControllerBase
         return Ok(result);
     }
 
-
     [HttpGet("filter/{id}")]
     public async Task<ActionResult<EdtDto>> GetById(string id)
     {

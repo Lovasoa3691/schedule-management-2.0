@@ -6,15 +6,24 @@ import Confirm from "./notification/confirm";
 import AlertInfo from "./notification/alert";
 import api from "../hooks/api";
 import { set } from "date-fns";
+import { tr } from "date-fns/locale";
+import {Loader} from "./spin/Spinner";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const loadSubject = () => {
+    setLoading(true);
     api
       .get("/matiere")
       .then((res) => setMatieres(res.data))
-      .catch((err) => console.error("Erreur de chargement:", err));
+      .catch((err) => console.error("Erreur de chargement:", err))
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1700);
+      });
   };
 
   useEffect(() => {
@@ -230,7 +239,7 @@ const Subject = () => {
       <div className="flex items-center space-x-4">
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
         >
           <FiPlus className="w-5 h-5 text-white" />
           <span>Nouveau</span>
@@ -290,7 +299,13 @@ const Subject = () => {
                 </tr>
               </thead>
               <tbody>
-                {filter.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <Loader />
+                    </td>
+                  </tr>
+                ) : filter.length > 0 ? (
                   filter.map((mat, index) => (
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3">{index + 1}</td>

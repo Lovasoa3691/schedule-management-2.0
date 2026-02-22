@@ -5,9 +5,11 @@ import ClassForm from "./forms/class-form";
 import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
+import { Loader } from "./spin/Spinner";
 
 const ClassRoom = () => {
   const [salles, setSalles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [fileterd, setFiltered] = useState([]);
   const [formData, setFormData] = useState({
@@ -19,13 +21,19 @@ const ClassRoom = () => {
   });
 
   const loadData = () => {
+    setLoading(true);
     api
       .get("/salle")
       .then((res) => {
         setSalles(res.data);
         setFiltered(res.data);
       })
-      .catch((err) => console.error("Erreur de chargement:", err.message));
+      .catch((err) => console.error("Erreur de chargement:", err.message))
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1700);
+      });
   };
 
   useEffect(() => {
@@ -141,7 +149,7 @@ const ClassRoom = () => {
       sl.localisation
     )
       .toLowerCase()
-      .includes(searchfield.toLowerCase())
+      .includes(searchfield.toLowerCase()),
   );
 
   return (
@@ -191,7 +199,7 @@ const ClassRoom = () => {
       <div className="flex items-center space-x-4">
         <button
           onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
         >
           <FiPlus className="w-5 h-5 text-white" />
           <span>Nouveau</span>
@@ -240,7 +248,13 @@ const ClassRoom = () => {
                 </tr>
               </thead>
               <tbody>
-                {filter.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <Loader />
+                    </td>
+                  </tr>
+                ) : filter.length > 0 ? (
                   filter.map((sl, index) => (
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3">{index + 1}</td>
@@ -251,14 +265,14 @@ const ClassRoom = () => {
 
                       <td className="px-4 py-3">
                         <button
-                          className="text-blue-600 "
+                          className="text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition"
                           onClick={() => openModalEdit(sl)}
                         >
                           <FaEdit className="inline-block w-5 h-5" />
                         </button>
                         <button
                           onClick={() => askDelete(sl.idsalle)}
-                          className="text-red-600  ml-4"
+                          className="text-red-600 ml-4 px-2 py-1 rounded hover:bg-red-100 transition"
                         >
                           <FaTrashAlt className="inline-block w-5 h-5" />
                         </button>

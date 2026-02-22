@@ -1,8 +1,11 @@
 using System.Security.Claims;
+using edt_api.config;
 using edt_api.dtos;
+using edt_api.models;
 using edt_api.services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace edt_api.controllers;
 
@@ -12,7 +15,7 @@ public class UtilisateurController : ControllerBase
 {
     private readonly IUtilisateur _service;
 
-    public UtilisateurController(IUtilisateur service)
+    public UtilisateurController(IUtilisateur service )
     {
         _service = service;
     }
@@ -33,10 +36,10 @@ public class UtilisateurController : ControllerBase
     public async Task<ActionResult<IEnumerable<EnseignantActiviteDto>>> GetSpecificTeacher()
         => Ok(await _service.getSpecificTeacher());
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<IEnumerable<ResponsableDto>>> GetById(string id)
+    [HttpGet("{id:guid}/{role}")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetById(string id, string role)
     {
-        var res = await _service.getByIdAsync(id);
+        var res = await _service.getByIdAsync(id,  role);
         return res == null ? NotFound() : Ok(res);
     }
 
@@ -45,7 +48,16 @@ public class UtilisateurController : ControllerBase
     public IActionResult GetProfile()
     {
         var id = User.FindFirst("userId")?.Value;
-        return Ok(id);
+        var user = _service.GetUtilisateurById(id);
+        if (user == null) return Unauthorized();
+        string role = user switch
+        {
+            Responsable => user.role,
+            Enseignant => user.role,
+            Administrateur => user.role,
+            _ => "utilisateur"
+        };
+        return Ok(new {userId = id, userRole = role});
     }
 
     [HttpPost("responsable/register")]

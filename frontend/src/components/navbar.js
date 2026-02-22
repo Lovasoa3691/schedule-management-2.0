@@ -1,4 +1,4 @@
-import {  FiCalendar } from "react-icons/fi";
+import { FiCalendar } from "react-icons/fi";
 import {
   MdPerson,
   MdMenuBook,
@@ -13,6 +13,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import nProgress from "nprogress";
 import "nprogress/nprogress.css";
+import api from "../hooks/api";
+import { can } from "../hooks/permission";
 
 const Navbar = ({ setLoading }) => {
   const [openStats, setOpenStats] = useState(false);
@@ -20,10 +22,23 @@ const Navbar = ({ setLoading }) => {
   const [active, setActive] = useState("Dashboard");
 
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState("Tableau de bord");
+  const [currentPage, setCurrentPage] = useState("Dashboard");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
     document.title = `SchedConnect | ${currentPage}`;
+    api.get("/utilisateur/profile").then((rep) => {
+      if (rep.data.userRole === "Responsable_planning") {
+        console.log("Responsable connecté, redirection vers le planning...");
+        setRole("secretary");
+      } else if (rep.data.userRole === "Admin") {
+        console.log("Admin connecté, accès complet accordé.");
+        setRole("admin");
+      } else {
+        // console.log("Rôle inconnu, accès limité.");
+        setRole("");
+      }
+    });
   });
 
   const menuClick = (menu, path) => {
@@ -34,7 +49,7 @@ const Navbar = ({ setLoading }) => {
     setTimeout(() => {
       nProgress.done();
       navigate(path);
-    }, 1000);
+    }, 700);
   };
 
   return (
@@ -44,9 +59,9 @@ const Navbar = ({ setLoading }) => {
         className="fixed top-0 left-0 z-1 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar"
       >
-        <div className=" flex-grow h-full px-3 py-4 overflow-y-auto bg-white dark:bg-slate-100">
+        <div className=" flex-grow h-full px-3 py-4 overflow-y-auto bg-slate-100 ">
           <nav className="mt-20">
-            <h4 className="text-xs px-4 text-gray-800 uppercase tracking-wide mb-2">
+            <h4 className="text-sm px-4 text-gray-800 uppercase tracking-wide mb-2">
               Accueil
             </h4>
             <ul>
@@ -66,7 +81,7 @@ const Navbar = ({ setLoading }) => {
             </ul>
 
             <div className="mt-8">
-              <h4 className="text-xs px-4 text-gray-800 uppercase tracking-wide mb-2">
+              <h4 className="text-sm px-4 text-gray-800 uppercase tracking-wide mb-2">
                 Gestion
               </h4>
               <ul className="space-y-2">
@@ -146,7 +161,7 @@ const Navbar = ({ setLoading }) => {
                           onClick={() =>
                             menuClick(
                               "Disponibilite",
-                              "/statistique/disponibilite"
+                              "/statistique/disponibilite",
                             )
                           }
                           className={`block px-2 py-1 hover:text-blue-600${
@@ -163,7 +178,7 @@ const Navbar = ({ setLoading }) => {
                           onClick={() =>
                             menuClick(
                               "Heures",
-                              "/statistique/heures-enseignants"
+                              "/statistique/heures-enseignants",
                             )
                           }
                           className={`block px-2 py-1 hover:text-blue-600${
@@ -182,24 +197,27 @@ const Navbar = ({ setLoading }) => {
             </div>
 
             <div className="mt-8">
-              <h4 className="text-xs px-4 text-gray-800 uppercase tracking-wide mb-2">
+              <h4 className="text-sm px-4 text-gray-800 uppercase tracking-wide mb-2">
                 Fonctionnalités avancées
               </h4>
-              <ul>
-                <li>
-                  <Link
-                    onClick={() => menuClick("users", "/users")}
-                    className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
-                      active === "users"
-                        ? " bg-slate-100 text-blue-600"
-                        : " text-gray-800"
-                    }`}
-                  >
-                    <MdPerson className="w-5 h-5 mr-3 text-gray-800" />
-                    Utilisateurs
-                  </Link>
-                </li>
-              </ul>
+              {can(role, "user") && (
+                <ul>
+                  <li>
+                    <Link
+                      onClick={() => menuClick("users", "/users")}
+                      className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
+                        active === "users"
+                          ? " bg-slate-100 text-blue-600"
+                          : " text-gray-800"
+                      }`}
+                    >
+                      <MdPerson className="w-5 h-5 mr-3 text-gray-800" />
+                      Utilisateurs
+                    </Link>
+                  </li>
+                </ul>
+              )}
+
               <ul className="space-y-2">
                 <li>
                   <button

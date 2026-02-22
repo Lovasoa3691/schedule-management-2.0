@@ -4,6 +4,7 @@ import PieCard from "./chart/pie";
 import Select from "react-select";
 import { tr } from "date-fns/locale";
 import api from "../hooks/api";
+import { Loader, Loader2, Spinner } from "./spin/Spinner";
 
 const genderData = [
   { name: "Masculin", value: 60 },
@@ -35,6 +36,7 @@ const Dashboard = () => {
 
   const [infoEnseignants, setInfoEnseignants] = useState([]);
   const [filter, setFilter] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get("/mention").then((rep) => {
@@ -48,23 +50,53 @@ const Dashboard = () => {
     api
       .get("/utilisateur/profile")
       .then((rep) => {
-        setUserId(rep.data);
+        setUserId(rep.data.userId);
       })
       .catch((err) => {
         console.error(err.message);
       });
 
-    api.get("/utilisateur/teacher").then((rep) => {
-      setEnseignants(rep.data);
-    });
+    api
+      .get("/utilisateur/teacher")
+      .then((rep) => {
+        setEnseignants(rep.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500);
+      });
 
-    api.get("/edt/all").then((rep) => {
-      setPlanning(rep.data);
-    });
+    api
+      .get("/edt/all")
+      .then((rep) => {
+        setPlanning(rep.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500);
+      });
 
-    api.get("/salle").then((rep) => {
-      setSalles(rep.data);
-    });
+    api
+      .get("/salle")
+      .then((rep) => {
+        setSalles(rep.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500);
+      });
 
     api
       .get("/utilisateur/teacher/info/all")
@@ -72,7 +104,14 @@ const Dashboard = () => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
       })
-      .catch((err) => console.error("Erreur de chargement:", err));
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500);
+      });
   }, []);
 
   const formatDate = (date) => {
@@ -108,10 +147,14 @@ const Dashboard = () => {
   }, [enseignants, planning]);
 
   useEffect(() => {
+    // setLoading(true);
+    // setTimeout(() => {
     const filtered = progressPlan.filter(
       (p) => p.jour === formatDate(Date.now()),
     );
     setFilteredProgressPlan(filtered);
+    //   setLoading(false);
+    // }, 1500);
   }, [progressPlan]);
 
   const mentionOptions = mentions.map((ment) => ({
@@ -158,7 +201,11 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-gray-700">
                 Total enseignants
               </h3>
-              <p className="text-3xl font-bold mt-2">{enseignants?.length}</p>
+              {loading ? (
+                <Spinner />
+              ) : (
+                <p className="text-3xl font-bold mt-2">{enseignants?.length}</p>
+              )}
             </div>
             <FaChalkboardTeacher className="text-indigo-600 text-4xl" />
           </div>
@@ -170,7 +217,11 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-gray-700">
                 Total salles
               </h3>
-              <p className="text-3xl font-bold mt-2">{salles?.length}</p>
+              {loading ? (
+                <Spinner />
+              ) : (
+                <p className="text-3xl font-bold mt-2">{salles?.length}</p>
+              )}
             </div>
             <FaDoorOpen className="text-green-500 text-4xl" />
           </div>
@@ -182,9 +233,15 @@ const Dashboard = () => {
               <h3 className="text-lg font-semibold text-gray-700">
                 Plannings en cours
               </h3>
-              <p className="text-3xl font-bold mt-2">
-                {progressPlan?.length ?? "N/A"}
-              </p>
+              <div className="text-3xl font-bold mt-2">
+                {loading ? (
+                  <Spinner />
+                ) : (
+                  <p className="text-3xl font-bold mt-2">
+                    {progressPlan?.length ?? "N/A"}
+                  </p>
+                )}
+              </div>
             </div>
             <FaCalendarAlt className="text-pink-500 text-4xl" />
           </div>
@@ -236,7 +293,7 @@ const Dashboard = () => {
                   <tr key={index} className="border-b">
                     <td className="px-4 py-2">{index + 1}</td>
                     <td className="px-4 py-2">
-                      {item.hDeb} - {item.hFin}
+                      {item.hDeb.slice(0, 5)} - {item.hFin.slice(0, 5)}
                     </td>
                     <td className="px-4 py-2">{item.nomMatiere}</td>
                     <td className="px-4 py-2">
@@ -283,16 +340,33 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-5">
+        <div className="bg-white shadow rounded-lg p-5 h-[400px]">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">
             Répartition des planning
           </h2>
           <div className="h-auto text-gray-400">
-            <PieCard
+            {loading ? (
+              <>
+                <div className="flex justify-center items-center h-full">
+                  <Loader />
+                </div>
+              </>
+            ) : hebdomadaire && semestriel && partiel ? (
+              <PieCard
+                hebdomadaire={hebdomadaire}
+                semetriel={semestriel}
+                partiel={partiel}
+              />
+            ) : (
+              <p className="text-center text-gray-500">
+                Aucune donnée disponible.
+              </p>
+            )}
+            {/* <PieCard
               hebdomadaire={hebdomadaire}
               semetriel={semestriel}
               partiel={partiel}
-            />
+            /> */}
           </div>
         </div>
 
@@ -314,7 +388,13 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {infoEnseignants && infoEnseignants.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={3}>
+                      <Loader2 />
+                    </td>
+                  </tr>
+                ) : infoEnseignants && infoEnseignants.length > 0 ? (
                   infoEnseignants.map((ens, index) => {
                     const totalPrevue = ens.matiereInfo.reduce(
                       (sum, mat) => sum + mat.hPrevue,

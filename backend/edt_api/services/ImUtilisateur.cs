@@ -89,10 +89,16 @@ public class ImUtilisateur : IUtilisateur
         return grouped;
     }
 
-    public async Task<ResponsableDto?> getByIdAsync(string id)
+    public async Task<IEnumerable<UserDto>> getByIdAsync(string id, string role)
     {
-        var res = await _db.Responsables.Include(a => a.Authentifications).Where(e=> e.idUt == id).FirstOrDefaultAsync();
-        return res == null ? null : _mapper.Map<ResponsableDto>(res);
+        var res = await _db.Utilisateurs.Include(a => a.Authentifications).Where(e=> e.idUt == id && e.role == role).ToListAsync();
+        if (res == null) return null;
+        return _mapper.Map<IEnumerable<UserDto>>(res);
+    }
+    
+    public Utilisateur? GetUtilisateurById(string id)
+    {
+        return _db.Utilisateurs.FirstOrDefault(u => u.idUt == id);
     }
 
     public async Task<AuthDto> getUserConnected(LoginDto dto)
@@ -115,8 +121,9 @@ public class ImUtilisateur : IUtilisateur
 
         string role = users switch
         {
-            Responsable => "responsable",
-            Enseignant => "enseignant",
+            Responsable => users.role,
+            Enseignant => users.role,
+            Administrateur => users.role,
             _ => "utilisateur"
         };
         
@@ -149,24 +156,24 @@ public class ImUtilisateur : IUtilisateur
         {
             nom = dto.nom,
             prenom = dto.prenom,
-            telephone = "+261345416063",
-            adresse = "fenomanana",
-            genre = "Masculin",
-            role = "Responsable EDT",
+            telephone = dto.phone,
+            adresse = dto.adresse,
+            genre = dto.genre,
+            role = dto.fonction,
         };
         
         _db.Responsables.Add(res);
         await _db.SaveChangesAsync();
 
-        var hasher = new PasswordHasher<Utilisateur>();
-        string hashedPass = hasher.HashPassword(res, dto.mdp);
+        // var hasher = new PasswordHasher<Utilisateur>();
+        // string hashedPass = hasher.HashPassword(res, dto.mdp);
 
         var auth = new Authentification
         {
             email = dto.email,
-            mdp = hashedPass,
+            mdp = "",
             utilisateurId = res.idUt,
-            isActive = true
+            isActive = false
         };
         
         _db.Authentifications.Add(auth);

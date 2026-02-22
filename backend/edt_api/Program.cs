@@ -1,5 +1,6 @@
 using System.Text;
 using edt_api.config;
+using edt_api.seed;
 using edt_api.services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,12 @@ var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var dbUser = Environment.GetEnvironmentVariable("DB_USER");
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+
+// var dbHost = "localhost";
+// var dbPort = 3306;
+// var dbName = "db_edt_p";
+// var dbUser = "orion";
+// var dbPassword = "orion3691";
 
 // var connectionString =
 //     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
@@ -103,7 +110,7 @@ var app = builder.Build();
 //     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 //     db.Database.Migrate();
 // }
-
+await AdminSeeder.SeedAsync(app.Services);
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
