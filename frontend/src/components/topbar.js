@@ -97,21 +97,20 @@ const TopBar = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    try {
-      await api.post("/utilisateur/logout", role, {
-        headers: { "Content-Type": "application/json" },
-      });
-      setIsAuthenticated(false);
-      // navigate("/login");
-    } catch (err) {
-      console.error("Erreur lors de la déconnexion :", err.response.data);
-    } finally {
-      // setIsLoginOut(false);
-    }
-    // setIsLoginOut(true);
-    // setTimeout(async () => {
-
-    // }, 3000);
+    setIsLoginOut(true);
+    setTimeout(async () => {
+      try {
+        await api.post("/utilisateur/logout", role, {
+          headers: { "Content-Type": "application/json" },
+        });
+        setIsAuthenticated(false);
+        // navigate("/login");
+      } catch (err) {
+        console.error("Erreur lors de la déconnexion :", err.response.data);
+      } finally {
+        setIsLoginOut(false);
+      }
+    }, 3000);
   };
 
   const handleMessagesClick = () => {
