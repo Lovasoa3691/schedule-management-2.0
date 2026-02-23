@@ -43,7 +43,7 @@ const LogoutLoadingModal = ({ isOpen }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-lg p-8 w-[90%] max-w-sm text-center">
         <div className="flex justify-center mb-4">
-          <Loader/>
+          <Loader />
         </div>
 
         <h2 className="text-lg font-semibold text-gray-800">
@@ -97,20 +97,21 @@ const TopBar = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    setIsLoginOut(true);
-    setTimeout(async () => {
-      try {
-        await api.post("/utilisateur/logout", role, {
-          headers: { "Content-Type": "application/json" },
-        });
-        setIsAuthenticated(false);
-        navigate("/login");
-      } catch (err) {
-        console.error("Erreur lors de la déconnexion :", err.response.data);
-      } finally {
-        setIsLoginOut(false);
-      }
-    }, 3000);
+    try {
+      await api.post("/utilisateur/logout", role, {
+        headers: { "Content-Type": "application/json" },
+      });
+      setIsAuthenticated(false);
+      // navigate("/login");
+    } catch (err) {
+      console.error("Erreur lors de la déconnexion :", err.response.data);
+    } finally {
+      // setIsLoginOut(false);
+    }
+    // setIsLoginOut(true);
+    // setTimeout(async () => {
+
+    // }, 3000);
   };
 
   const handleMessagesClick = () => {
@@ -148,14 +149,12 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   return (
     <header className="bg-blue-600 shadow top-0 left-0 right-0 z-10 fixed">
-      {
-        isLoginOut && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <LogoutLoadingModal isOpen={isLoginOut} />
-      </div>
-        )
-      }
-      
+      {isLoginOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <LogoutLoadingModal isOpen={isLoginOut} />
+        </div>
+      )}
+
       <div className="px-4 py-4 z-100 flex items-center justify-between">
         <div className="flex items-center space-x-2 px-3 py-1">
           <h1 className="text-3xl font-bold text-gray-100">
@@ -190,7 +189,6 @@ const TopBar = ({ setIsAuthenticated }) => {
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center gap-2 text-gray-800 font-medium focus:outline-none"
             >
-              
               <Avatar user={user} avatar={null} setAvatar={() => {}} />
 
               <div className="hidden sm:flex flex-col items-start leading-tight">

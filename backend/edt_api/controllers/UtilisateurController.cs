@@ -112,7 +112,7 @@ public class UtilisateurController : ControllerBase
         Response.Cookies.Delete("jwt", new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = false,
             SameSite = SameSiteMode.Strict,
             Path = "/"
         });
