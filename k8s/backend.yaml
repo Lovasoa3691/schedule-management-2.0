@@ -22,7 +22,7 @@ spec:
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
-                  name: backend-secrets
+                  name: backend-secrets-k8s
                   key: db-connection
       imagePullSecrets:
         - name: regcred

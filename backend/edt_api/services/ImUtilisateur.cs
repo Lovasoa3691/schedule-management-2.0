@@ -190,6 +190,47 @@ public class ImUtilisateur : IUtilisateur
             auth.email
         );
     }
+
+    public async Task<bool> importEnseignant(List<CreateEnseignantDto> enseignants)
+    {
+        if (enseignants == null || !enseignants.Any())
+            return false;
+
+        var existants = await _db.Utilisateurs
+            .Select(e => new { e.nom, e.prenom, e.telephone })
+            .ToListAsync();
+
+        var nouveauxEnseignants = new List<Enseignant>();
+
+        foreach (var ens in enseignants)
+        {
+            bool existe = existants.Any(e =>
+                e.nom == ens.nom &&
+                e.prenom == ens.prenom &&
+                e.telephone == ens.phone
+            );
+
+            if (existe)
+                continue; 
+
+            nouveauxEnseignants.Add(new Enseignant
+            {
+                nom = ens.nom,
+                prenom = ens.prenom,
+                telephone = "+261"+ens.phone,
+                adresse = ens.adresse,
+                genre = ens.genre,
+                grade = ens.grade
+            });
+        }
+
+        if (nouveauxEnseignants.Any())
+        {
+            _db.Enseignants.AddRange(nouveauxEnseignants);
+            await _db.SaveChangesAsync();
+        }
+        return true;
+    }
     
     public async Task<EnseignantDto> addAsync(CreateEnseignantDto dto)
     {

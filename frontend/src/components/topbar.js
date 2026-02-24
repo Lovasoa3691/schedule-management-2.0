@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../hooks/api";
 import { FiCamera } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
-import { Loader } from "./spin/Spinner";
+import { Loader, Loader2, Spinner } from "./spin/Spinner";
 
 const Avatar = ({ user, avatar, setAvatar }) => {
   const handleUpload = (e) => {
@@ -71,7 +71,7 @@ const TopBar = ({ setIsAuthenticated }) => {
     api
       .get("/utilisateur/profile")
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setId(res.data.userId);
         setRole(res.data.userRole);
       })
@@ -80,9 +80,9 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   const getUser = (key) => {
     api
-      .get(`/utilisateur/${key}/${role}`)
+      .get(`/utilisateur/info?id=${key}&role=${role}`)
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setUser(res.data);
       })
       .catch((err) => console.error("Erreur de recuperation: ", err));
@@ -142,9 +142,9 @@ const TopBar = ({ setIsAuthenticated }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  if (!user) {
-    return <div className="text-center">Chargement...</div>;
-  }
+  // if (!user) {
+  //   return <Loader className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />;
+  // }
 
   return (
     <header className="bg-blue-600 shadow top-0 left-0 right-0 z-10 fixed">
@@ -162,7 +162,7 @@ const TopBar = ({ setIsAuthenticated }) => {
         </div>
 
         <div className="flex items-center space-x-6 relative">
-          <div
+          {/* <div
             className="relative cursor-pointer"
             onClick={handleMessagesClick}
           >
@@ -170,7 +170,7 @@ const TopBar = ({ setIsAuthenticated }) => {
             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
               4
             </span>
-          </div>
+          </div> */}
           <div
             className="relative cursor-pointer"
             onClick={handleNotificationsClick}
@@ -190,14 +190,18 @@ const TopBar = ({ setIsAuthenticated }) => {
             >
               <Avatar user={user} avatar={null} setAvatar={() => {}} />
 
-              <div className="hidden sm:flex flex-col items-start leading-tight">
-                <span className="text-md text-white">
-                  {user[0]?.email ?? "N/A"}
-                </span>
-                <span className="text-sm text-white capitalize">
-                  {user[0]?.role ?? "utilisateur"}
-                </span>
-              </div>
+              {user ? (
+                <div className="hidden sm:flex flex-col items-start leading-tight">
+                  <span className="text-md text-white">
+                    {user[0]?.email ?? "N/A"}
+                  </span>
+                  <span className="text-sm text-white capitalize">
+                    {user[0]?.role ?? "utilisateur"}
+                  </span>
+                </div>
+              ) : (
+                <Spinner className="w-5 h-5 text-gray-300 animate-spin" />
+              )}
 
               <FiChevronDown className="w-4 h-4 text-white" />
             </button>

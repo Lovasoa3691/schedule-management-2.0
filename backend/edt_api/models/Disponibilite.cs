@@ -12,7 +12,7 @@ public class Disponibilite
     public TimeOnly hDeb{get; set;}
     public TimeOnly hFin{get; set;}
     [Column(TypeName = "varchar(15)")]
-    public string statusDispo { get; set; }
+    public string semaine { get; set; }
     public string enseignantId {get; set;}
     public Enseignant enseignant{get; set;}
 }

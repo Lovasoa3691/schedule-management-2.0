@@ -4,6 +4,7 @@ import { FiEdit2 } from "react-icons/fi";
 
 import { FiCamera } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
+import { Loader, Spinner } from "../spin/Spinner";
 
 const Avatar = ({ user, avatar, setAvatar }) => {
   const handleUpload = (e) => {
@@ -219,7 +220,7 @@ const Profil = () => {
   useEffect(() => {
     if (id && role) {
       api
-        .get(`/utilisateur/${id}/${role}`)
+        .get(`/utilisateur/info?id=${id}&role=${role}`)
         .then((res) => setUser(res.data[0]))
         .catch((err) => console.error(err));
     }
@@ -247,8 +248,17 @@ const Profil = () => {
     }
   };
 
+  // if (!user) {
+  //   return <div className="text-center mt-10">Chargement...</div>;
+  // }
+
   if (!user) {
-    return <div className="text-center mt-10">Chargement...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader size="md" color="blue" />
+        {/* <div className="text-gray-500 text-lg">Chargement du profil...</div> */}
+      </div>
+    );
   }
 
   return (

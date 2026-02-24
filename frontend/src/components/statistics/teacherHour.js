@@ -2,13 +2,18 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import SimpleBarChart from "../chart/bar";
 import api from "../../hooks/api";
+import { set } from "nprogress";
+import { Loader } from "../spin/Spinner";
 
 const TeacherHour = () => {
   const [enseignants, setEnseignants] = useState([]);
   const [infoEnseignants, setInfoEnseignants] = useState([]);
   const [filter, setFilter] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const loadAll = () => {
+    setLoading(true);
+
     api
       .get("utilisateur/teacher/info/all")
       .then((res) => {
@@ -16,14 +21,16 @@ const TeacherHour = () => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
       })
-      .catch((err) => console.error("Erreur de chargement:", err));
+      .catch((err) => console.error("Erreur de chargement:", err))
+      .finally(() => setLoading(false));
 
     api
       .get("utilisateur/teacher")
       .then((res) => {
         setEnseignants(res.data);
       })
-      .catch((err) => console.error("Erreur de chargement:", err));
+      .catch((err) => console.error("Erreur de chargement:", err))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -76,22 +83,31 @@ const TeacherHour = () => {
           />
         </div>
       </div>
-
-      <div className="w-full p-6 bg-white rounded-lg shadow-md">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl font-bold">
-            {filter[0]?.nom.charAt(0) ?? "N/A"} {filter[0]?.prenom.charAt(0)}
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">
-              {filter[0]?.nom ?? "N/A"} {filter[0]?.prenom ?? "N/A"}
-            </h3>
-            <p className="text-sm text-gray-500">{filter[0]?.grade ?? "N/A"}</p>
-            <p className="text-sm text-gray-400">{filter[0]?.email ?? "N/A"}</p>
-          </div>
+      {loading ? (
+        <div className="flex items-center justify-center mt-10">
+          <Loader size="lg" color="blue" />
         </div>
-        {filter.length > 0 && <SimpleBarChart data={filter} />}
-      </div>
+      ) : (
+        <div className="w-full p-6 bg-white rounded-lg shadow-md">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl font-bold">
+              {filter[0]?.nom.charAt(0) ?? "N/A"} {filter[0]?.prenom.charAt(0)}
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {filter[0]?.nom ?? "N/A"} {filter[0]?.prenom ?? "N/A"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {filter[0]?.grade ?? "N/A"}
+              </p>
+              <p className="text-sm text-gray-400">
+                {filter[0]?.email ?? "N/A"}
+              </p>
+            </div>
+          </div>
+          {filter.length > 0 && <SimpleBarChart data={filter} />}
+        </div>
+      )}
     </div>
   );
 };

@@ -14,6 +14,7 @@ public interface IUtilisateur
     Task<AuthDto> getUserConnected(LoginDto dto);
     Task<ResponsableDto> createAsync(CreateResponsableDto dto);
     Task<EnseignantDto> addAsync(CreateEnseignantDto dto);
+    Task<bool> importEnseignant(List<CreateEnseignantDto> enseignants);
     Task<EnseignantDto> registerAsync(RegisterEnseignantDto dto);
     Task<bool> updateAsync(string id, UpdateResponsableDto dto);
     Task<bool> updateTeacherAsync(string id, UpdateEnseignantDto dto);

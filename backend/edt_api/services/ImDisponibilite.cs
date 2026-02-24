@@ -18,44 +18,33 @@ public class ImDisponibilite : IDisponibilite
         _mapper = mapper;
     }
     
-    public async Task<IEnumerable<DispoDto>> GetAllAsync(string id)
+    public async Task<IEnumerable<DispoDto>> GetAllAsync(string id, string week)
     {
         var result = new List<DispoDto>();
         if (id == "all")
         {
+            List<Enseignant> ens = new List<Enseignant>();
+            if (week == null)
+            {
+                var res = await _db.Enseignants
+                    .Include(e => e.disponibilites)
+                    .ToListAsync();
+                ens.AddRange(res);
+            }
+            else
+            {
+                var res = await _db.Enseignants
+                    .Include(e => e.disponibilites
+                        .Where(d => d.semaine == week))
+                    .ToListAsync();
+                ens.AddRange(res);
+            }
             // var enseignants = await _db.Enseignants
-            //     .Include(e => e.disponibilites)
+            //     .Include(e => e.disponibilites
+            //         .Where(d => d.semaine == week))
             //     .ToListAsync();
-            //
-            // foreach (var enseignant in enseignants)
-            // {
-            //     var disposActives = enseignant.disponibilites?
-            //         .Where(d => d.statusDispo == "ACTIVE")
-            //         .ToList();
-            //
-            //     if (disposActives != null && disposActives.Any())
-            //     {
-            //         foreach (var dispo in disposActives)
-            //         {
-            //             result.Add(new DispoDto(
-            //                 idDispo: dispo.numDispo,
-            //                 dateDispo: dispo.dateDispo,
-            //                 hDeb: dispo.hDeb,
-            //                 hFin: dispo.hFin,
-            //                 nomEns: enseignant.nom,
-            //                 prenomEns: enseignant.prenom,
-            //                 grade: enseignant.grade
-            //             ));
-            //         }
-            //     }
-            // }
             
-            var enseignants = await _db.Enseignants
-                .Include(e => e.disponibilites
-                    .Where(d => d.statusDispo == "ACTIVE"))
-                .ToListAsync();
-
-            foreach (var enseignant in enseignants)
+            foreach (var enseignant in ens)
             {
                 var disposTriees = enseignant.disponibilites?
                     .OrderBy(d => d.dateDispo)
@@ -147,7 +136,7 @@ public class ImDisponibilite : IDisponibilite
             hDeb = dto.hDeb,
             hFin = dto.hFin,
             enseignantId = dto.codeEns,
-            statusDispo = "ACTIVE"
+            semaine = dto.semaine
         };
         _db.Disponibilites.Add(data);
         await _db.SaveChangesAsync();

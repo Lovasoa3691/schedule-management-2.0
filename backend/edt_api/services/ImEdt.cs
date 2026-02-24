@@ -194,6 +194,35 @@ public class ImEdt : IEdt
         return true;
     }
 
+    public async Task<bool> CancelAsync(string id)
+    {
+        var res = await _db.Edts
+            .Include(e => e.enseignant)
+            .FirstOrDefaultAsync(e => e.numEd == id);
+
+        if (res == null)
+            return false;
+
+        // var dispo = await  _db.Disponibilites.Include(e => e.enseignant)
+        //     .Where(a => a.enseignantId == res.enseignantId && res.hDeb >= a.hDeb && res.hFin <= a.hFin && res.jour == a.dateDispo)
+        //     .ToListAsync();
+        // if (dispo.Count == 0) return false;
+        
+        var acts = await _db.Activites.FirstOrDefaultAsync(a =>
+            a.enseignantId == res.enseignantId &&
+            a.created_at == res.created_at);
+        
+        res.disponibilite = "Annulé";
+        
+        if (acts != null)
+        {
+            acts.statusActivite = "Inaccompli";
+            acts.updated_at = DateTime.Now;
+        }
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
 
     public async Task<bool> UpdateAsync(string id, UpdateEdtDto dto)
     {

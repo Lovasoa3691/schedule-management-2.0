@@ -39,6 +39,7 @@ interface Dispo {
   hdeb: string;
   hfin: string;
   codeEns: string;
+  semaine: string;
 }
 
 export default function DisponibilityCalendar() {
@@ -75,7 +76,9 @@ export default function DisponibilityCalendar() {
     setLoading(true);
 
     api
-      .get(`/disponibilite/${data.userId}`)
+      .get(
+        `/disponibilite/${data.userId}?week=${mode === "week" ? date.toISOString() : undefined}`,
+      )
       .then((rep) => {
         if (!rep.data || rep.data.length === 0) {
           setDispoData([]);
@@ -120,6 +123,18 @@ export default function DisponibilityCalendar() {
     }
   }, [modalVisible]);
 
+  const getCurrentWeek = (date: Date) => {
+    const day = date.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + diffToMonday);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return { monday, sunday };
+  };
+
   const formatTime = (date: Date): string =>
     date.toLocaleTimeString(["fr-FR"], {
       hour: "2-digit",
@@ -157,18 +172,26 @@ export default function DisponibilityCalendar() {
       Alert.alert("Veuillez remplir les champs s'il vous plait!");
     }
 
+    const today = getCurrentWeek(new Date(dateDispo));
+
     const newDispo: Omit<Dispo, "id"> = {
       dateDispo: dateDispo,
       hdeb: heureDebut,
       hfin: heureFin,
       codeEns: id,
+      semaine: `${today.monday.getDate()}-${today.sunday.getDate()}`,
     };
 
     api
       .post("/disponibilite", newDispo)
       .then((rep) => {
-        Alert.alert("Programme ajoute avec sucess");
+        Alert.alert("Disponibilité ajoutée avec succès");
         loadDispo();
+        newDispo.dateDispo = "";
+        newDispo.hdeb = "";
+        newDispo.hfin = "";
+        newDispo.semaine = "";
+        newDispo.codeEns = id;
       })
       .catch((err) => {
         console.error("Erreur: ", err.response.data);

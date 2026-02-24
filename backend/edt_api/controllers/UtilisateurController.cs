@@ -36,8 +36,8 @@ public class UtilisateurController : ControllerBase
     public async Task<ActionResult<IEnumerable<EnseignantActiviteDto>>> GetSpecificTeacher()
         => Ok(await _service.getSpecificTeacher());
 
-    [HttpGet("{id:guid}/{role}")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetById(string id, string role)
+    [HttpGet("info")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetById([FromQuery] string id, [FromQuery] string role)
     {
         var res = await _service.getByIdAsync(id,  role);
         return res == null ? NotFound() : Ok(res);
@@ -125,6 +125,13 @@ public class UtilisateurController : ControllerBase
     {
         var created = await _service.addAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
+    }
+    
+    [HttpPost("teacher/import")]
+    public async Task<IActionResult> ImportTeacher([FromBody] List<CreateEnseignantDto> dto)
+    {
+        var created = await _service.importEnseignant(dto);
+        return created ? Ok() : BadRequest();
     }
     
     [HttpPut("{id}")]

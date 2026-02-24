@@ -88,6 +88,7 @@ const Planning = () => {
   const [filteredMat, setFilteredMat] = useState([]);
   const [disponibilite, setDisponibilite] = useState([]);
   const [filteredDispo, setFilteredDispo] = useState([]);
+  const [userId, setUserId] = useState("");
   const [formData, setFormData] = useState({
     numEd: "",
     jour: "",
@@ -95,7 +96,7 @@ const Planning = () => {
     hFin: "",
     dispo: "En cours",
     type: "",
-    responsableId: localStorage.getItem("user"),
+    responsableId: userId,
     enseignantId: "",
     mentionId: "",
     niveauId: "",
@@ -104,6 +105,15 @@ const Planning = () => {
     semaine: "",
     anneeId: "1",
   });
+
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((res) => {
+        setUserId(res.data.userId);
+      })
+      .catch((err) => console.error("Erreur de récupération du profil:", err));
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("");
@@ -140,6 +150,24 @@ const Planning = () => {
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const getCurrentWeek = (date) => {
+    const day = date.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + diffToMonday);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    return { monday, sunday };
+  };
+
+  const today = new Date(selectedDate);
+  const { monday, sunday } = getCurrentWeek(today);
+
+  const start = monday.toISOString().split("T")[0];
+  const end = sunday.toISOString().split("T")[0];
 
   const loadAll = () => {
     api
@@ -182,11 +210,19 @@ const Planning = () => {
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
+    const today = getCurrentWeek(new Date());
+    console.log(
+      "Api call for disponibilite with week:",
+      `${today.monday.getDate()}-${today.sunday.getDate()}`,
+    );
+
     api
-      .get("/disponibilite/all")
+      .get(
+        `/disponibilite/all?week=${today.monday.getDate()}-${today.sunday.getDate()}`,
+      )
       .then((res) => {
         setDisponibilite(res.data);
-        // console.log("Disponibilités chargées:", res.data);
+        console.log("Disponibilités chargées:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
   };
@@ -255,7 +291,7 @@ const Planning = () => {
       hFin: "",
       dispo: "En cours",
       type: "",
-      responsableId: localStorage.getItem("user"),
+      responsableId: userId,
       enseignantId: "",
       mentionId: "",
       niveauId: "",
@@ -267,24 +303,6 @@ const Planning = () => {
     setShowForm(true);
   };
 
-  const getCurrentWeek = (date) => {
-    const day = date.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    const monday = new Date(date);
-    monday.setDate(date.getDate() + diffToMonday);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    return { monday, sunday };
-  };
-
-  const today = new Date(selectedDate);
-  const { monday, sunday } = getCurrentWeek(today);
-
-  const start = monday.toISOString().split("T")[0];
-  const end = sunday.toISOString().split("T")[0];
-
   useEffect(() => {
     if (selectedDate !== null) {
       const date = new Date(selectedDate);
@@ -292,9 +310,9 @@ const Planning = () => {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
 
-      console.log(
-        `Semaine: ${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}`,
-      );
+      // console.log(
+      //   `Semaine: ${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}`,
+      // );
 
       setFormData({
         ...formData,

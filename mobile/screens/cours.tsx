@@ -36,6 +36,7 @@ type coursesList = {
   status: string;
   matiere: string;
   completed: boolean;
+  canceled: boolean;
   statusEns: boolean;
 };
 
@@ -103,6 +104,7 @@ export default function courses(): React.JSX.Element {
             salle: c.nomSalle,
             localisation: "",
             completed: c.dispo === "Terminé" ? true : false,
+            canceled: c.dispo === "Annulé" ? true : false,
             statusEns: c.status === "Accompli" ? true : false,
           }));
           setCourses(cours);
@@ -172,16 +174,28 @@ export default function courses(): React.JSX.Element {
     );
   };
 
-  const getStatus = (
-    cours: coursesList,
-  ): "À venir" | "En cours" | "Terminé" => {
+  const getStatus = (cours: coursesList): "Annulé" | "En cours" | "Terminé" => {
     if (cours.completed) return "Terminé";
-
-    const today = new Date();
-    const target = new Date(cours.jour);
-    if (target > today) return "À venir";
-
+    if (cours.canceled) return "Annulé";
+    // const today = new Date();
+    // const target = new Date(cours.jour);
+    // if (target > today) return "À venir";
     return "En cours";
+  };
+
+  const canceledCours = (id: string) => {
+    api
+      .put(`/edt/cancel/${id}`)
+      .then(() => {
+        loadCourses();
+      })
+      .catch((err) => {
+        console.error("Erreur lors de l'annulation du cours:", err);
+        Alert.alert(
+          "Erreur",
+          "Une erreur est survenue lors de l'annulation du cours. Veuillez réessayer.",
+        );
+      });
   };
 
   const cancelCours = (id: string) => {
@@ -189,8 +203,7 @@ export default function courses(): React.JSX.Element {
       { text: "Non", style: "cancel" },
       {
         text: "Oui",
-        onPress: () =>
-          setCourses((prev) => prev.filter((cours) => cours.id !== id)),
+        onPress: () => canceledCours(id),
         style: "destructive",
       },
     ]);
@@ -270,6 +283,7 @@ export default function courses(): React.JSX.Element {
                 style={[
                   styles.coursItem,
                   item.completed && { backgroundColor: "#e6f4ea" },
+                  item.canceled && { backgroundColor: "#fce4e4" },
                 ]}
               >
                 <View style={styles.coursHeader}>
@@ -292,43 +306,45 @@ export default function courses(): React.JSX.Element {
                       color="#ff9800"
                     />
                   ) : (
-                    <Ionicons name="time-outline" size={16} color="#2196f3" />
+                    <Ionicons name="close-circle-outline" size={16} color="#2196f3" />
                   )}{" "}
                   {status}
                 </Text>
 
                 <View style={{ flexDirection: "row", marginTop: 10 }}>
-                  {!item.completed && (
-                    <TouchableOpacity
-                      onPress={() => done(item.id)}
-                      style={styles.completeButton}
-                      disabled={loadingDone}
-                    >
-                      {loadingDone ? (
-                        <ActivityIndicator size="small" color="#fff" />
-                      ) : (
-                        <>
-                          <Ionicons
-                            name="checkmark-done"
-                            size={18}
-                            color="#fff"
-                          />
-                          <Text style={styles.completeText}>
-                            Marquer comme fait
-                          </Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
-                  )}
+                  {!item.completed ||
+                    (!item.canceled && (
+                      <TouchableOpacity
+                        onPress={() => done(item.id)}
+                        style={styles.completeButton}
+                        disabled={loadingDone}
+                      >
+                        {loadingDone ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <>
+                            <Ionicons
+                              name="checkmark-done"
+                              size={18}
+                              color="#fff"
+                            />
+                            <Text style={styles.completeText}>
+                              Marquer comme fait
+                            </Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ))}
 
-                  {!item.completed && (
-                    <TouchableOpacity
-                      style={styles.cancelButton}
-                      onPress={() => cancelCours(item.id)}
-                    >
-                      <Text style={styles.cancelText}>Annuler</Text>
-                    </TouchableOpacity>
-                  )}
+                  {!item.completed ||
+                    (!item.canceled && (
+                      <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => cancelCours(item.id)}
+                      >
+                        <Text style={styles.cancelText}>Annuler</Text>
+                      </TouchableOpacity>
+                    ))}
                 </View>
               </View>
             );

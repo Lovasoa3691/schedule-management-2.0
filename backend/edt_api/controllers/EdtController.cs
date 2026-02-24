@@ -54,6 +54,13 @@ public class EdtController: ControllerBase
         var ok = await _service.UpdateAsync(id, dto);
         return ok ? NoContent() : NotFound();
     }
+    
+    [HttpPut("cancel/{id}")]
+    public async Task<IActionResult> Cancel(string id)
+    {
+        var ok = await _service.CancelAsync(id);
+        return ok ? NoContent() : NotFound();
+    }
 
     [HttpPut("status/{id}/done")]
     public async Task<IActionResult> UpdateStatus(string id)

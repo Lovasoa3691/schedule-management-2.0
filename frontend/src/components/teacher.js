@@ -272,24 +272,15 @@ const Teacher = () => {
   };
 
   const downloadCsvTemplate = () => {
-    const headers = [
-      "NOM",
-      "PRENOM",
-      "GENRE",
-      "ADRESSE",
-      "TELEPHONE",
-      "GRADE",
-      "EMAIL",
-    ];
+    const headers = ["nom", "prenom", "genre", "adresse", "telephone", "grade"];
 
     const exampleRow = [
       "RAKOTOARIJAONA",
       "Mahafaly Germain",
       "Masculin",
       "Tanambao",
-      "+261385968912",
+      "0345896612",
       "Professeur Titulaire",
-      "mahafaly.rakoto@gmail.com",
     ];
 
     const csvContent = [headers.join(","), exampleRow.join(",")].join("\n");
@@ -316,6 +307,7 @@ const Teacher = () => {
       encoding: "UTF-8",
       complete: (results) => {
         const data = results.data;
+        console.log("Données brutes CSV :", data);
 
         if (data.length === 0) {
           setImporting(false);
@@ -323,26 +315,51 @@ const Teacher = () => {
           return;
         }
 
-        console.log("Données CSV :", data);
-
-        // Exemple simulation de progression
         let current = 0;
-        const interval = setInterval(() => {
-          current += 5;
-          setProgress(current);
-          if (current >= 100) {
-            clearInterval(interval);
-            setImporting(false);
-            Swal.fire({
-              title: "Importation terminée !",
-              text: "Les données ont été importées avec succès.",
-              icon: "success",
-            });
+        setImporting(true);
+        setProgress(0);
 
-            // Ici tu peux envoyer les données au serveur
-            // axios.post("/enseignants/import", data)
+        const interval = setInterval(() => {
+          if (current < 70) {
+            current += 5;
+            setProgress(current);
           }
         }, 100);
+
+        api
+          .post("/utilisateur/teacher/import", data)
+          .then(() => {
+            clearInterval(interval);
+
+            const finishInterval = setInterval(() => {
+              if (current < 100) {
+                current += 5;
+                setProgress(current);
+              } else {
+                clearInterval(finishInterval);
+                setImporting(false);
+                loadData();
+
+                Swal.fire({
+                  title: "Importation terminée !",
+                  text: "Les données ont été importées avec succès.",
+                  icon: "success",
+                });
+              }
+            }, 100);
+          })
+          .catch((err) => {
+            clearInterval(interval);
+            setImporting(false);
+
+            console.error("Erreur d'importation:", err?.response?.data);
+
+            Swal.fire({
+              title: "Erreur d'importation",
+              text: "Une erreur est survenue lors de l'importation des données. Veuillez vérifier le format du fichier.",
+              icon: "error",
+            });
+          });
       },
       error: (err) => {
         console.error("Erreur CSV :", err);
@@ -580,7 +597,7 @@ const Teacher = () => {
                       <td className="px-4 py-3">{ens.prenom}</td>
                       <td className="px-4 py-3">{ens.genre}</td>
                       <td className="px-4 py-3">{ens.adresse}</td>
-                      <td className="px-4 py-3">{ens.email}</td>
+                      <td className="px-4 py-3">{ens.email ?? "N/A"}</td>
                       <td className="px-4 py-3">{ens.phone}</td>
                       <td className="px-4 py-3">{ens.grade}</td>
                       <td className="px-4 py-3">

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/calendar.png";
 import Office from "../../assets/espace-de-travail.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileWarning, XCircle } from "lucide-react";
 import api from "../../hooks/api";
 
@@ -16,6 +16,10 @@ const Login = ({ setIsAuthentificated }) => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Login - SchedConnect";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

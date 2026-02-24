@@ -16,8 +16,8 @@ public class DispoController: ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll(string id)
-        => Ok(await _service.GetAllAsync(id));
+    public async Task<ActionResult<IEnumerable<DispoDto>>> GetAll(string id, [FromQuery] string week)
+        => Ok(await _service.GetAllAsync(id, week));
 
     [HttpGet("filter/{id}")]
     public async Task<ActionResult<DispoDto>> GetById(string id)

@@ -10,21 +10,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
-var dbName = Environment.GetEnvironmentVariable("DB_NAME");
-var dbUser = Environment.GetEnvironmentVariable("DB_USER");
-var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+// var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+// var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
+// var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+// var dbUser = Environment.GetEnvironmentVariable("DB_USER");
+// var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-// var dbHost = "localhost";
-// var dbPort = 3306;
+// var dbHost = "mysql-fa8f43c-hghjbjjkhjhuifhjg.g.aivencloud.com";
+// var dbPort = 11328;
 // var dbName = "db_edt_p";
-// var dbUser = "orion";
-// var dbPassword = "orion3691";
-
+// var dbUser = "avnadmin";
+// var dbPassword = "AVNS_kN0s7eSogKTNZ_uQEl8";
+//
 // var connectionString =
 //     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
-
+//
 // builder.Services.AddDbContext<AppDbContext>(options =>
 //     options.UseMySql(
 //         connectionString,
@@ -39,6 +39,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.WithOrigins("http://192.168.49.2:32654","http://192.168.49.2:30735/")
+        // policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
