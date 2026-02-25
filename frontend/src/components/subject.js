@@ -7,7 +7,8 @@ import AlertInfo from "./notification/alert";
 import api from "../hooks/api";
 import { set } from "date-fns";
 import { tr } from "date-fns/locale";
-import {Loader} from "./spin/Spinner";
+import { Loader } from "./spin/Spinner";
+import { can } from "../hooks/permission";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
@@ -192,6 +193,19 @@ const Subject = () => {
       .includes(searchfield.toLowerCase()),
   );
 
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((rep) => {
+        setUserRole(rep.data.userRole);
+      })
+      .catch(() => {
+        setUserRole(null);
+      });
+  }, []);
+
   return (
     <div className="subject-container h-screen">
       {showAlert && alert && (
@@ -207,7 +221,7 @@ const Subject = () => {
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
-          Gestion des matieres
+          {userRole === "Admin" ? "Gestion des matieres" : "Liste des matieres"}
         </h2>
 
         <div className="w-full max-w-md">
@@ -236,15 +250,17 @@ const Subject = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
-        >
-          <FiPlus className="w-5 h-5 text-white" />
-          <span>Nouveau</span>
-        </button>
-      </div>
+      {can(userRole === "Admin" ? "admin" : "secretary", "add") && (
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
+          >
+            <FiPlus className="w-5 h-5 text-white" />
+            <span>Nouveau</span>
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <SubjectForm
@@ -292,10 +308,14 @@ const Subject = () => {
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     CLASSE
                   </th>
-
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    ACTIONS
-                  </th>
+                  {can(
+                    userRole === "Admin" ? "admin" : "secretary",
+                    "edit",
+                  ) && (
+                    <th className="px-4 py-3 sticky top-0 bg-indigo-100">
+                      ACTIONS
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -318,20 +338,26 @@ const Subject = () => {
                       <td className="px-4 py-3">
                         {mat.mention} {mat.niveau.join(" / ")}
                       </td>
-                      <td className="px-4 py-3">
-                        <button
-                          className="text-blue-600 text-sm"
-                          onClick={() => openModalEdit(mat)}
-                        >
-                          <FaEdit className="inline-block w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => askDelete(mat.id)}
-                          className="text-red-600 text-sm ml-4"
-                        >
-                          <FaTrashAlt className="inline-block w-5 h-5" />
-                        </button>
-                      </td>
+
+                      {can(
+                        userRole === "Admin" ? "admin" : "secretary",
+                        "edit",
+                      ) && (
+                        <td className="px-4 py-3">
+                          <button
+                            className="text-blue-600 text-sm"
+                            onClick={() => openModalEdit(mat)}
+                          >
+                            <FaEdit className="inline-block w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => askDelete(mat.id)}
+                            className="text-red-600 text-sm ml-4"
+                          >
+                            <FaTrashAlt className="inline-block w-5 h-5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 ) : (

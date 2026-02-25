@@ -6,6 +6,7 @@ namespace edt_api.services;
 public interface IUtilisateur
 {
     Task<IEnumerable<ResponsableDto>> getAllAsync();
+    Task<IEnumerable<UserDto>> getAllUserAsync();
     Task<IEnumerable<EnseignantDto>> getAllTeacherAsync();
     Task<IEnumerable<EnseignantActiviteDto>> getSpecificTeacher();
     Task<IEnumerable<EnseignantInfoDto>> getInfoTeacherAsync(string id);

@@ -296,9 +296,7 @@ const Dashboard = () => {
                       {item.hDeb.slice(0, 5)} - {item.hFin.slice(0, 5)}
                     </td>
                     <td className="px-4 py-2">{item.nomMatiere}</td>
-                    <td className="px-4 py-2">
-                      {item.nomEns} {item.prenomEns}
-                    </td>
+                    <td className="px-4 py-2">{item.prenomEns}</td>
                     <td className="px-4 py-2">{item.nomSalle}</td>
                   </tr>
                 ))

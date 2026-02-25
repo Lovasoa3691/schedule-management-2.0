@@ -24,6 +24,10 @@ public class UtilisateurController : ControllerBase
     public async Task<ActionResult<IEnumerable<ResponsableDto>>> GetAll()
         => Ok(await _service.getAllAsync());
 
+    [HttpGet("all")]
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUser()
+        => Ok(await _service.getAllUserAsync());
+
     [HttpGet("teacher/info/{id}")]
     public async Task<ActionResult<IEnumerable<ResponsableDto>>> GetInfo(string id)
         => Ok(await _service.getInfoTeacherAsync(id));

@@ -6,6 +6,7 @@ import AlertInfo from "./notification/alert";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
 import { Loader } from "./spin/Spinner";
+import { can } from "../hooks/permission";
 
 const ClassRoom = () => {
   const [salles, setSalles] = useState([]);
@@ -152,6 +153,19 @@ const ClassRoom = () => {
       .includes(searchfield.toLowerCase()),
   );
 
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((rep) => {
+        setUserRole(rep.data.userRole);
+      })
+      .catch(() => {
+        setUserRole(null);
+      });
+  }, []);
+
   return (
     <div className="classroom-container h-screen">
       {showAlert && alert && (
@@ -167,7 +181,7 @@ const ClassRoom = () => {
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
-          Gestion des salles
+          {userRole === "Admin" ? "Gestion des salles" : "Liste des salles"}
         </h2>
 
         <div className="w-full max-w-md">
@@ -196,15 +210,17 @@ const ClassRoom = () => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
-        >
-          <FiPlus className="w-5 h-5 text-white" />
-          <span>Nouveau</span>
-        </button>
-      </div>
+      {can(userRole === "Admin" ? "admin" : "secretary", "add") && (
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
+          >
+            <FiPlus className="w-5 h-5 text-white" />
+            <span>Nouveau</span>
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <ClassForm
@@ -242,9 +258,14 @@ const ClassRoom = () => {
                     LOCALISATION
                   </th>
 
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    ACTIONS
-                  </th>
+                  {can(
+                    userRole === "Admin" ? "admin" : "secretary",
+                    "edit",
+                  ) && (
+                    <th className="px-4 py-3 sticky top-0 bg-indigo-100">
+                      ACTIONS
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -263,20 +284,25 @@ const ClassRoom = () => {
                       <td className="px-4 py-3">{sl.capacite}</td>
                       <td className="px-4 py-3">{sl.localisation}</td>
 
-                      <td className="px-4 py-3">
-                        <button
-                          className="text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition"
-                          onClick={() => openModalEdit(sl)}
-                        >
-                          <FaEdit className="inline-block w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => askDelete(sl.idsalle)}
-                          className="text-red-600 ml-4 px-2 py-1 rounded hover:bg-red-100 transition"
-                        >
-                          <FaTrashAlt className="inline-block w-5 h-5" />
-                        </button>
-                      </td>
+                      {can(
+                        userRole === "Admin" ? "admin" : "secretary",
+                        "edit",
+                      ) && (
+                        <td className="px-4 py-3">
+                          <button
+                            className="text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition"
+                            onClick={() => openModalEdit(sl)}
+                          >
+                            <FaEdit className="inline-block w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => askDelete(sl.idsalle)}
+                            className="text-red-600 ml-4 px-2 py-1 rounded hover:bg-red-100 transition"
+                          >
+                            <FaTrashAlt className="inline-block w-5 h-5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 ) : (

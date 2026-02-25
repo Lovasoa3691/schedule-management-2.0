@@ -28,15 +28,18 @@ import Sector from "./components/settings/sector";
 import AssistantFloatingForm from "./components/forms/assistant";
 import api from "./hooks/api";
 import ForgotPassword from "./components/auth/forgetPassword";
+import Users from "./components/users";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     api
       .get("/utilisateur/profile")
       .then((rep) => {
+        setUserRole(rep.data.userRole);
         setIsAuthenticated(true);
       })
       .catch(() => {
@@ -75,8 +78,9 @@ function App() {
                   />
                   <Route path="/statistique/semaine" element={<Week />} />
                   <Route path="/parametre/profile" element={<Profil />} />
+                  <Route path="/profile" element={<Profil />} />
                   <Route path="/parametre/curcus" element={<Sector />} />
-                  <Route path="/users" element={<Teacher />} />
+                  <Route path="/users" element={<Users />} />
                 </Routes>
               </div>
               {/* <AssistantFloatingForm /> */}

@@ -17,6 +17,7 @@ import AlertInfo from "./notification/alert";
 import ErrorDialog from "./notification/error";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
+import { can } from "../hooks/permission";
 const locales = {
   fr: fr,
 };
@@ -211,18 +212,22 @@ const Planning = () => {
       .catch((err) => console.error("Erreur de chargement:", err));
 
     const today = getCurrentWeek(new Date());
-    console.log(
-      "Api call for disponibilite with week:",
-      `${today.monday.getDate()}-${today.sunday.getDate()}`,
-    );
+    // console.log(
+    //   "Api call for disponibilite with week:",
+    //   `${today.monday.getDate()}-${today.sunday.getDate()}`,
+    // );
 
     api
       .get(
         `/disponibilite/all?week=${today.monday.getDate()}-${today.sunday.getDate()}`,
       )
       .then((res) => {
-        setDisponibilite(res.data);
+        if (res.data.length === 0) {
+          console.log("Aucune disponibilité trouvée pour la semaine actuelle.");
+          return;
+        }
         console.log("Disponibilités chargées:", res.data);
+        setDisponibilite(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
   };
@@ -490,16 +495,31 @@ const Planning = () => {
         ens.id.toString().includes(value.toString()),
       );
 
+      console.log("Enseignant sélectionné:", ens);
+      console.log("Matieres disponibles pour cet enseignant:", matieres);
+
       setFilteredEns(ens);
 
       if (ens.length > 0) {
-        const mat = matieres.filter((mat) =>
-          mat.enseignants[0]
-            .toLowerCase()
-            .includes(
-              ens[0].nom.toLowerCase() + " " + ens[0].prenom.toLowerCase(),
-            ),
-        );
+        // On prépare le nom complet de l'enseignant sélectionné pour la comparaison
+        const selectedFullName = `${ens[0].nom} ${ens[0].prenom}`
+          .toLowerCase()
+          .trim();
+        const selectedFullNameAlt = `${ens[0].prenom} ${ens[0].nom}`
+          .toLowerCase()
+          .trim();
+
+        const mat = matieres.filter((mat) => {
+          // On vérifie si le tableau 'enseignants' contient le nom
+          return mat.enseignants.some((e) => {
+            const ensNameInMat = e.toLowerCase().trim();
+            return (
+              ensNameInMat.includes(selectedFullName) ||
+              ensNameInMat.includes(selectedFullNameAlt)
+            );
+          });
+        });
+
         setFilteredMat(mat);
       } else {
         setFilteredMat([]);
@@ -627,6 +647,19 @@ const Planning = () => {
     setAlert("Desole! Aucun emploi du temps a exporte pour le moment");
   };
 
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((rep) => {
+        setUserRole(rep.data.userRole);
+      })
+      .catch(() => {
+        setUserRole(null);
+      });
+  }, []);
+
   return (
     <div>
       {showAlert && alert && (
@@ -742,167 +775,171 @@ const Planning = () => {
         }}
       />
 
-      {showForm && selectedDate && (
-        <PlanningForm
-          enseignants={ensignants}
-          mentions={filteredMent}
-          niveaux={filteredNiv}
-          salles={salles}
-          matieres={filteredMat}
-          horaires={filteredHoraire}
-          selectedDate={selectedDate}
-          data={formData}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
-          setShowModal={setShowForm}
-        />
-      )}
+      {can(userRole === "Admin" ? "admin" : "secretary", "addPlanning") &&
+        showForm &&
+        selectedDate && (
+          <PlanningForm
+            enseignants={ensignants}
+            mentions={filteredMent}
+            niveaux={filteredNiv}
+            salles={salles}
+            matieres={filteredMat}
+            horaires={filteredHoraire}
+            selectedDate={selectedDate}
+            data={formData}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            setShowModal={setShowForm}
+          />
+        )}
 
-      {showModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[420px]">
-            {modalMode === "" && (
-              <>
-                <h2 className="text-lg font-bold mb-1">
-                  {selectedEvent.title}
-                </h2>
+      {can(userRole === "Admin" ? "admin" : "secretary", "addPlanning") &&
+        showModal &&
+        selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-[420px]">
+              {modalMode === "" && (
+                <>
+                  <h2 className="text-lg font-bold mb-1">
+                    {selectedEvent.title}
+                  </h2>
 
-                <p className="text-sm text-gray-600 mb-4">
-                  {selectedEvent.prenomEns} – Salle {selectedEvent.salle}
-                </p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {selectedEvent.prenomEns} – Salle {selectedEvent.salle}
+                  </p>
 
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Annuler
-                  </button>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="px-4 py-2 bg-gray-300 rounded"
+                    >
+                      Annuler
+                    </button>
 
-                  <button
-                    onClick={() => setModalMode("edit")}
-                    className="px-4 py-2 bg-blue-600 text-white rounded"
-                  >
-                    Modifier
-                  </button>
+                    <button
+                      onClick={() => setModalMode("edit")}
+                      className="px-4 py-2 bg-blue-600 text-white rounded"
+                    >
+                      Modifier
+                    </button>
 
-                  <button
-                    onClick={() => setModalMode("confirm")}
-                    className="px-4 py-2 bg-red-600 text-white rounded"
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              </>
-            )}
+                    <button
+                      onClick={() => setModalMode("confirm")}
+                      className="px-4 py-2 bg-red-600 text-white rounded"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </>
+              )}
 
-            {modalMode === "confirm" && (
-              <>
-                <h2 className="text-lg font-bold text-red-600 mb-4">
-                  Confirmation de suppression
-                </h2>
+              {modalMode === "confirm" && (
+                <>
+                  <h2 className="text-lg font-bold text-red-600 mb-4">
+                    Confirmation de suppression
+                  </h2>
 
-                <p className="mb-4">
-                  Supprimer la séance du{" "}
-                  {selectedEvent.start.toLocaleDateString("fr-FR")} ?
-                </p>
+                  <p className="mb-4">
+                    Supprimer la séance du{" "}
+                    {selectedEvent.start.toLocaleDateString("fr-FR")} ?
+                  </p>
 
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setModalMode("")}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Retour
-                  </button>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setModalMode("")}
+                      className="px-4 py-2 bg-gray-300 rounded"
+                    >
+                      Retour
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      askDelete(selectedEvent.numEd);
-                      setShowModal(false);
-                    }}
-                    className="px-4 py-2 bg-red-600 text-white rounded"
-                  >
-                    Confirmer
-                  </button>
-                </div>
-              </>
-            )}
+                    <button
+                      onClick={() => {
+                        askDelete(selectedEvent.numEd);
+                        setShowModal(false);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded"
+                    >
+                      Confirmer
+                    </button>
+                  </div>
+                </>
+              )}
 
-            {modalMode === "edit" && (
-              <PlanningForm
-                enseignants={ensignants}
-                mentions={filteredMent}
-                niveaux={filteredNiv}
-                salles={salles}
-                matieres={filteredMat}
-                horaires={filteredHoraire}
-                selectedDate={selectedEvent.start}
-                data={{
-                  numEd: selectedEvent.numEd,
-                  jour: formatDate(selectedEvent.start),
-                  hDeb: selectedEvent.hDeb,
-                  hFin: selectedEvent.hFin,
-                  dispo: selectedEvent.status,
-                  type: selectedEvent.type,
-                  responsableId: localStorage.getItem("user"),
-                  enseignantId:
-                    ensignants.find(
-                      (ens) =>
-                        `${ens.prenom} ${ens.nom}` ===
-                        `${selectedEvent.prenomEns} ${selectedEvent.nomEns}`,
-                    )?.id || "",
-                  mentionId:
-                    mentions.find(
-                      (mnt) => mnt.nomMention === selectedEvent.mention,
-                    )?.idMent || "",
-                  niveauId:
-                    niveaux.find((nv) => nv.intitule === selectedEvent.niveau)
-                      ?.idNiv || "",
-                  idSalle:
-                    salles.find((s) => s.nomSalle === selectedEvent.salle)
-                      ?.idSalle || "",
-                  matiereId:
-                    matieres.find((m) => m.nomMatiere === selectedEvent.title)
-                      ?.id || "",
-                  anneeId: "1",
-                }}
-                handleChange={handleChange}
-                handleSubmit={(e) => {
-                  e.preventDefault();
-                  const data = {
-                    ...formData,
-                    mentionId: parseInt(formData.mentionId),
-                    niveauId: parseInt(formData.niveauId),
-                    idSalle: parseInt(formData.idSalle),
-                    anneeId: parseInt(formData.anneeId),
-                    jour: formData.jour,
-                    hDeb: `${formData.hDeb}:00`,
-                    hFin: `${formData.hFin}:00`,
-                  };
+              {modalMode === "edit" && (
+                <PlanningForm
+                  enseignants={ensignants}
+                  mentions={filteredMent}
+                  niveaux={filteredNiv}
+                  salles={salles}
+                  matieres={filteredMat}
+                  horaires={filteredHoraire}
+                  selectedDate={selectedEvent.start}
+                  data={{
+                    numEd: selectedEvent.numEd,
+                    jour: formatDate(selectedEvent.start),
+                    hDeb: selectedEvent.hDeb,
+                    hFin: selectedEvent.hFin,
+                    dispo: selectedEvent.status,
+                    type: selectedEvent.type,
+                    responsableId: localStorage.getItem("user"),
+                    enseignantId:
+                      ensignants.find(
+                        (ens) =>
+                          `${ens.prenom} ${ens.nom}` ===
+                          `${selectedEvent.prenomEns} ${selectedEvent.nomEns}`,
+                      )?.id || "",
+                    mentionId:
+                      mentions.find(
+                        (mnt) => mnt.nomMention === selectedEvent.mention,
+                      )?.idMent || "",
+                    niveauId:
+                      niveaux.find((nv) => nv.intitule === selectedEvent.niveau)
+                        ?.idNiv || "",
+                    idSalle:
+                      salles.find((s) => s.nomSalle === selectedEvent.salle)
+                        ?.idSalle || "",
+                    matiereId:
+                      matieres.find((m) => m.nomMatiere === selectedEvent.title)
+                        ?.id || "",
+                    anneeId: "1",
+                  }}
+                  handleChange={handleChange}
+                  handleSubmit={(e) => {
+                    e.preventDefault();
+                    const data = {
+                      ...formData,
+                      mentionId: parseInt(formData.mentionId),
+                      niveauId: parseInt(formData.niveauId),
+                      idSalle: parseInt(formData.idSalle),
+                      anneeId: parseInt(formData.anneeId),
+                      jour: formData.jour,
+                      hDeb: `${formData.hDeb}:00`,
+                      hFin: `${formData.hFin}:00`,
+                    };
 
-                  api
-                    .put(`/edt/${formData.numEd}`, data)
-                    .then(() => {
-                      loadSchedule();
-                      setShowAlert(true);
-                      setAlert("Données modifiées avec succès!");
-                    })
-                    .catch((err) => {
-                      if (err.response) {
-                        console.error("Status:", err.response.status);
-                        console.error("Erreur serveur:", err.response.data);
-                      } else {
-                        console.error("Erreur:", err.message);
-                      }
-                    });
-                  setShowModal(false);
-                }}
-                setShowModal={setShowModal}
-              />
-            )}
+                    api
+                      .put(`/edt/${formData.numEd}`, data)
+                      .then(() => {
+                        loadSchedule();
+                        setShowAlert(true);
+                        setAlert("Données modifiées avec succès!");
+                      })
+                      .catch((err) => {
+                        if (err.response) {
+                          console.error("Status:", err.response.status);
+                          console.error("Erreur serveur:", err.response.data);
+                        } else {
+                          console.error("Erreur:", err.message);
+                        }
+                      });
+                    setShowModal(false);
+                  }}
+                  setShowModal={setShowModal}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

@@ -28,8 +28,11 @@ const Login = ({ setIsAuthentificated }) => {
       setLoading(true);
       const rep = await api.post("/utilisateur/login", user);
       if (rep.data) {
-        setIsAuthentificated(true);
-        navigate("/dashboard");
+        setTimeout(() => {
+          setIsAuthentificated(true);
+          navigate("/dashboard");
+          setLoading(false);
+        }, 2000);
       }
     } catch (err) {
       if (err.response) {
@@ -43,7 +46,7 @@ const Login = ({ setIsAuthentificated }) => {
         setShowAlert(true);
       }
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

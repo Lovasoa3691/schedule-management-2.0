@@ -16,6 +16,9 @@ public class UserProfile:Profile
             .ForCtorParam("role", opt => opt.MapFrom(src => src.role))
             .ForCtorParam("genre", opt => opt.MapFrom(src => src.genre))
             .ForCtorParam("adresse", opt => opt.MapFrom(src => src.adresse))
-            .ForCtorParam("email", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.email));
+            .ForCtorParam("email", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.email))
+            .ForCtorParam("creation", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.createdAt))
+            .ForCtorParam("photo", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.photo))
+            .ForCtorParam("status", opt => opt.MapFrom(src => src.Authentifications.FirstOrDefault()!.status));
     }
 }

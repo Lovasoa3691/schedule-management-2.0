@@ -50,7 +50,7 @@ export default function LoginScreen() {
 
       const token = response.data.token;
       const decoded = jwtDecode<{ userId?: string; role?: string }>(token);
-      if (decoded.role !== "enseignant") {
+      if (decoded.role !== "Enseignant") {
         Alert.alert(
           "Accès refusé",
           "Seuls les enseignants peuvent se connecter.",
@@ -60,11 +60,12 @@ export default function LoginScreen() {
 
       await AsyncStorage.setItem("jwt", token);
 
-      const profile = await api.get<string>("/utilisateur/profile");
-      await AsyncStorage.setItem("userId", profile.data);
+      const profile = await api.get<{ userId: string; userRole: string }>(
+        "/utilisateur/profile",
+      );
+      await AsyncStorage.setItem("userId", profile.data.userId);
 
       setAuthenticated(true);
-      // Alert.alert("Connexion réussie!", `ID utilisateur : ${profile.data}`);
     } catch (err: any) {
       const message = err.response?.data || err.message || "Erreur inconnue";
       Alert.alert("Erreur de connexion", message.toString());

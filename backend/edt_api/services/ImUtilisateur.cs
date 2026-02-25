@@ -31,6 +31,14 @@ public class ImUtilisateur : IUtilisateur
         return _mapper.Map<IEnumerable<ResponsableDto>>(responsable);
     }
 
+    public async Task<IEnumerable<UserDto>> getAllUserAsync()
+    {
+        var users = await _db.Utilisateurs.Include(u => u.Authentifications)
+            .Where(u => u.Authentifications.FirstOrDefault()!.email != "" && u.idUt == u.Authentifications.FirstOrDefault()!.utilisateurId)
+            .ToListAsync();
+        return _mapper.Map<IEnumerable<UserDto>>(users);
+    }
+
     public async Task<IEnumerable<EnseignantDto>> getAllTeacherAsync()
     {
         var enseignant = await _db.Enseignants.Include(e => e.Authentifications).ToListAsync();
@@ -220,7 +228,8 @@ public class ImUtilisateur : IUtilisateur
                 telephone = "+261"+ens.phone,
                 adresse = ens.adresse,
                 genre = ens.genre,
-                grade = ens.grade
+                grade = ens.grade,
+                role = "Enseignant"
             });
         }
 
@@ -234,10 +243,6 @@ public class ImUtilisateur : IUtilisateur
     
     public async Task<EnseignantDto> addAsync(CreateEnseignantDto dto)
     {
-        // var res = _mapper.Map<Enseignant>(dto);
-        // await _db.Enseignants.AddAsync(res);
-        // await _db.SaveChangesAsync();
-        // return _mapper.Map<EnseignantDto>(res);
         var res = new Enseignant()
         {
             nom = dto.nom,
@@ -246,6 +251,7 @@ public class ImUtilisateur : IUtilisateur
             adresse = dto.adresse,
             genre = dto.genre,
             grade = dto.grade,
+            role = "Enseignant"
         };
         
         _db.Enseignants.Add(res);

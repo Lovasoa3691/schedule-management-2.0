@@ -5,14 +5,17 @@ export const permissionsByRole = {
     teacher: true,
     subject: true,
     user: true,
+    profil: false,
     stats: true,
     config: true,
 
+    addPlanning: false,
     add: true,
     edit: true,
     delete: true,
     view: true,
     export: true,
+    import: true,
   },
 
   secretary: {
@@ -21,14 +24,17 @@ export const permissionsByRole = {
     teacher: true,
     subject: true,
     user: false,
+    profil: true,
     stats: true,
     config: false,
 
-    add: true,
+    addPlanning: true,
+    add: false,
     edit: false,
     delete: false,
     view: true,
     export: true,
+    import: false,
   },
 };
 

@@ -16,30 +16,30 @@ var builder = WebApplication.CreateBuilder(args);
 // var dbUser = Environment.GetEnvironmentVariable("DB_USER");
 // var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-// var dbHost = "mysql-fa8f43c-hghjbjjkhjhuifhjg.g.aivencloud.com";
-// var dbPort = 11328;
-// var dbName = "db_edt_p";
-// var dbUser = "avnadmin";
-// var dbPassword = "AVNS_kN0s7eSogKTNZ_uQEl8";
-//
-// var connectionString =
-//     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
-//
-// builder.Services.AddDbContext<AppDbContext>(options =>
-//     options.UseMySql(
-//         connectionString,
-//         ServerVersion.AutoDetect(connectionString)
-//     )
-// );
+var dbHost = "localhost";
+var dbPort = 3306;
+var dbName = "db_edt_p";
+var dbUser = "orion";
+var dbPassword = "orion3691";
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString =
+    $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString)
+    )
+);
+
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://192.168.49.2:32654","http://192.168.49.2:30735/")
-        // policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
+        // policy.WithOrigins("http://192.168.49.2:32654","http://192.168.49.2:30735/")
+        policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

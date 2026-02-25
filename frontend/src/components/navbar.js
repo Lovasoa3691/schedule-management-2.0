@@ -1,4 +1,4 @@
-import { FiCalendar } from "react-icons/fi";
+import { FiCalendar, FiUser } from "react-icons/fi";
 import {
   MdPerson,
   MdMenuBook,
@@ -193,14 +193,29 @@ const Navbar = ({ setLoading }) => {
                     </ul>
                   )}
                 </li>
+                {can(role, "profil") && (
+                  <li>
+                    <Link
+                      onClick={() => menuClick("Profile", "/profile")}
+                      className={`flex items-center px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold${
+                        active === "Profile"
+                          ? " bg-slate-100 text-blue-600"
+                          : " text-gray-800"
+                      }`}
+                    >
+                      <FiUser className="w-5 h-5 mr-3 text-gray-800" />
+                      Profile
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
+            {can(role, "user") && (
+              <div className="mt-8">
+                <h4 className="text-sm px-4 text-gray-800 uppercase tracking-wide mb-2">
+                  Fonctionnalités avancées
+                </h4>
 
-            <div className="mt-8">
-              <h4 className="text-sm px-4 text-gray-800 uppercase tracking-wide mb-2">
-                Fonctionnalités avancées
-              </h4>
-              {can(role, "user") && (
                 <ul>
                   <li>
                     <Link
@@ -216,60 +231,60 @@ const Navbar = ({ setLoading }) => {
                     </Link>
                   </li>
                 </ul>
-              )}
 
-              <ul className="space-y-2">
-                <li>
-                  <button
-                    onClick={() => setOpenSettings(!openSettings)}
-                    className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold text-left"
-                  >
-                    <div className="flex items-center">
-                      <MdSettings className="w-5 h-5 mr-3 text-gray-800" />
-                      <span>Paramètres</span>
-                    </div>
-                    <MdExpandMore
-                      className={`transform transition-transform duration-200 ${
-                        openSettings ? "rotate-180" : "rotate-0"
-                      }`}
-                    />
-                  </button>
+                <ul className="space-y-2">
+                  <li>
+                    <button
+                      onClick={() => setOpenSettings(!openSettings)}
+                      className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 rounded-lg font-semibold text-left"
+                    >
+                      <div className="flex items-center">
+                        <MdSettings className="w-5 h-5 mr-3 text-gray-800" />
+                        <span>Paramètres</span>
+                      </div>
+                      <MdExpandMore
+                        className={`transform transition-transform duration-200 ${
+                          openSettings ? "rotate-180" : "rotate-0"
+                        }`}
+                      />
+                    </button>
 
-                  {openSettings && (
-                    <ul className="ml-12 mt-2 space-y-2 text-sm text-gray-700">
-                      <li>
-                        <Link
-                          onClick={() =>
-                            menuClick("Profile", "/parametre/profile")
-                          }
-                          className={`block px-2 py-1 hover:text-blue-600${
-                            active === "Profile"
-                              ? " text-blue-600"
-                              : " text-gray-800"
-                          }`}
-                        >
-                          Profil
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          onClick={() =>
-                            menuClick("Curcus", "/parametre/curcus")
-                          }
-                          className={`block px-2 py-1 hover:text-blue-600${
-                            active === "Curcus"
-                              ? " text-blue-600"
-                              : " text-gray-800"
-                          }`}
-                        >
-                          Curcus
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              </ul>
-            </div>
+                    {openSettings && (
+                      <ul className="ml-12 mt-2 space-y-2 text-sm text-gray-700">
+                        <li>
+                          <Link
+                            onClick={() =>
+                              menuClick("Profile", "/parametre/profile")
+                            }
+                            className={`block px-2 py-1 hover:text-blue-600${
+                              active === "Profile"
+                                ? " text-blue-600"
+                                : " text-gray-800"
+                            }`}
+                          >
+                            Profil
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            onClick={() =>
+                              menuClick("Curcus", "/parametre/curcus")
+                            }
+                            className={`block px-2 py-1 hover:text-blue-600${
+                              active === "Curcus"
+                                ? " text-blue-600"
+                                : " text-gray-800"
+                            }`}
+                          >
+                            Curcus
+                          </Link>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
+                </ul>
+              </div>
+            )}
           </nav>
         </div>
       </aside>

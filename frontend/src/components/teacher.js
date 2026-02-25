@@ -36,6 +36,7 @@ import api from "../hooks/api";
 import { set } from "date-fns";
 import { Loader } from "./spin/Spinner";
 import Swal from "sweetalert2";
+import { can } from "../hooks/permission";
 
 const Teacher = () => {
   const [enseignant, setEnseignant] = useState([]);
@@ -373,6 +374,19 @@ const Teacher = () => {
     handleCloseExportMenu();
   };
 
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    api
+      .get("/utilisateur/profile")
+      .then((rep) => {
+        setUserRole(rep.data.userRole);
+      })
+      .catch(() => {
+        setUserRole(null);
+      });
+  }, []);
+
   return (
     <div className="teacher-container h-screen">
       {showAlert && alert && (
@@ -410,7 +424,9 @@ const Teacher = () => {
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
-          Gestion des enseignants
+          {userRole === "Admin"
+            ? "Gestion des enseignants"
+            : "Liste des enseignants"}
         </h2>
 
         <div className="w-full max-w-md">
@@ -474,54 +490,57 @@ const Teacher = () => {
               </MenuItem>
             </Menu>
           </div>
-
-          <div className="relative">
-            <button
-              onClick={handleOpenImportMenu}
-              className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition hover:bg-emerald-100"
-            >
-              <FaFileImport className="w-5 h-5" />
-              Import
-            </button>
-
-            <Menu
-              anchorEl={anchorElImport}
-              open={openImportMenu}
-              onClose={handleCloseImportMenu}
-              PaperProps={{
-                className: "rounded-xl shadow-xl border border-gray-100 mt-2",
-              }}
-            >
-              <MenuItem className="text-sm">
-                <label className="flex items-center gap-2 cursor-pointer w-full">
-                  <FaUpload className="w-5 h-5 text-blue-400" />
-                  Importer CSV
-                  <input
-                    type="file"
-                    accept=".csv"
-                    hidden
-                    onChange={handleImportCsv}
-                  />
-                </label>
-              </MenuItem>
-              <MenuItem
-                onClick={downloadCsvTemplate}
-                className="flex items-center gap-2 text-sm"
+          {can(userRole === "Admin" ? "admin" : "secretary", "import") && (
+            <div className="relative">
+              <button
+                onClick={handleOpenImportMenu}
+                className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm transition hover:bg-emerald-100"
               >
-                <FaDownload className="w-5 h-5" />
-                Télécharger template
-              </MenuItem>
-            </Menu>
-          </div>
+                <FaFileImport className="w-5 h-5" />
+                Import
+              </button>
+
+              <Menu
+                anchorEl={anchorElImport}
+                open={openImportMenu}
+                onClose={handleCloseImportMenu}
+                PaperProps={{
+                  className: "rounded-xl shadow-xl border border-gray-100 mt-2",
+                }}
+              >
+                <MenuItem className="text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer w-full">
+                    <FaUpload className="w-5 h-5 text-blue-400" />
+                    Importer CSV
+                    <input
+                      type="file"
+                      accept=".csv"
+                      hidden
+                      onChange={handleImportCsv}
+                    />
+                  </label>
+                </MenuItem>
+                <MenuItem
+                  onClick={downloadCsvTemplate}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <FaDownload className="w-5 h-5" />
+                  Télécharger template
+                </MenuItem>
+              </Menu>
+            </div>
+          )}
         </div>
 
-        <button
-          onClick={openModal}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
-        >
-          <FiPlus className="w-5 h-5" />
-          Nouveau
-        </button>
+        {can(userRole === "Admin" ? "admin" : "secretary", "add") && (
+          <button
+            onClick={openModal}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
+          >
+            <FiPlus className="w-5 h-5" />
+            Nouveau
+          </button>
+        )}
       </div>
 
       {showModal && (
@@ -555,7 +574,7 @@ const Teacher = () => {
         <div className="overflow-x-auto">
           <div className="max-h-[700px] overflow-y-auto">
             <table className="min-w-full bg-white text-gray-700 table-fixed">
-              <thead className="bg-indigo-100 text-left font-semibold sticky top-0 z-5">
+              <thead className="bg-indigo-100 text-left font-semibold sticky top-0 z-0">
                 <tr>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">#</th>
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">NOM</th>
@@ -577,9 +596,14 @@ const Teacher = () => {
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     GRADE
                   </th>
-                  <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    ACTIONS
-                  </th>
+                  {can(
+                    userRole === "Admin" ? "admin" : "secretary",
+                    "edit",
+                  ) && (
+                    <th className="px-4 py-3 sticky top-0 bg-indigo-100">
+                      ACTIONS
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -600,20 +624,25 @@ const Teacher = () => {
                       <td className="px-4 py-3">{ens.email ?? "N/A"}</td>
                       <td className="px-4 py-3">{ens.phone}</td>
                       <td className="px-4 py-3">{ens.grade}</td>
-                      <td className="px-4 py-3">
-                        <button
-                          className="text-blue-600 text-sm"
-                          onClick={() => openModalEdit(ens)}
-                        >
-                          <FaEdit className="inline-block w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => askDelete(ens.id)}
-                          className="text-red-600 text-sm ml-4"
-                        >
-                          <FaTrashAlt className="inline-block w-5 h-5" />
-                        </button>
-                      </td>
+                      {can(
+                        userRole === "Admin" ? "admin" : "secretary",
+                        "edit",
+                      ) && (
+                        <td className="px-4 py-3">
+                          <button
+                            className="text-blue-600 text-md p-2"
+                            onClick={() => openModalEdit(ens)}
+                          >
+                            <FaEdit className="inline-block w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => askDelete(ens.id)}
+                            className="text-red-600 text-md ml-4 p-2"
+                          >
+                            <FaTrashAlt className="inline-block w-5 h-5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 ) : (
