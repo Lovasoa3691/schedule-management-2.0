@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "A"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +28,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["@react-native-community/datetimepicker", "expo-secure-store"],
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
+    ],
     "extra": {
       "eas": {
         "projectId": "245f5c46-1be9-41ae-a18d-77d9f1b042ff"
