@@ -38,8 +38,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://192.168.49.2:32654","http://192.168.49.2:30735/")
-        // policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
+        // policy.WithOrigins("http://192.168.49.2:32654","http://192.168.49.2:30735/")
+        policy.WithOrigins("http://app.local")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
