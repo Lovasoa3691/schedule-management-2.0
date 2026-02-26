@@ -48,7 +48,7 @@ const Dashboard = () => {
     });
 
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserId(rep.data.userId);
       })
@@ -57,7 +57,7 @@ const Dashboard = () => {
       });
 
     api
-      .get("/utilisateur/teacher")
+      .get("/user/teacher")
       .then((rep) => {
         setEnseignants(rep.data);
       })
@@ -99,7 +99,7 @@ const Dashboard = () => {
       });
 
     api
-      .get("/utilisateur/teacher/info/all")
+      .get("/user/teacher/info/all")
       .then((res) => {
         setInfoEnseignants(res.data);
         setFilter(res.data);
@@ -130,7 +130,7 @@ const Dashboard = () => {
     const man = enseignants.filter((item) => item.genre === "Masculin");
     setMan(man);
 
-    const fem = enseignants.filter((item) => item.genre === "Feminin");
+    const fem = enseignants.filter((item) => item.genre === "Féminin");
     setWomen(fem);
 
     const plan = planning.filter((item) => item.dispo === "En cours");

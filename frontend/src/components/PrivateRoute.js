@@ -7,7 +7,7 @@ const PrivateRoute = ({ children }) => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then(() => setIsAuth(true))
       .catch(() => setIsAuth(false));
   }, []);

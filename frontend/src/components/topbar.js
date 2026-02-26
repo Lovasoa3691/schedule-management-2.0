@@ -69,7 +69,7 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((res) => {
         // console.log(res.data);
         setId(res.data.userId);
@@ -80,7 +80,7 @@ const TopBar = ({ setIsAuthenticated }) => {
 
   const getUser = (key) => {
     api
-      .get(`/utilisateur/info?id=${key}&role=${role}`)
+      .get(`/user/info?id=${key}&role=${role}`)
       .then((res) => {
         // console.log(res.data);
         setUser(res.data);
@@ -100,7 +100,7 @@ const TopBar = ({ setIsAuthenticated }) => {
     setIsLoginOut(true);
     setTimeout(async () => {
       try {
-        await api.post("/utilisateur/logout", role, {
+        await api.post("/user/logout", role, {
           headers: { "Content-Type": "application/json" },
         });
         setIsAuthenticated(false);
@@ -171,7 +171,7 @@ const TopBar = ({ setIsAuthenticated }) => {
               4
             </span>
           </div> */}
-          <div
+          {/* <div
             className="relative cursor-pointer"
             onClick={handleNotificationsClick}
           >
@@ -179,9 +179,9 @@ const TopBar = ({ setIsAuthenticated }) => {
             <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1.5">
               3
             </span>
-          </div>
+          </div> */}
 
-          <div className="w-px h-8 bg-gray-100 mx-4"></div>
+          {/* <div className="w-px h-8 bg-gray-100 mx-4"></div> */}
 
           <div className="relative">
             <button

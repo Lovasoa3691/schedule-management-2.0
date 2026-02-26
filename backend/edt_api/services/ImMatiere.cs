@@ -33,6 +33,21 @@ public class ImMatiere : IMatiere
         return _mapper.Map<IEnumerable<MatiereDto>>(mat);
     }
 
+    public async Task<IEnumerable<MatiereDto>> GetSubjectAsync()
+    {
+        var mat = await _db.Matieres
+            .AsNoTracking()
+            .Include(e => e.activites)
+            .ThenInclude(ee => ee.enseignant)
+            .Include(m => m.matiereMention)
+            .ThenInclude(mm => mm.mention)
+            .Include(n => n.matiereNiveau)
+            .ThenInclude(n => n.niveau)
+            .Where(a => a.activites.FirstOrDefault()!.matiereId == a.codeMat)
+            .ToListAsync();
+        return _mapper.Map<IEnumerable<MatiereDto>>(mat);
+    }
+
     public async Task<MatiereDto?> GetByIdAsync(string id)
     {
        var res = await _db.Matieres.FindAsync(id);
@@ -166,11 +181,11 @@ public class ImMatiere : IMatiere
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var checkPlan = await _db.Edts.Include(e => e.matiere).FirstOrDefaultAsync(e => e.matiereId == id);
-        if ( checkPlan != null || checkPlan.disponibilite == "En cours") return false;
+        // var checkPlan = await _db.Edts.Include(e => e.matiere).FirstOrDefaultAsync(e => e.matiereId == id);
+        // if ( checkPlan != null || checkPlan.disponibilite == "En cours") return false;
         var res =  await _db.Matieres.FindAsync(id);
-        if (res == null) 
-            _db.Matieres.Remove(res);
+        if (res == null)
+            return false;
         _db.Matieres.Remove(res);
         await _db.SaveChangesAsync();
         return true;

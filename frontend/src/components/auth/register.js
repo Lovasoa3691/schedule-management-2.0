@@ -46,7 +46,7 @@ const Register = () => {
     }
 
     api
-      .post("/utilisateur/responsable/register", formData)
+      .post("/user/responsable/register", formData)
       .then((rep) => {
         setShowInfo(true);
       })

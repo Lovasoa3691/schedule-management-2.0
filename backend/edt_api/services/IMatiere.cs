@@ -5,6 +5,7 @@ namespace edt_api.services;
 public interface IMatiere
 {
     Task<IEnumerable<MatiereDto>> GetAllAsync();
+    Task<IEnumerable<MatiereDto>> GetSubjectAsync();
     Task<MatiereDto> GetByIdAsync(string id);
     Task<MatiereDto> AddAsync(CreateMatiereDto dto);
     Task<bool> UpdateAsync(string id, UpdateMatiereDto dto);

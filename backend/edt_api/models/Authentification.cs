@@ -18,6 +18,8 @@ public class Authentification
     public string? status {get; set;} = string.Empty;
     [Column(TypeName = "varchar(100)")]
     public string? photo {get; set;} = string.Empty;
+     [Column(TypeName = "varchar(50)")]
+    public string? username {get; set;} = string.Empty;
 
     public string utilisateurId { get; set; } = null!;
     public Utilisateur utilisateur{get;set;}

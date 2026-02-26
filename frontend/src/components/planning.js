@@ -5,7 +5,13 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import fr from "date-fns/locale/fr";
 import React, { use, useEffect, useState } from "react";
 import Select from "react-select";
-import { FaFileExcel, FaTimes } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaClock,
+  FaFileExcel,
+  FaTimes,
+  FaTimesCircle,
+} from "react-icons/fa";
 import PlanningForm from "./forms/planning-form";
 import { MdPrint } from "react-icons/md";
 import { jsPDF } from "jspdf";
@@ -18,6 +24,8 @@ import ErrorDialog from "./notification/error";
 import Confirm from "./notification/confirm";
 import api from "../hooks/api";
 import { can } from "../hooks/permission";
+import Swal from "sweetalert2";
+
 const locales = {
   fr: fr,
 };
@@ -109,7 +117,7 @@ const Planning = () => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((res) => {
         setUserId(res.data.userId);
       })
@@ -172,10 +180,9 @@ const Planning = () => {
 
   const loadAll = () => {
     api
-      .get("/utilisateur/teacher")
+      .get("/user/teacher")
       .then((res) => {
         setEnsignants(res.data);
-        // console.log("Enseignants chargés:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
@@ -183,7 +190,6 @@ const Planning = () => {
       .get("/mention")
       .then((res) => {
         setMentions(res.data);
-        // console.log("Mentions chargées:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
@@ -191,7 +197,6 @@ const Planning = () => {
       .get("/niveau")
       .then((res) => {
         setNiveaux(res.data);
-        // console.log("Niveaux chargés:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
@@ -199,7 +204,6 @@ const Planning = () => {
       .get("/salle")
       .then((res) => {
         setSalles(res.data);
-        // console.log("Salles chargées:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
@@ -207,15 +211,10 @@ const Planning = () => {
       .get("/matiere")
       .then((res) => {
         setMatieres(res.data);
-        // console.log("Matieres chargées:", res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
 
     const today = getCurrentWeek(new Date());
-    // console.log(
-    //   "Api call for disponibilite with week:",
-    //   `${today.monday.getDate()}-${today.sunday.getDate()}`,
-    // );
 
     api
       .get(
@@ -226,7 +225,6 @@ const Planning = () => {
           console.log("Aucune disponibilité trouvée pour la semaine actuelle.");
           return;
         }
-        console.log("Disponibilités chargées:", res.data);
         setDisponibilite(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
@@ -238,7 +236,6 @@ const Planning = () => {
         params: { startDate: null, endDate: null },
       })
       .then((res) => {
-        // console.log("Emploi du temps chargé:", res.data);
         setEvents(
           res.data.map((event) => ({
             numEd: event.numEd,
@@ -276,17 +273,34 @@ const Planning = () => {
 
   const handleSelectSlot = (slotInfo) => {
     const today = new Date();
-    setSelectedDate(slotInfo.start);
+    today.setHours(0, 0, 0, 0);
+
     const slotDate = new Date(slotInfo.start);
+    slotDate.setHours(0, 0, 0, 0);
+
+    setSelectedDate(slotInfo.start);
+
+    if (slotDate < today) {
+      Swal.fire({
+        title: "Date invalide",
+        text: "Impossible de créer un événement à une date déjà passée.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
 
     const currentWeekStart = moment(today).startOf("week");
     const slotWeekStart = moment(slotDate).startOf("week");
 
     if (slotWeekStart.isBefore(currentWeekStart)) {
-      setAlert(
-        "Impossible de créer un événement dans une semaine déjà passée.",
-      );
-      setShowAlert(true);
+      Swal.fire({
+        title: "Semaine invalide",
+        text: "Impossible de créer un événement dans une semaine déjà passée.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+
       return;
     }
     setFormData({
@@ -305,6 +319,7 @@ const Planning = () => {
       semaine: "",
       anneeId: "1",
     });
+
     setShowForm(true);
   };
 
@@ -314,10 +329,6 @@ const Planning = () => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
-
-      // console.log(
-      //   `Semaine: ${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}`,
-      // );
 
       setFormData({
         ...formData,
@@ -393,7 +404,6 @@ const Planning = () => {
       hFin: `${formData.hFin}:00`,
       semaine: `${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}`,
     };
-    console.log("Données à soumettre:", data);
 
     api
       .post("/edt", data)
@@ -415,8 +425,12 @@ const Planning = () => {
           semaine: "",
           anneeId: "",
         });
-        setShowAlert(true);
-        setAlert("Données enregistré avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Programme ajouté avec succès!",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => {
         if (err.response) {
@@ -447,13 +461,10 @@ const Planning = () => {
         );
 
         setFilteredDispo(dispoEns);
-        console.log("Dispos enseignant:", dispoEns);
 
         const dispoDuJour = dispoEns.filter(
           (d) => formatDate(d.dateDispo) === formatDate(selectedDate),
         );
-
-        console.log("Dispos du jour:", dispoDuJour);
 
         if (dispoDuJour.length === 0) {
           setFilteredHoarire([]);
@@ -495,13 +506,9 @@ const Planning = () => {
         ens.id.toString().includes(value.toString()),
       );
 
-      console.log("Enseignant sélectionné:", ens);
-      console.log("Matieres disponibles pour cet enseignant:", matieres);
-
       setFilteredEns(ens);
 
       if (ens.length > 0) {
-        // On prépare le nom complet de l'enseignant sélectionné pour la comparaison
         const selectedFullName = `${ens[0].nom} ${ens[0].prenom}`
           .toLowerCase()
           .trim();
@@ -510,7 +517,6 @@ const Planning = () => {
           .trim();
 
         const mat = matieres.filter((mat) => {
-          // On vérifie si le tableau 'enseignants' contient le nom
           return mat.enseignants.some((e) => {
             const ensNameInMat = e.toLowerCase().trim();
             return (
@@ -567,11 +573,15 @@ const Planning = () => {
 
   const handleDelete = () => {
     api
-      .delete(`/utilisateur/teacher/${deleteId}`)
+      .delete(`/user/teacher/${deleteId}`)
       .then(() => {
         loadSchedule();
-        setShowAlert(true);
-        setAlert("Données supprimées !");
+        Swal.fire({
+          title: "Succès",
+          text: "Programme supprimé avec succès!",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => {
         console.error("Erreur: ", err.message);
@@ -582,76 +592,110 @@ const Planning = () => {
   };
 
   const handleExport = () => {
-    const doc = new jsPDF();
+    if (!selectedMention || !selectedNiveau) {
+      Swal.fire({
+        title: "Filtres manquants",
+        text: "Veuillez sélectionner une mention et un niveau pour exporter le PDF.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
 
+    const { monday, sunday } = getCurrentWeek(currentDate);
+
+    const filteredEvents = events.filter((e) => {
+      const eventDate = new Date(e.start);
+      return (
+        e.mention === selectedMention.value &&
+        e.niveau === selectedNiveau.value &&
+        eventDate >= monday &&
+        eventDate <= sunday
+      );
+    });
+
+    if (filteredEvents.length === 0) {
+      Swal.fire({
+        title: "Aucun événement",
+        text: "Aucun cours trouvé pour les filtres sélectionnés.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const doc = new jsPDF();
     const colonnes = ["JOUR", "HORAIRE", "MATIERE", "PROFESSEUR", "SALLE"];
 
-    if (selectedMention && selectedNiveau) {
-      if (events.length > 0) {
-        const grouped = {};
-        events.forEach((e) => {
-          const jour = e.start
-            .toLocaleDateString("fr-FR", { weekday: "long" })
-            .toUpperCase();
-          const salle = e.salle;
-          const key = `${jour}-${salle}`;
+    const grouped = {};
 
-          const horaire = `${e.start.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })} - ${e.end.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}`;
+    filteredEvents.forEach((e) => {
+      const jour = e.start
+        .toLocaleDateString("fr-FR", { weekday: "long" })
+        .toUpperCase();
 
-          if (!grouped[key]) {
-            grouped[key] = {
-              jour,
-              salle,
-              horaires: [horaire],
-              matieres: [e.title],
-              profs: [e.prenomEns],
-            };
-          } else {
-            grouped[key].horaires.push(horaire);
-            grouped[key].matieres.push(e.title);
-            grouped[key].profs.push(e.prenomEns);
-          }
-        });
+      const horaire = `${e.start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${e.end.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
 
-        const ligne = Object.values(grouped).map((g) => [
-          g.jour,
-          g.horaires.join("\n"),
-          g.matieres.join("\n"),
-          g.profs.join("\n"),
-          g.salle,
-        ]);
+      const key = `${jour}-${e.salle}`;
 
-        doc.text(`Emploi du temps`, 15, 10);
-        doc.autoTable({
-          head: [colonnes],
-          body: ligne,
-          startY: 20,
-          styles: { cellWidth: "wrap" },
-          columnStyles: {
-            1: { cellWidth: 40 },
-            2: { cellWidth: 50 },
-            3: { cellWidth: 40 },
-          },
-        });
-
-        doc.save(`edt_${selectedMention.value}_${selectedNiveau.value}.pdf`);
+      if (!grouped[key]) {
+        grouped[key] = {
+          jour,
+          salle: e.salle,
+          horaires: [horaire],
+          matieres: [e.title],
+          profs: [e.prenomEns],
+        };
+      } else {
+        grouped[key].horaires.push(horaire);
+        grouped[key].matieres.push(e.title);
+        grouped[key].profs.push(e.prenomEns);
       }
-    }
-    setShowAlert(true);
-    setAlert("Desole! Aucun emploi du temps a exporte pour le moment");
+    });
+
+    const lignes = Object.values(grouped).map((g) => [
+      g.jour,
+      g.horaires.join("\n"),
+      g.matieres.join("\n"),
+      g.profs.join("\n"),
+      g.salle,
+    ]);
+
+    doc.text(
+      `Emploi du temps - ${selectedMention.label} ${selectedNiveau.label}`,
+      15,
+      10,
+    );
+
+    doc.text(
+      `Semaine du ${monday.toLocaleDateString("fr-FR")} au ${sunday.toLocaleDateString("fr-FR")}`,
+      15,
+      16,
+    );
+
+    doc.autoTable({
+      head: [colonnes],
+      body: lignes,
+      startY: 25,
+      styles: { cellWidth: "wrap", valign: "middle" },
+    });
+
+    doc.save(
+      `edt_${selectedMention.value}_${selectedNiveau.value}_${monday.toISOString().slice(0, 10)}.pdf`,
+    );
   };
 
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserRole(rep.data.userRole);
       })
@@ -659,6 +703,12 @@ const Planning = () => {
         setUserRole(null);
       });
   }, []);
+
+  const statusIcon = {
+    "En cours": FaClock,
+    Annulé: FaTimesCircle,
+    Terminé: FaCheckCircle,
+  };
 
   return (
     <div>
@@ -717,6 +767,7 @@ const Planning = () => {
             isClearable
           />
           <button
+            disabled={!selectedMention || !selectedNiveau}
             onClick={handleExport}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center space-x-2"
           >
@@ -736,7 +787,7 @@ const Planning = () => {
         selectable
         date={currentDate}
         onNavigate={(date) => setCurrentDate(date)}
-        onSelectSlot={handleSelectSlot}
+        onSelectSlot={userRole === "Admin" ? null : handleSelectSlot}
         defaultView="month"
         views={["month", "week", "day"]}
         view={currentView}
@@ -748,15 +799,27 @@ const Planning = () => {
           setShowModal(true);
         }}
         components={{
-          event: ({ event }) => (
-            <div className="p-2 text-sm leading-snug">
-              <div className="font-bold">
-                {event.title} | Salle {event.salle}
+          event: ({ event }) => {
+            const Icon = statusIcon[event.status] || FaCheckCircle;
+
+            return (
+              <div className="p-2 text-sm leading-snug">
+                <div className="flex items-center gap-1 font-bold">
+                  {/* <Icon size={14} /> */}
+                  <span>
+                    {event.title} | Salle {event.salle}
+                  </span>
+                </div>
+
+                <div>{event.prenomEns}</div>
+
+                <div className="flex items-center gap-1 text-xs opacity-90 mt-4">
+                  <Icon size={16} />
+                  <span>{event.status}</span>
+                </div>
               </div>
-              <div>{event.prenomEns}</div>
-              <div className="text-xs opacity-90">{event.status}</div>
-            </div>
-          ),
+            );
+          },
         }}
         style={{ height: "90vh" }}
         messages={{

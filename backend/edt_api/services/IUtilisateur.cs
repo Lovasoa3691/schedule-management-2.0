@@ -14,6 +14,7 @@ public interface IUtilisateur
     Task<IEnumerable<UserDto>> getByIdAsync(string id, string role);
     Task<AuthDto> getUserConnected(LoginDto dto);
     Task<ResponsableDto> createAsync(CreateResponsableDto dto);
+    Task<bool> createUserAsync(CreateUserDto dto);
     Task<EnseignantDto> addAsync(CreateEnseignantDto dto);
     Task<bool> importEnseignant(List<CreateEnseignantDto> enseignants);
     Task<EnseignantDto> registerAsync(RegisterEnseignantDto dto);

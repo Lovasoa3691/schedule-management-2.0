@@ -9,6 +9,8 @@ import { set } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Loader } from "./spin/Spinner";
 import { can } from "../hooks/permission";
+import Swal from "sweetalert2";
+import Select from "react-select";
 
 const Subject = () => {
   const [matieres, setMatieres] = useState([]);
@@ -19,7 +21,15 @@ const Subject = () => {
     api
       .get("/matiere")
       .then((res) => setMatieres(res.data))
-      .catch((err) => console.error("Erreur de chargement:", err))
+      .catch((err) => {
+        console.error("Erreur de chargement:", err);
+        Swal.fire({
+          title: "Erreur",
+          text: "Une erreur est survenue lors du chargement des matières.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      })
       .finally(() => {
         setTimeout(() => {
           setLoading(false);
@@ -53,10 +63,15 @@ const Subject = () => {
   const [niveaux, setNiveaux] = useState([]);
   const [enseignants, setEnseignants] = useState([]);
 
+  const [searchfield, setSearchfield] = useState("");
+  const [selectedEnseignant, setSelectedEnseignant] = useState(null);
+
   const loadData = () => {
     api.get("/mention").then((res) => setMentions(res.data));
     api.get("/niveau").then((res) => setNiveaux(res.data));
-    api.get("/utilisateur/teacher").then((res) => setEnseignants(res.data));
+    api.get("/user/teacher").then((res) => {
+      setEnseignants(res.data);
+    });
   };
 
   useEffect(() => {
@@ -95,8 +110,12 @@ const Subject = () => {
           mentionId: [],
           niveauId: [],
         });
-        setShowAlert(true);
-        setAlert("Données enregistré avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données enregistrées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
         setShowModal(false);
       });
     } catch (error) {
@@ -125,8 +144,12 @@ const Subject = () => {
           mentionId: [],
           niveauId: [],
         });
-        setShowAlert(true);
-        setAlert("Données modifié avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données modifiées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => console.error("Erreur d'envoi:", err.message));
     setShowModalEdit(false);
@@ -155,8 +178,12 @@ const Subject = () => {
       .delete(`/matiere/${deleteId}`)
       .then(() => {
         loadSubject();
-        setShowAlert(true);
-        setAlert("Données supprimées !");
+        Swal.fire({
+          title: "Succès",
+          text: "Données supprimées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => {
         console.error("Erreur: ", err.message);
@@ -173,31 +200,39 @@ const Subject = () => {
     return () => timer;
   }, [alert]);
 
-  const [searchfield, setSearchfield] = useState("");
+  const enseignantOptions = enseignants.map((ens) => ({
+    value: `${ens.nom} ${ens.prenom}`,
+    label: `${ens.nom} ${ens.prenom}`,
+  }));
 
-  const filter = matieres.filter((mt) =>
-    (
+  const filteredMatieres = matieres.filter((mt) => {
+    const matchSearch = (
       mt.nomMat +
       " " +
       mt.nbH +
       " " +
       mt.coeff +
       " " +
-      mt.prenomEns +
-      " " +
-      mt.nomEns +
-      " " +
       mt.mention
     )
       .toLowerCase()
-      .includes(searchfield.toLowerCase()),
-  );
+      .includes(searchfield.toLowerCase());
 
+    const matchEnseignant = selectedEnseignant
+      ? mt.enseignants?.includes(selectedEnseignant.value)
+      : true;
+
+    return matchSearch && matchEnseignant;
+  });
+
+  const handleEnseignantChange = (selected) => {
+    setSelectedEnseignant(selected);
+  };
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserRole(rep.data.userRole);
       })
@@ -249,18 +284,30 @@ const Subject = () => {
           </div>
         </div>
       </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+        {can(userRole === "Admin" ? "admin" : "secretary", "add") && (
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
+            >
+              <FiPlus className="w-5 h-5 text-white" />
+              <span>Nouveau</span>
+            </button>
+          </div>
+        )}
 
-      {can(userRole === "Admin" ? "admin" : "secretary", "add") && (
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95"
-          >
-            <FiPlus className="w-5 h-5 text-white" />
-            <span>Nouveau</span>
-          </button>
+        <div className="search-group flex items-center justify-between gap-4">
+          <Select
+            className="w-80"
+            options={enseignantOptions}
+            placeholder="Filtre par enseignant"
+            value={selectedEnseignant}
+            onChange={handleEnseignantChange}
+            isClearable
+          />
         </div>
-      )}
+      </div>
 
       {showModal && (
         <SubjectForm
@@ -302,9 +349,7 @@ const Subject = () => {
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     COEFFICIENT
                   </th>
-                  {/* <th className="px-4 py-3 sticky top-0 bg-indigo-100">
-                    ENSEIGNANT
-                  </th> */}
+
                   <th className="px-4 py-3 sticky top-0 bg-indigo-100">
                     CLASSE
                   </th>
@@ -325,16 +370,14 @@ const Subject = () => {
                       <Loader />
                     </td>
                   </tr>
-                ) : filter.length > 0 ? (
-                  filter.map((mat, index) => (
+                ) : filteredMatieres.length > 0 ? (
+                  filteredMatieres.map((mat, index) => (
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-4 py-3">{index + 1}</td>
                       <td className="px-4 py-3">{mat.nomMat}</td>
                       <td className="px-4 py-3">{mat.nbH} Heures</td>
                       <td className="px-4 py-3">{mat.coeff}</td>
-                      {/* <td className="px-4 py-3">
-                        {mat.nomEns} {mat.prenomEns}
-                      </td> */}
+
                       <td className="px-4 py-3">
                         {mat.mention} {mat.niveau.join(" / ")}
                       </td>

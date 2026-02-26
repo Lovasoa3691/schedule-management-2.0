@@ -26,7 +26,7 @@ const Login = ({ setIsAuthentificated }) => {
 
     try {
       setLoading(true);
-      const rep = await api.post("/utilisateur/login", user);
+      const rep = await api.post("/user/login", user);
       if (rep.data) {
         setTimeout(() => {
           setIsAuthentificated(true);

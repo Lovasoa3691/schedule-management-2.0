@@ -7,6 +7,7 @@ import Confirm from "./notification/confirm";
 import api from "../hooks/api";
 import { Loader } from "./spin/Spinner";
 import { can } from "../hooks/permission";
+import Swal from "sweetalert2";
 
 const ClassRoom = () => {
   const [salles, setSalles] = useState([]);
@@ -77,8 +78,12 @@ const ClassRoom = () => {
           capacite: "",
           localisation: "",
         });
-        setShowAlert(true);
-        setAlert("Données enregistré avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données enregistrées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => console.error("Erreur d'envoi:", err.message));
     setShowModal(false);
@@ -101,8 +106,12 @@ const ClassRoom = () => {
           capacite: "",
           localisation: "",
         });
-        setShowAlert(true);
-        setAlert("Données modifié avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données modifiées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => console.error("Erreur d'envoi:", err.message));
     setShowModalEdit(false);
@@ -121,8 +130,12 @@ const ClassRoom = () => {
       .delete(`/salle/${deleteId}`)
       .then(() => {
         loadData();
-        setShowAlert(true);
-        setAlert("Données supprimées !");
+        Swal.fire({
+          title: "Succès",
+          text: "Données supprimées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => {
         console.error("Erreur: ", err.message);
@@ -157,7 +170,7 @@ const ClassRoom = () => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserRole(rep.data.userRole);
       })

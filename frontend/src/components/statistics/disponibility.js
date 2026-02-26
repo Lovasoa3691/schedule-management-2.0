@@ -56,9 +56,7 @@ const Disponibility = () => {
     // console.log("Semaine actuelle:", monday.getDate(), "-", sunday.getDate());
     setLoading(true);
     api
-      .get(
-        `/disponibilite/all?week=${monday.toISOString().split("T")[0]}-${sunday.toISOString().split("T")[0]}`,
-      )
+      .get(`/disponibilite/all?week=${monday.getDate()}-${sunday.getDate()}`)
       .then((res) => {
         const grouped = groupByEnseignant(res.data);
         setDisponibilites(grouped);
@@ -96,7 +94,7 @@ const Disponibility = () => {
           <Loader size="lg" color="blue" />
         </div>
       ) : (
-        <div className="max-h-[700px] overflow-y-auto mt-12 bg-white rounded-lg shadow-md p-8">
+        <div className="max-h-[800px] overflow-y-auto mt-12 bg-white rounded-lg shadow-md p-8">
           {disponibilites.map((ens, index) => (
             <li className="mb-4 list-none" key={index}>
               <button
@@ -118,7 +116,11 @@ const Disponibility = () => {
                 </div>
                 <div className="flex gap-4 items-center">
                   <span className="bg-yellow-50 text-yellow-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-yellow-900 dark:text-yellow-300">
-                    {ens.disponibilites.length} disponibilités
+                    {ens.disponibilites.length === 0
+                      ? "Aucune disponibilité"
+                      : `${ens.disponibilites.length} disponibilité${
+                          ens.disponibilites.length > 1 ? "s" : ""
+                        }`}
                   </span>
                   {ens.disponibilites.length > 0 && (
                     <MdExpandMore

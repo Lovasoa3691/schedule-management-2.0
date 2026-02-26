@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Loader } from "./spin/Spinner";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import { FiPlus, FiSearch } from "react-icons/fi";
 import api from "../hooks/api";
 import UserForm from "./forms/user-form";
+import Swal from "sweetalert2";
 
 const Users = () => {
   const [loading, setLoading] = useState(false);
@@ -11,28 +12,77 @@ const Users = () => {
   const [searchfield, setSearchfiled] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [userdata, setUserdata] = useState({
+    id: "",
+    username: "",
     nom: "",
     prenom: "",
     email: "",
     role: "",
   });
   const [isEdit, setIsEdit] = useState(false);
+  const [enseignants, setEnseignants] = useState([]);
 
-  useEffect(() => {
+  const loadTeacher = () => {
     api
-      .get("/utilisateur/all")
+      .get("user/teacher")
+      .then((rep) => {
+        setEnseignants(rep.data);
+      })
+      .catch(() => {
+        setEnseignants([]);
+      });
+  };
+
+  const users = () => {
+    api
+      .get("user/all")
       .then((rep) => {
         setFilter(rep.data);
       })
       .catch(() => {
         setFilter([]);
       });
-  });
+  };
+
+  useEffect(() => {
+    users();
+    loadTeacher();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserdata({ ...userdata, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    api
+      .post("user/create", userdata)
+      .then(() => {
+        setShowModal(false);
+        Swal.fire({
+          title: "Succès",
+          text: "Utilisateur créé avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        users();
+        loadTeacher();
+      })
+      .catch((err) => {
+        console.error("Erreur lors de la création de l'utilisateur:", err);
+        Swal.fire({
+          title: "Erreur",
+          text: "Une erreur est survenue lors de la création de l'utilisateur.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      });
+  };
 
   return (
     <div className="user-container h-screen">
       <h1 className="text-2xl font-bold mb-4"></h1>
-      {/* <p>Cette section est en cours de développement.</p> */}
 
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-semibold text-gray-800">
@@ -75,11 +125,11 @@ const Users = () => {
 
       {showModal && (
         <UserForm
-          data={""}
+          data={userdata}
           setShowModal={setShowModal}
-          handleChange={""}
-          handleSubmit={""}
-          enseignants={""}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          enseignants={enseignants}
         />
       )}
 
@@ -138,7 +188,7 @@ const Users = () => {
                       </td>
 
                       <td className="px-4 py-3 text-md italic text-gray-500">
-                        {u.creation.slice(0, 8) || "N/A"}
+                        {u.creation || "N/A"}
                       </td>
 
                       <td className="px-4 py-3">

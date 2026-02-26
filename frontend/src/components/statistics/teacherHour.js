@@ -15,7 +15,7 @@ const TeacherHour = () => {
     setLoading(true);
 
     api
-      .get("utilisateur/teacher/info/all")
+      .get("user/teacher/info/all")
       .then((res) => {
         console.log("Info enseignants : ", res.data);
         setInfoEnseignants(res.data);
@@ -25,7 +25,7 @@ const TeacherHour = () => {
       .finally(() => setLoading(false));
 
     api
-      .get("utilisateur/teacher")
+      .get("user/teacher")
       .then((res) => {
         setEnseignants(res.data);
       })
@@ -55,8 +55,6 @@ const TeacherHour = () => {
   const handleEnseignantChange = (selectedEnseignant) => {
     setSelectedEnseignant(selectedEnseignant);
     filtrerData(selectedEnseignant);
-
-    // console.log("Filtered data: ", filtrerData(selectedEnseignant));
   };
 
   return (

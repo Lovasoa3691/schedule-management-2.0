@@ -173,20 +173,6 @@ public class ImUtilisateur : IUtilisateur
         _db.Responsables.Add(res);
         await _db.SaveChangesAsync();
 
-        // var hasher = new PasswordHasher<Utilisateur>();
-        // string hashedPass = hasher.HashPassword(res, dto.mdp);
-
-        var auth = new Authentification
-        {
-            email = dto.email,
-            mdp = "",
-            utilisateurId = res.idUt,
-            isActive = false
-        };
-        
-        _db.Authentifications.Add(auth);
-        await _db.SaveChangesAsync();
-
         return new ResponsableDto(
             res.idUt,
             res.nom,
@@ -195,8 +181,62 @@ public class ImUtilisateur : IUtilisateur
             res.role,
             res.genre,
             res.adresse,
-            auth.email
+            ""
         );
+    }
+
+    public async Task<bool> createUserAsync(CreateUserDto dto)
+    {
+        if(dto.role == "Enseignant")
+        {
+            var res = await _db.Utilisateurs.FirstOrDefaultAsync(r => r.idUt == dto.id);
+            if (res == null) return false;
+
+            var auth = new Authentification
+            {
+                email = dto.email,
+                mdp = "",
+                utilisateurId = res.idUt,
+                isActive = false,
+                status = "Inactif",
+                createdAt = DateTime.Now
+            };
+        
+            _db.Authentifications.Add(auth);
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+        else
+        {
+            var respo = new Responsable
+            {
+                nom = dto.nom,
+                prenom = dto.prenom,
+                telephone = "",
+                adresse = "",
+                genre = "",
+                role = dto.role,
+            };
+            _db.Responsables.Add(respo);
+            await _db.SaveChangesAsync();
+
+            var res_auth = new Authentification
+            {
+                email = dto.email,
+                username = dto.username,
+                mdp = "",
+                utilisateurId = respo.idUt,
+                isActive = false,
+                status = "Inactif",
+                createdAt = DateTime.Now
+            };
+        
+            _db.Authentifications.Add(res_auth);
+            await _db.SaveChangesAsync();
+        }
+        return true;
+        
     }
 
     public async Task<bool> importEnseignant(List<CreateEnseignantDto> enseignants)
@@ -253,20 +293,7 @@ public class ImUtilisateur : IUtilisateur
             grade = dto.grade,
             role = "Enseignant"
         };
-        
-        _db.Enseignants.Add(res);
-        await _db.SaveChangesAsync();
-
-        var auth = new Authentification
-        {
-            email = dto.email,
-            mdp = "",
-            utilisateurId = res.idUt,
-            isActive = false
-        };
-        
-        _db.Authentifications.Add(auth);
-        await _db.SaveChangesAsync();
+    
 
         return new EnseignantDto(
             res.idUt,
@@ -276,7 +303,7 @@ public class ImUtilisateur : IUtilisateur
             res.grade,
             res.genre,
             res.adresse,
-            auth.email
+            ""
         );
     }
 

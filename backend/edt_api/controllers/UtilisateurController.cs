@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace edt_api.controllers;
 
 [ApiController]
-[Route("api/utilisateur")]
+[Route("api/user")]
 public class UtilisateurController : ControllerBase
 {
     private readonly IUtilisateur _service;
@@ -135,6 +135,13 @@ public class UtilisateurController : ControllerBase
     public async Task<IActionResult> ImportTeacher([FromBody] List<CreateEnseignantDto> dto)
     {
         var created = await _service.importEnseignant(dto);
+        return created ? Ok() : BadRequest();
+    }
+
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
+    {
+        var created = await _service.createUserAsync(dto);
         return created ? Ok() : BadRequest();
     }
     

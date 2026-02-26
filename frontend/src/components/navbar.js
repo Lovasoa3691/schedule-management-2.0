@@ -27,7 +27,7 @@ const Navbar = ({ setLoading }) => {
 
   useEffect(() => {
     document.title = `SchedConnect | ${currentPage}`;
-    api.get("/utilisateur/profile").then((rep) => {
+    api.get("/user/profile").then((rep) => {
       if (rep.data.userRole === "Responsable_planning") {
         console.log("Responsable connecté, redirection vers le planning...");
         setRole("secretary");

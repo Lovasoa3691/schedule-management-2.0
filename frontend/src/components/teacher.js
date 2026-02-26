@@ -56,7 +56,7 @@ const Teacher = () => {
   const loadData = () => {
     setLoading(true);
     api
-      .get("/utilisateur/teacher")
+      .get("/user/teacher")
       .then((res) => {
         setEnseignant(res.data);
         setFiltered(res.data);
@@ -101,7 +101,7 @@ const Teacher = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     api
-      .post("/utilisateur/add/teacher", formData)
+      .post("/user/add/teacher", formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -114,10 +114,24 @@ const Teacher = () => {
           grade: "",
           email: "",
         });
-        setShowAlert(true);
-        setAlert("Données enregistré avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données enregistrées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
-      .catch((err) => console.error("Erreur d'envoi:", err.message));
+      .catch((err) =>
+        Swal.fire({
+          title: "Erreur",
+          text:
+            err?.response?.data ||
+            "Une erreur est survenue lors de l'enregistrement.",
+          icon: "error",
+          confirmButtonText: "OK",
+        }),
+      );
+
     setShowModal(false);
   };
 
@@ -128,7 +142,7 @@ const Teacher = () => {
       return;
     }
     api
-      .put(`/utilisateur/teacher/${formData.id}`, formData)
+      .put(`/user/teacher/${formData.id}`, formData)
       .then((res) => {
         loadData();
         setFormData({
@@ -141,8 +155,12 @@ const Teacher = () => {
           grade: "",
           email: "",
         });
-        setShowAlert(true);
-        setAlert("Données modifié avec succès!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données modifiées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => console.error("Erreur d'envoi:", err.message));
     setShowModalEdit(false);
@@ -158,11 +176,15 @@ const Teacher = () => {
 
   const handleDelete = () => {
     api
-      .delete(`/utilisateur/teacher/${deleteId}`)
+      .delete(`/user/teacher/${deleteId}`)
       .then(() => {
         loadData();
-        setShowAlert(true);
-        setAlert("Données supprimées!");
+        Swal.fire({
+          title: "Succès",
+          text: "Données supprimées avec succès.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
       })
       .catch((err) => {
         console.error("Erreur: ", err.message);
@@ -328,7 +350,7 @@ const Teacher = () => {
         }, 100);
 
         api
-          .post("/utilisateur/teacher/import", data)
+          .post("/user/teacher/import", data)
           .then(() => {
             clearInterval(interval);
 
@@ -378,7 +400,7 @@ const Teacher = () => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserRole(rep.data.userRole);
       })

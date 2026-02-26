@@ -209,7 +209,7 @@ const Profil = () => {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((res) => {
         setId(res.data.userId);
         setRole(res.data.userRole);
@@ -220,7 +220,7 @@ const Profil = () => {
   useEffect(() => {
     if (id && role) {
       api
-        .get(`/utilisateur/info?id=${id}&role=${role}`)
+        .get(`/user/info?id=${id}&role=${role}`)
         .then((res) => setUser(res.data[0]))
         .catch((err) => console.error(err));
     }
@@ -241,7 +241,7 @@ const Profil = () => {
 
   const handleSave = async () => {
     try {
-      await api.put(`/utilisateur/${id}`, formData);
+      await api.put(`/user/${id}`, formData);
       alert("Profil mis à jour");
     } catch (err) {
       console.error(err);

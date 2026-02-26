@@ -37,7 +37,7 @@ function App() {
 
   useEffect(() => {
     api
-      .get("/utilisateur/profile")
+      .get("/user/profile")
       .then((rep) => {
         setUserRole(rep.data.userRole);
         setIsAuthenticated(true);
