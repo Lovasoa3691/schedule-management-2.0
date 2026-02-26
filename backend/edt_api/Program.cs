@@ -16,23 +16,23 @@ var builder = WebApplication.CreateBuilder(args);
 // var dbUser = Environment.GetEnvironmentVariable("DB_USER");
 // var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-var dbHost = "localhost";
-var dbPort = 3306;
-var dbName = "db_edt_p";
-var dbUser = "orion";
-var dbPassword = "orion3691";
+// var dbHost = "localhost";
+// var dbPort = 3306;
+// var dbName = "db_edt_p";
+// var dbUser = "orion";
+// var dbPassword = "orion3691";
 
-var connectionString =
-    $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
+// var connectionString =
+//     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    )
-);
+// builder.Services.AddDbContext<AppDbContext>(options =>
+//     options.UseMySql(
+//         connectionString,
+//         ServerVersion.AutoDetect(connectionString)
+//     )
+// );
 
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddCors(options =>
 {
