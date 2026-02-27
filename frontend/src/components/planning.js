@@ -213,8 +213,10 @@ const Planning = () => {
         setMatieres(res.data);
       })
       .catch((err) => console.error("Erreur de chargement:", err));
+  };
 
-    const today = getCurrentWeek(new Date());
+  const loadDispo = (selectedDate) => {
+    const today = getCurrentWeek(selectedDate);
 
     api
       .get(
@@ -229,6 +231,14 @@ const Planning = () => {
       })
       .catch((err) => console.error("Erreur de chargement:", err));
   };
+
+  useEffect(() => {
+    if (selectedDate === null) {
+      loadDispo(currentDate);
+    } else {
+      loadDispo(selectedDate);
+    }
+  }, [selectedDate]);
 
   const loadSchedule = () => {
     api
