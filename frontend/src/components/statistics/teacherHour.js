@@ -13,24 +13,24 @@ const TeacherHour = () => {
 
   const loadAll = () => {
     setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      api
+        .get("user/teacher/info/all")
+        .then((res) => {
+          console.log("Info enseignants : ", res.data);
+          setInfoEnseignants(res.data);
+          setFilter(res.data);
+        })
+        .catch((err) => console.error("Erreur de chargement:", err));
 
-    api
-      .get("user/teacher/info/all")
-      .then((res) => {
-        console.log("Info enseignants : ", res.data);
-        setInfoEnseignants(res.data);
-        setFilter(res.data);
-      })
-      .catch((err) => console.error("Erreur de chargement:", err))
-      .finally(() => setLoading(false));
-
-    api
-      .get("user/teacher")
-      .then((res) => {
-        setEnseignants(res.data);
-      })
-      .catch((err) => console.error("Erreur de chargement:", err))
-      .finally(() => setLoading(false));
+      api
+        .get("user/teacher")
+        .then((res) => {
+          setEnseignants(res.data);
+        })
+        .catch((err) => console.error("Erreur de chargement:", err));
+    }, 1500);
   };
 
   useEffect(() => {

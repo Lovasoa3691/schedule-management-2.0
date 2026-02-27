@@ -186,6 +186,10 @@ const Dashboard = () => {
     filtrerData(selectedMention, selectedNiveau);
   };
 
+  const total = enseignants?.length || 0;
+  const manPercent = total ? Math.floor((Man.length * 100) / total) : 0;
+  const womenPercent = total ? Math.floor((Women.length * 100) / total) : 0;
+
   return (
     <div className="dash-container">
       <h2 className="text-2xl text-gray-700">
@@ -315,25 +319,38 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-white shadow rounded-lg p-5">
-          <h3 className="font-semibold text-gray-700 mb-12">
-            Diveristé de genre
+          <h3 className="font-semibold text-gray-700 mb-6">
+            Diversité de genre
           </h3>
 
-          <div className="h-40 flex flex-col items-center justify-center text-gray-700">
-            <div className="flex items-center justify-between w-full border border-gray-400 rounded-lg p-4 mb-10">
-              <span>Homme</span>
-              <span>
-                {Math.floor((Man?.length * 100) / enseignants?.length) ?? "N/A"}{" "}
-                %
-              </span>
+          <div className="space-y-6 text-gray-700">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span>Homme</span>
+                <span>{manPercent} %</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-10">
+                <div
+                  className="bg-blue-500 h-10 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${manPercent}%`,
+                  }}
+                />
+              </div>
             </div>
-            <div className=" flex items-center justify-between w-full  border border-gray-400 rounded-lg p-4">
-              <span>Femme</span>
-              <span>
-                {Math.floor((Women?.length * 100) / enseignants?.length) ??
-                  "N/A"}{" "}
-                %
-              </span>
+            <div>
+              <div className="flex justify-between mb-2">
+                <span>Femme</span>
+                <span>{womenPercent} %</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-10">
+                <div
+                  className="bg-pink-500 h-10 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${womenPercent}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -360,11 +377,7 @@ const Dashboard = () => {
                 Aucune donnée disponible.
               </p>
             )}
-            {/* <PieCard
-              hebdomadaire={hebdomadaire}
-              semetriel={semestriel}
-              partiel={partiel}
-            /> */}
+          
           </div>
         </div>
 
@@ -380,7 +393,6 @@ const Dashboard = () => {
               <thead className="bg-indigo-100 text-left font-semibold sticky top-0 ">
                 <tr>
                   <th className="px-4 py-2">Nom & Prenom</th>
-                  {/* <th className="px-4 py-2">Sexe</th> */}
                   <th className="px-4 py-2">Grade</th>
                   <th className="px-4 py-2">Performance</th>
                 </tr>
@@ -415,9 +427,9 @@ const Dashboard = () => {
                         <td className="px-4 py-2">{ens.grade}</td>
                         <td className="px-4 py-2">
                           <div className="flex flex-row items-center gap-2">
-                            <div className="w-full h-2 bg-gray-200 rounded">
+                            <div className="w-full h-4 bg-gray-200 rounded">
                               <div
-                                className="h-2 bg-green-500 rounded"
+                                className="h-4 bg-green-500 rounded"
                                 style={{ width: `${performance}%` }}
                               ></div>
                             </div>

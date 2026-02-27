@@ -21,10 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 // var dbName = "db_edt_p";
 // var dbUser = "orion";
 // var dbPassword = "orion3691";
-
+//
 // var connectionString =
 //     $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
-
+//
 // builder.Services.AddDbContext<AppDbContext>(options =>
 //     options.UseMySql(
 //         connectionString,

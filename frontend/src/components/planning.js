@@ -127,6 +127,7 @@ const Planning = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [week, setWeek] = useState(null);
 
   function generateHoraire(start = "07:00", end = "18:00", step = 30) {
     const result = [];
@@ -217,11 +218,11 @@ const Planning = () => {
 
   const loadDispo = (selectedDate) => {
     const today = getCurrentWeek(selectedDate);
+    const week = `${today.monday.getDate()}-${today.sunday.getDate()}_${today.monday.getMonth() + 1}_${today.monday.getFullYear()}`;
+    console.log("Semaine: ", week);
 
     api
-      .get(
-        `/disponibilite/all?week=${today.monday.getDate()}-${today.sunday.getDate()}`,
-      )
+      .get(`/disponibilite/all?week=${week}`)
       .then((res) => {
         if (res.data.length === 0) {
           console.log("Aucune disponibilité trouvée pour la semaine actuelle.");
@@ -235,8 +236,10 @@ const Planning = () => {
   useEffect(() => {
     if (selectedDate === null) {
       loadDispo(currentDate);
+      console.log("Date: ", currentDate);
     } else {
       loadDispo(selectedDate);
+      console.log("Date: ", currentDate);
     }
   }, [selectedDate]);
 
@@ -403,6 +406,8 @@ const Planning = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const week = `${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}_${new Date(sunday.toLocaleDateString()).getMonth()}_${new Date(sunday.toLocaleDateString()).getFullYear()}`;
+
     const data = {
       ...formData,
       mentionId: parseInt(formData.mentionId),
@@ -412,7 +417,7 @@ const Planning = () => {
       jour: formData.jour,
       hDeb: `${formData.hDeb}:00`,
       hFin: `${formData.hFin}:00`,
-      semaine: `${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}`,
+      semaine: `${week}`,
     };
 
     api
@@ -426,7 +431,7 @@ const Planning = () => {
           hFin: "",
           dispo: "En cours",
           type: "",
-          responsableId: localStorage.getItem("user"),
+          responsableId: userId,
           enseignantId: "",
           mentionId: "",
           niveauId: "",
@@ -479,8 +484,12 @@ const Planning = () => {
         if (dispoDuJour.length === 0) {
           setFilteredHoarire([]);
           setShowForm(false);
-          setshowError(true);
-          console.log("Désolé, enseignant non disponible ce jour !");
+          Swal.fire({
+            title: "Information",
+            text: "Désolé, enseignant non disponible. Veuillez choisir un autre s'il vous plait!",
+            icon: "information",
+            confirmButtonText: "OK",
+          });
           return;
         }
 

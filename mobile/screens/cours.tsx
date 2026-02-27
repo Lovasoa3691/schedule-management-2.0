@@ -85,12 +85,16 @@ export default function courses(): React.JSX.Element {
     }
     setLoading(true);
 
+    const week = `${monday.getDate()}-${sunday.getDate()}_${monday.getMonth() + 1}_${monday.getFullYear()}`;
+
+    // Alert.alert(week);
+
     api
-      .get(`/edt/${data.userId}/week_${monday.getDate()}-${sunday.getDate()}`, {
+      .get(`/edt/${data.userId}/week_${week}`, {
         params: { start, end },
       })
       .then((rep) => {
-        console.log("Cours chargés: ", rep.data);
+        // console.log("Cours chargés: ", rep.data);
         if (rep.data.length > 0) {
           const cours: coursesList[] = rep.data.map((c: any) => ({
             id: c.numEd,
@@ -108,17 +112,9 @@ export default function courses(): React.JSX.Element {
             statusEns: c.status === "Accompli" ? true : false,
           }));
           setCourses(cours);
+        } else {
+          setCourses([]);
         }
-        setCourses((prev) =>
-          prev.map((cours) => ({
-            ...cours,
-            jour: new Date(cours.jour).toLocaleDateString("fr-FR", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            }),
-          })),
-        );
       })
       .catch((err) =>
         console.error(
@@ -175,11 +171,11 @@ export default function courses(): React.JSX.Element {
   };
 
   const getStatus = (cours: coursesList): "Annulé" | "En cours" | "Terminé" => {
-    if (cours.completed) return "Terminé";
-    if (cours.canceled) return "Annulé";
     // const today = new Date();
     // const target = new Date(cours.jour);
     // if (target > today) return "À venir";
+    if (cours.completed) return "Terminé";
+    if (cours.canceled) return "Annulé";
     return "En cours";
   };
 
@@ -240,6 +236,17 @@ export default function courses(): React.JSX.Element {
     setRefreshing(false);
   };
 
+  const isToday = (dateStr: string) => {
+    const today = new Date();
+    const target = new Date(dateStr);
+
+    return (
+      today.getFullYear() === target.getFullYear() &&
+      today.getMonth() === target.getMonth() &&
+      today.getDate() === target.getDate()
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -270,13 +277,21 @@ export default function courses(): React.JSX.Element {
             </Text>
           }
           renderItem={({ item }) => {
+            const today = isToday(item.jour);
+
             const status = getStatus(item);
+
+            const displayStatus =
+              !today && status === "En cours" ? "À venir" : status;
+
             const statusColor =
-              status === "Terminé"
+              displayStatus === "Terminé"
                 ? "#4caf50"
-                : status === "En cours"
-                  ? "#ff9800"
-                  : "#2196f3";
+                : displayStatus === "Annulé"
+                  ? "#f44336"
+                  : displayStatus === "À venir"
+                    ? "#2196f3"
+                    : "#ff9800";
 
             return (
               <View
@@ -297,55 +312,60 @@ export default function courses(): React.JSX.Element {
                 </Text>
                 <Text style={styles.coursDate}> {item.jour} </Text>
                 <Text style={[styles.coursestatus, { color: statusColor }]}>
-                  {status === "Terminé" ? (
+                  {displayStatus === "Terminé" ? (
                     <Ionicons name="checkmark-done" size={16} color="#4caf50" />
-                  ) : status === "En cours" ? (
+                  ) : displayStatus === "En cours" ? (
                     <Ionicons
                       name="play-circle-outline"
                       size={16}
                       color="#ff9800"
                     />
+                  ) : displayStatus === "À venir" ? (
+                    <Ionicons name="time-outline" size={16} color="#2196f3" />
                   ) : (
-                    <Ionicons name="close-circle-outline" size={16} color="#2196f3" />
+                    <Ionicons
+                      name="close-circle-outline"
+                      size={16}
+                      color="#f44336"
+                    />
                   )}{" "}
-                  {status}
+                  {displayStatus}
                 </Text>
 
-                <View style={{ flexDirection: "row", marginTop: 10 }}>
-                  {!item.completed ||
-                    (!item.canceled && (
-                      <TouchableOpacity
-                        onPress={() => done(item.id)}
-                        style={styles.completeButton}
-                        disabled={loadingDone}
-                      >
-                        {loadingDone ? (
-                          <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                          <>
-                            <Ionicons
-                              name="checkmark-done"
-                              size={18}
-                              color="#fff"
-                            />
-                            <Text style={styles.completeText}>
-                              Marquer comme fait
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    ))}
+                {status === "En cours" && (
+                  <View style={{ flexDirection: "row", marginTop: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => done(item.id)}
+                      style={[
+                        styles.completeButton,
+                        (!today || loadingDone) && { opacity: 0.5 },
+                      ]}
+                      disabled={!today || loadingDone}
+                    >
+                      {loadingDone ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="checkmark-done"
+                            size={18}
+                            color="#fff"
+                          />
+                          <Text style={styles.completeText}>
+                            Marquer comme fait
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
 
-                  {!item.completed ||
-                    (!item.canceled && (
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => cancelCours(item.id)}
-                      >
-                        <Text style={styles.cancelText}>Annuler</Text>
-                      </TouchableOpacity>
-                    ))}
-                </View>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => cancelCours(item.id)}
+                    >
+                      <Text style={styles.cancelText}>Annuler</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             );
           }}

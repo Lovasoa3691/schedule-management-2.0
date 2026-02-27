@@ -71,7 +71,8 @@ public class ImEdt : IEdt
             .Include(n => n.niveau)
             .Include(s => s.salle)
             .Include(a => a.anneeScolaire)
-            .Where(e => e.anneeScolaire.status == "Active" && e.enseignantId == id && e.semaine == week);
+            .Where(e => e.anneeScolaire.status == "Active" && e.enseignantId == id && e.semaine == week)
+            .OrderBy(o => o.jour);
 
         var result = await query.ToListAsync();
         return _mapper.Map<IEnumerable<EdtDto>>(result);

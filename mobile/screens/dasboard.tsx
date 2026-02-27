@@ -18,6 +18,7 @@ import { RefreshControl } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Speech from "expo-speech";
 import * as Location from "expo-location";
+import { usePlanning } from "./utils/PlanningContext";
 
 export const getUserLocationWithCity = async () => {
   // Permission
@@ -139,6 +140,7 @@ const Dashboard: React.FC = () => {
   const [resumeSemaine, setResumeSemaine] = useState<Semaine[]>([]);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const { selectedWeek } = usePlanning();
 
   const getCurrentWeek = (date: Date) => {
     const day = date.getDay();
@@ -176,14 +178,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const today = new Date();
-  const { monday, sunday } = getCurrentWeek(today);
-
-  const start = monday.toISOString().split("T")[0];
-  const end = sunday.toISOString().split("T")[0];
-
   const loadCourses = async () => {
     loadWeather();
+
+    const today = new Date(selectedWeek);
+    const { monday, sunday } = getCurrentWeek(today);
+
+    const start = monday.toISOString().split("T")[0];
+    const end = sunday.toISOString().split("T")[0];
 
     const dateFormat = (date: Date) => {
       const dateStr = new Date(date);
@@ -201,14 +203,19 @@ const Dashboard: React.FC = () => {
     setEmail(data.email || "");
     setLoading(true);
 
-    console.log("Ajourd'hui:", monday.getDate(), "-", sunday.getDate());
+    // const today = new Date(selectedWeek);
+    // const { monday, sunday } = getCurrentWeek(today);
+
+    const week = `${monday.getDate()}-${sunday.getDate()}_${monday.getMonth() + 1}_${monday.getFullYear()}`;
+
+    // Alert.alert("Semaine: ", week);
 
     api
-      .get(`/edt/${data.userId}/week_${monday.getDate()}-${sunday.getDate()}`, {
+      .get(`/edt/${data.userId}/week_${week}`, {
         params: { start, end },
       })
       .then((rep) => {
-        console.log("Données de l'emploi du temps: ", rep.data);
+        // console.log("Données de l'emploi du temps: ", rep.data);
         if (rep.data.length > 0) {
           const today = dateFormat(new Date());
 
@@ -278,11 +285,6 @@ const Dashboard: React.FC = () => {
           "Erreur de chargement",
           "Impossible de charger les données de l'emploi du temps. Veuillez réessayer plus tard.",
         );
-        // (console.error(
-        //   "Erreur de chargement des données: ",
-        //   err.response?.data || err.message,
-        // ),
-        //   setCourses([]));
       })
       .finally(() => setLoading(false));
   };
@@ -312,10 +314,6 @@ const Dashboard: React.FC = () => {
         const target = new Date();
         target.setHours(h, m, 0, 0);
         const diff = target.getTime() - now.getTime();
-        // Alert.alert(
-        //   "Seance a venir",
-        //   `Prochaine seance: ${seanceAVenir.matiere} a ${seanceAVenir.hDeb}`,
-        // );
 
         if (diff <= 0) {
           setTimeLeft("La séance commence !");
@@ -447,7 +445,8 @@ const Dashboard: React.FC = () => {
               <Text
                 style={{ fontSize: 16, color: "#d6d6d6ff", marginBottom: 4 }}
               >
-                {prochaineSeance.hDeb.slice(0, 5)} - {prochaineSeance.hFin.slice(0, 5)}
+                {prochaineSeance.hDeb.slice(0, 5)} -{" "}
+                {prochaineSeance.hFin.slice(0, 5)}
               </Text>
               <Text
                 style={{ fontSize: 16, color: "#d6d6d6ff", marginBottom: 4 }}
@@ -517,7 +516,8 @@ const Dashboard: React.FC = () => {
             return (
               <View key={index} style={styles.seanceItem}>
                 <Text style={styles.cardContent}>
-                  {seance.hDeb.slice(0, 5)} - {seance.hFin.slice(0, 5)} | {seance.matiere}
+                  {seance.hDeb.slice(0, 5)} - {seance.hFin.slice(0, 5)} |{" "}
+                  {seance.matiere}
                 </Text>
                 <Text style={styles.cardContent}>Salle {seance.salle}</Text>
                 <Text style={styles.cardContent}>

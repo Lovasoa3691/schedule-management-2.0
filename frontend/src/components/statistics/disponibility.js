@@ -52,40 +52,61 @@ const Disponibility = () => {
     return { monday, sunday };
   };
 
-  const loadDisponibilites = () => {
-    const today = new Date();
-    const { monday, sunday } = getCurrentWeek(today);
-    setLoading(true);
-    api
-      .get(`/disponibilite/all?week=${monday.getDate()}-${sunday.getDate()}`)
-      .then((res) => {
-        const grouped = groupByEnseignant(res.data);
-        setDisponibilites(grouped);
-      })
-      .catch((err) => {
-        Swal.fire({
-          icon: "error",
-          title: "Erreur de chargement",
-          text: "Impossible de charger les disponibilités. Veuillez réessayer plus tard.",
-        });
-      })
-      .finally(() => setLoading(false));
-  };
-
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [week, setWeek] = useState(null);
 
   const handleWeekChange = (date) => {
     setSelectedDate(date);
+    const today = getCurrentWeek(date);
+    setWeek(
+      today.monday.getDate() +
+        "-" +
+        today.sunday.getDate() +
+        "_" +
+        (selectedDate.getMonth() + 1) +
+        "_" +
+        today.monday.getFullYear(),
+    );
+  };
 
-    const week = getCurrentWeek(date);
-    const year = date.getFullYear();
-
-    onWeekChange({ week, year });
+  const loadDisponibilites = (week) => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      api
+        .get(`/disponibilite/all?week=${week}`)
+        .then((res) => {
+          const grouped = groupByEnseignant(res.data);
+          setDisponibilites(grouped);
+        })
+        .catch((err) => {
+          Swal.fire({
+            icon: "error",
+            title: "Erreur de chargement",
+            text: "Impossible de charger les disponibilités. Veuillez réessayer plus tard.",
+          });
+        });
+    }, 1500);
   };
 
   useEffect(() => {
-    loadDisponibilites();
-  }, []);
+    console.log("Semaine: ",week)
+    if (week === null) {
+      const currentWeek = getCurrentWeek(new Date());
+      const actualWeek =
+        currentWeek.monday.getDate() +
+        "-" +
+        currentWeek.sunday.getDate() +
+        "_" +
+        (selectedDate.getMonth() + 1) +
+        "_" +
+        currentWeek.monday.getFullYear();
+
+      loadDisponibilites(actualWeek);
+    } else {
+      loadDisponibilites(week);
+    }
+  }, [selectedDate, week]);
 
   return (
     <div className="dispo-container h-screen">
@@ -103,10 +124,11 @@ const Disponibility = () => {
         <DatePicker
           selected={selectedDate}
           onChange={handleWeekChange}
-          showWeekNumbers
           showWeekPicker
           dateFormat="yyyy '– Semaine' ww"
-          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          popperPlacement="bottom-end"
+          withPortal
+          className="border rounded-lg px-3 py-2"
         />
       </div>
 

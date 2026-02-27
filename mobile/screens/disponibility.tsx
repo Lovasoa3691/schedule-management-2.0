@@ -179,7 +179,7 @@ export default function DisponibilityCalendar() {
       hdeb: heureDebut,
       hfin: heureFin,
       codeEns: id,
-      semaine: `${today.monday.getDate()}-${today.sunday.getDate()}`,
+      semaine: `${today.monday.getDate()}-${today.sunday.getDate()}_${today.monday.getMonth() + 1}_${today.monday.getFullYear()}`,
     };
 
     api
