@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import api from "../../hooks/api";
 import Swal from "sweetalert2";
 import { Loader } from "../spin/Spinner";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Disponibility = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -53,14 +55,12 @@ const Disponibility = () => {
   const loadDisponibilites = () => {
     const today = new Date();
     const { monday, sunday } = getCurrentWeek(today);
-    // console.log("Semaine actuelle:", monday.getDate(), "-", sunday.getDate());
     setLoading(true);
     api
       .get(`/disponibilite/all?week=${monday.getDate()}-${sunday.getDate()}`)
       .then((res) => {
         const grouped = groupByEnseignant(res.data);
         setDisponibilites(grouped);
-        // console.log("Disponibilités groupées:", grouped);
       })
       .catch((err) => {
         Swal.fire({
@@ -70,7 +70,17 @@ const Disponibility = () => {
         });
       })
       .finally(() => setLoading(false));
-    // console.error("Erreur de chargement:", err);
+  };
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const handleWeekChange = (date) => {
+    setSelectedDate(date);
+
+    const week = getCurrentWeek(date);
+    const year = date.getFullYear();
+
+    onWeekChange({ week, year });
   };
 
   useEffect(() => {
@@ -79,14 +89,25 @@ const Disponibility = () => {
 
   return (
     <div className="dispo-container h-screen">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-700 mb-2">
-          Disposition des enseignants
-        </h2>
-        <p className="text-sm text-gray-500">
-          Analyse hebdomadaire de la répartition des cours sur le mois
-          sélectionné
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-700 mb-2">
+            Disposition des enseignants
+          </h2>
+          <p className="text-sm text-gray-500">
+            Analyse hebdomadaire de la répartition des cours sur le mois
+            sélectionné
+          </p>
+        </div>
+
+        <DatePicker
+          selected={selectedDate}
+          onChange={handleWeekChange}
+          showWeekNumbers
+          showWeekPicker
+          dateFormat="yyyy '– Semaine' ww"
+          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {loading ? (
