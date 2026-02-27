@@ -44,7 +44,7 @@ export default function App() {
     }
 
     api
-      .get(`/utilisateur/teacher/info/${user.userId}`)
+      .get(`/user/teacher/info/${user.userId}`)
       .then((rep) => {
         // Alert.alert("Données chargées!", JSON.stringify(rep.data));
         setSubjectData(rep.data);

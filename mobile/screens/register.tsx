@@ -41,7 +41,7 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
 
-      const rep = await api.post("/utilisateur/register", data);
+      const rep = await api.post("/user/register", data);
 
       Alert.alert(
         "Votre compte est activé!",

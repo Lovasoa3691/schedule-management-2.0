@@ -42,7 +42,7 @@ export default function LoginScreen() {
         email: string;
         role: string;
         token: string;
-      }>("/utilisateur/login", {
+      }>("/user/login", {
         email,
         mdp,
         client: "mobile",
@@ -61,7 +61,7 @@ export default function LoginScreen() {
       await AsyncStorage.setItem("jwt", token);
 
       const profile = await api.get<{ userId: string; userRole: string }>(
-        "/utilisateur/profile",
+        "/user/profile",
       );
       await AsyncStorage.setItem("userId", profile.data.userId);
 

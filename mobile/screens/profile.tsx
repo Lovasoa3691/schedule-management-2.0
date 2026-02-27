@@ -59,7 +59,7 @@ const UserProfile = () => {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      await api.post("/utilisateur/logout");
+      await api.post("/user/logout");
       logout();
       //   Alert.alert("Déconnexion", "Vous êtes maintenant déconnecté");
     } catch (error) {
