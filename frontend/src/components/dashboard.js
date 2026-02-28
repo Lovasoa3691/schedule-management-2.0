@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [infoEnseignants, setInfoEnseignants] = useState([]);
   const [filter, setFilter] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     api.get("/mention").then((rep) => {
@@ -51,6 +52,7 @@ const Dashboard = () => {
       .get("/user/profile")
       .then((rep) => {
         setUserId(rep.data.userId);
+        setRole(rep.data.userRole);
       })
       .catch((err) => {
         console.error(err.message);
@@ -196,6 +198,9 @@ const Dashboard = () => {
         Bienvenue sur{" "}
         <span className="font-bold">
           Sched<span className="text-blue-500">Connect</span>
+        </span>
+        <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+          CI/CD OK
         </span>
       </h2>
       <div className=" h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -377,7 +382,6 @@ const Dashboard = () => {
                 Aucune donnée disponible.
               </p>
             )}
-          
           </div>
         </div>
 

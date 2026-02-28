@@ -241,8 +241,8 @@ const Teacher = () => {
       XLSX.writeFile(wb, "enseignants.xlsx");
     }
 
-    setShowAlert(true);
-    setAlert("Desole! Aucun enseignant a exporte pour le moment");
+    // setShowAlert(true);
+    // setAlert("Desole! Aucun enseignant a exporte pour le moment");
   };
 
   const ExportPDF = () => {
@@ -267,8 +267,8 @@ const Teacher = () => {
       doc.save(`liste_enseignants.pdf`);
     }
 
-    setShowAlert(true);
-    setAlert("Desole! Aucun enseignant a exporte pour le moment");
+    // setShowAlert(true);
+    // setAlert("Desole! Aucun enseignant a exporte pour le moment");
   };
 
   const [anchorElImport, setAnchorElImport] = useState(null);
