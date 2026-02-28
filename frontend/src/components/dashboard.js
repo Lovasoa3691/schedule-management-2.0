@@ -212,18 +212,16 @@ const Dashboard = () => {
 
   return (
     <div className="dash-container">
-      <h3 className="text-lg">
+      {/* <h3 className="text-2xl">
         Bonjour{" "}
-        <span className="text-blue-400 underline">{user[0]?.email}</span>
-      </h3>
+        <span className="text-blue-500 underline">{user[0]?.email}</span>
+      </h3> */}
+
       <h2 className="text-2xl text-gray-700">
         Bienvenue sur{" "}
         <span className="font-bold">
           Sched<span className="text-blue-500">Connect</span>
         </span>
-        {/* <span className="ml-6 text-xs px-2 py-2 bg-green-100 text-green-700 rounded-full">
-          CI/CD OK
-        </span> */}
       </h2>
       <div className=" h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         <div className="bg-white shadow rounded-lg p-5 flex flex-col justify-between">
