@@ -213,7 +213,8 @@ const Dashboard = () => {
   return (
     <div className="dash-container">
       <h3 className="text-lg">
-        Bonjour <span className="text-blue-400 underline">{user?.email}</span>
+        Bonjour{" "}
+        <span className="text-blue-400 underline">{user[0]?.email}</span>
       </h3>
       <h2 className="text-2xl text-gray-700">
         Bienvenue sur{" "}
