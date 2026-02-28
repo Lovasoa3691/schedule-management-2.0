@@ -380,7 +380,7 @@ const Subject = () => {
 
                       <td className="px-4 py-3">
                         {mat.mention.map((m, i) => (
-                          <div key={i} className="text-sm">
+                          <div key={i}>
                             <span className="font-semibold">{m}</span>
                             <span className="text-gray-600">
                               {" "}
