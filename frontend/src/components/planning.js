@@ -389,14 +389,28 @@ const Planning = () => {
     setFilteredEvents(filtered);
   };
 
-  const handleMentionChange = (selectedMention) => {
-    setSelectedMention(selectedMention);
-    filtrerData(selectedMention, selectedNiveau);
+  useEffect(() => {
+    if (mentionOptions.length > 0 && !selectedMention) {
+      setSelectedMention(mentionOptions[0]);
+    }
+
+    if (niveauOptions.length > 0 && !selectedNiveau) {
+      setSelectedNiveau(niveauOptions[0]);
+    }
+  }, [mentionOptions, niveauOptions]);
+
+  useEffect(() => {
+    if (selectedMention && selectedNiveau) {
+      filtrerData(selectedMention, selectedNiveau);
+    }
+  }, [selectedMention, selectedNiveau]);
+
+  const handleMentionChange = (mention) => {
+    setSelectedMention(mention ?? mentionOptions[0]);
   };
 
-  const handleNiveauChange = (selectedNiveau) => {
-    setSelectedNiveau(selectedNiveau);
-    filtrerData(selectedMention, selectedNiveau);
+  const handleNiveauChange = (niveau) => {
+    setSelectedNiveau(niveau ?? niveauOptions[0]);
   };
 
   const handleTypeChanged = (selectedType) => {
