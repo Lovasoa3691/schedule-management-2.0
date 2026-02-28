@@ -379,7 +379,15 @@ const Subject = () => {
                       <td className="px-4 py-3">{mat.coeff}</td>
 
                       <td className="px-4 py-3">
-                        {mat.mention.join(" / ")} | {mat.niveau.join(" / ")}
+                        {mat.mention.map((m, i) => (
+                          <div key={i} className="text-sm">
+                            <span className="font-semibold">{m}</span>
+                            <span className="text-gray-600">
+                              {" "}
+                              ({mat.niveau.join(", ")})
+                            </span>
+                          </div>
+                        ))}
                       </td>
 
                       {can(
