@@ -3,6 +3,7 @@ using AutoMapper;
 using edt_api.config;
 using edt_api.dtos;
 using edt_api.models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace edt_api.services;
@@ -107,7 +108,7 @@ public class ImEdt : IEdt
         var conflict = await CheckConflitAsync(dto);
         if (conflict)
         {
-            throw new InvalidOperationException("Chevauchement detecté: la salle ou l'enseignant est déjà occupé.");
+            throw new EdtConflictException("Chevauchement détecté : la salle ou l'enseignant est déjà occupé.");
         }
 
         var activeAnne = await _db.AnneeScolaires.Where(a => a.status == "Active").FirstOrDefaultAsync();

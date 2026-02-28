@@ -420,7 +420,7 @@ const Planning = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const week = `${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}_${new Date(sunday.toLocaleDateString()).getMonth()}_${new Date(sunday.toLocaleDateString()).getFullYear()}`;
+    const week = `${new Date(monday.toLocaleDateString()).getDate()}-${new Date(sunday.toLocaleDateString()).getDate()}_${new Date(sunday.toLocaleDateString()).getMonth() + 1}_${new Date(sunday.toLocaleDateString()).getFullYear()}`;
 
     const data = {
       ...formData,
@@ -462,11 +462,14 @@ const Planning = () => {
         });
       })
       .catch((err) => {
-        if (err.response) {
-          console.error("Status:", err.response.status);
-          console.error("Erreur serveur:", err.response.data);
-        } else {
-          console.error("Erreur:", err.message);
+        if (err.response?.status === 409) {
+          Swal.fire({
+            title: "Erreur",
+            text: `${err.response.data.message}`,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          // console.error(err.response.data.message);
         }
       });
     setShowForm(false);
@@ -774,7 +777,7 @@ const Planning = () => {
             Selectionner une date pour ajouter un programme
           </p>
         </div>
-        <div className="flex items-center ml-auto justify-end gap-2 z-20">
+        <div className="flex items-center ml-auto justify-end gap-2 z-5">
           <Select
             className="w-48 "
             options={typeOptions}

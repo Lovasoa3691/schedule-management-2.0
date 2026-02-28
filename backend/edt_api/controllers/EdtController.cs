@@ -42,10 +42,20 @@ public class EdtController: ControllerBase
     [HttpPost]
     public async Task<ActionResult<EdtDto>> Create([FromBody] CreateEdtDto dto)
     {
-        // Console.WriteLine("Id : "+dto.responsableId);
-        // return Ok();
-        var created = await _service.AddAsync(dto);
-         return CreatedAtAction(nameof(GetById), new { id = created.numEd }, created);
+        try
+        {
+            var created = await _service.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById),
+                new { id = created.numEd },
+                created);
+        }
+        catch (EdtConflictException ex)
+        {
+            return Conflict(new
+            {
+                message = ex.Message
+            });
+        }
     }
     
     [HttpPut("{id}")]
