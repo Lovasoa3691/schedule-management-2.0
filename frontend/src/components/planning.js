@@ -760,7 +760,7 @@ const Planning = () => {
             Selectionner une date pour ajouter un programme
           </p>
         </div>
-        <div className="flex items-center ml-auto justify-end gap-2">
+        <div className="flex items-center ml-auto justify-end gap-2 z-20">
           <Select
             className="w-48 "
             options={typeOptions}
