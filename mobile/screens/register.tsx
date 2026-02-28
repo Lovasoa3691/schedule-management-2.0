@@ -82,7 +82,7 @@ export default function RegisterScreen() {
       <View style={styles.inputContainer}>
         <Icon name="mail-outline" size={20} color="#666" />
         <TextInput
-          placeholder="Adresse mail"
+          placeholder="-- Email --"
           value={email}
           onChangeText={setEmail}
           placeholderTextColor={"gray"}

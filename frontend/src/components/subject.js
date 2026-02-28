@@ -379,7 +379,7 @@ const Subject = () => {
                       <td className="px-4 py-3">{mat.coeff}</td>
 
                       <td className="px-4 py-3">
-                        {mat.mention} {mat.niveau.join(" / ")}
+                        {mat.mention.join(" / ")} - {mat.niveau.join(" / ")}
                       </td>
 
                       {can(

@@ -325,6 +325,7 @@ public class ImUtilisateur : IUtilisateur
         
         auth.mdp = hashedPassword;
         auth.isActive = true;
+        auth.status = "Actif";
         
         await _db.SaveChangesAsync();
          
