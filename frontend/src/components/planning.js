@@ -632,6 +632,183 @@ const Planning = () => {
       });
   };
 
+  // const handleExportMulti = (selectedMentions, selectedNiveaux) => {
+  //   const { monday, sunday } = getCurrentWeek(currentDate);
+
+  //   const doc = new jsPDF({
+  //     orientation: "landscape",
+  //     unit: "mm",
+  //     format: "a4",
+  //   });
+
+  //   const pageWidth = doc.internal.pageSize.getWidth();
+  //   const pageHeight = doc.internal.pageSize.getHeight();
+
+  //   const marginX = 10;
+  //   const marginTop = 30;
+  //   const marginBottom = 10;
+
+  //   const usableWidth = pageWidth - marginX * 2;
+  //   const usableHeight = pageHeight - marginTop - marginBottom;
+
+  //   const colonnes = ["JOUR", "HORAIRE", "MATIÈRE", "PROF", "SALLE"];
+
+  //   const getGrid = (count) => {
+  //     if (count <= 3) return { cols: count, rows: 1 };
+  //     if (count === 4) return { cols: 2, rows: 2 };
+  //     if (count <= 6) return { cols: 3, rows: 2 };
+  //     return { cols: 3, rows: 3 };
+  //   };
+
+  //   selectedNiveaux.forEach((niveau, niveauIndex) => {
+  //     if (niveauIndex > 0) doc.addPage();
+
+  //     doc.setFontSize(14);
+  //     doc.setTextColor(0, 51, 102);
+  //     doc.text(`Emploi du temps pour le Niveau ${niveau.label}`, marginX, 12);
+
+  //     doc.setFontSize(10);
+  //     doc.setTextColor(0, 0, 0);
+  //     doc.text(
+  //       `Semaine du ${monday.toLocaleDateString("fr-FR")} au ${sunday.toLocaleDateString("fr-FR")}`,
+  //       marginX,
+  //       18,
+  //     );
+
+  //     const { cols, rows } = getGrid(selectedMentions.length);
+  //     const cellWidth = usableWidth / cols;
+  //     const cellHeight = usableHeight / rows;
+
+  //     const colWidths = [0.12, 0.18, 0.28, 0.22, 0.2];
+  //     const lineHeight = 8;
+
+  //     selectedMentions.forEach((mention, index) => {
+  //       const colIndex = index % cols;
+  //       const rowIndex = Math.floor(index / cols);
+
+  //       const startX = marginX + colIndex * cellWidth;
+  //       const startY = marginTop + rowIndex * cellHeight;
+
+  //       doc.setFillColor(245, 245, 245);
+  //       doc.rect(startX, startY, cellWidth, cellHeight, "F");
+
+  //       doc.setFontSize(11);
+  //       doc.setTextColor(0, 51, 102);
+  //       doc.text(mention.label, startX + 2, startY + 6);
+  //       doc.setDrawColor(0, 51, 102);
+  //       doc.line(startX, startY + 7, startX + cellWidth, startY + 7);
+
+  //       const headerHeight = 10;
+  //       doc.setFontSize(8);
+  //       doc.setFont("helvetica", "bold");
+  //       doc.setTextColor(0, 51, 102);
+  //       doc.setFillColor(200, 220, 240);
+  //       doc.rect(startX, startY + 8, cellWidth, headerHeight, "F");
+
+  //       let colX = startX + 2;
+  //       colonnes.forEach((col, i) => {
+  //         const verticalOffset = headerHeight / 2 + 1;
+  //         doc.text(col, colX, startY + 8 + verticalOffset, {
+  //           maxWidth: cellWidth * colWidths[i] - 2,
+  //         });
+  //         colX += cellWidth * colWidths[i];
+  //       });
+
+  //       doc.setFont("helvetica", "normal");
+  //       let currentY = startY + 8 + headerHeight + 4;
+
+  //       const startOfWeek = new Date(monday);
+  //       startOfWeek.setHours(0, 0, 0, 0);
+
+  //       const endOfWeek = new Date(sunday);
+  //       endOfWeek.setHours(23, 59, 59, 999);
+
+  //       const filteredEvents = events.filter((e) => {
+  //         const d = new Date(e.start);
+  //         return (
+  //           e.mention === mention.value &&
+  //           e.niveau === niveau.value &&
+  //           d >= startOfWeek &&
+  //           d <= endOfWeek
+  //         );
+  //       });
+
+  //       console.log("Donnee filtres: ", filteredEvents);
+
+  //       const eventsByDay = {};
+  //       filteredEvents.forEach((e) => {
+  //         const dayKey = new Date(e.start).toISOString().split("T")[0];
+  //         if (!eventsByDay[dayKey]) eventsByDay[dayKey] = [];
+  //         eventsByDay[dayKey].push(e);
+  //       });
+
+  //       console.log("EventsGrouped: ", eventsByDay);
+
+  //       let toggle = false;
+
+  //       if (filteredEvents.length === 0) {
+  //         doc.setTextColor(128, 0, 0);
+  //         doc.text("Aucun cours", startX + cellWidth / 2, currentY + 2, {
+  //           align: "center",
+  //         });
+  //       } else {
+  //         Object.keys(eventsByDay).forEach((dayKey) => {
+  //           const dayEvents = eventsByDay[dayKey];
+  //           let firstLine = true;
+
+  //           dayEvents.forEach((e) => {
+  //             if (currentY > startY + cellHeight - 2) return;
+
+  //             if (toggle) doc.setFillColor(230, 240, 250);
+  //             else doc.setFillColor(255, 255, 255);
+  //             doc.rect(startX, currentY - 3, cellWidth, lineHeight, "F");
+  //             toggle = !toggle;
+
+  //             colX = startX + 2;
+
+  //             const values = [
+  //               firstLine
+  //                 ? new Date(e.start)
+  //                     .toLocaleDateString("fr-FR", { weekday: "short" })
+  //                     .toUpperCase()
+  //                 : "",
+  //               `${new Date(e.start).toLocaleTimeString("fr-FR", {
+  //                 hour: "2-digit",
+  //                 minute: "2-digit",
+  //                 hour12: false,
+  //               })} - ${new Date(e.end).toLocaleTimeString("fr-FR", {
+  //                 hour: "2-digit",
+  //                 minute: "2-digit",
+  //                 hour12: false,
+  //               })}`,
+  //               e.title,
+  //               e.prenomEns,
+  //               e.salle,
+  //             ];
+
+  //             values.forEach((text, i) => {
+  //               doc.text(
+  //                 doc.splitTextToSize(text, cellWidth * colWidths[i] - 2),
+  //                 colX,
+  //                 currentY,
+  //               );
+  //               colX += cellWidth * colWidths[i];
+  //             });
+
+  //             firstLine = false;
+  //             currentY += lineHeight;
+  //           });
+  //         });
+  //       }
+
+  //       doc.setDrawColor(180);
+  //       doc.rect(startX, startY, cellWidth, cellHeight);
+  //     });
+  //   });
+
+  //   doc.save("edt_grille_mentions.pdf");
+  // };
+
   const handleExportMulti = (selectedMentions, selectedNiveaux) => {
     const { monday, sunday } = getCurrentWeek(currentDate);
 
@@ -663,6 +840,7 @@ const Planning = () => {
     selectedNiveaux.forEach((niveau, niveauIndex) => {
       if (niveauIndex > 0) doc.addPage();
 
+      // --- TITRE DE LA PAGE ---
       doc.setFontSize(14);
       doc.setTextColor(0, 51, 102);
       doc.text(`Emploi du temps pour le Niveau ${niveau.label}`, marginX, 12);
@@ -689,19 +867,21 @@ const Planning = () => {
         const startX = marginX + colIndex * cellWidth;
         const startY = marginTop + rowIndex * cellHeight;
 
+        // Fond de la cellule de la mention
         doc.setFillColor(245, 245, 245);
         doc.rect(startX, startY, cellWidth, cellHeight, "F");
 
+        // Titre de la Mention
         doc.setFontSize(11);
         doc.setTextColor(0, 51, 102);
         doc.text(mention.label, startX + 2, startY + 6);
         doc.setDrawColor(0, 51, 102);
         doc.line(startX, startY + 7, startX + cellWidth, startY + 7);
 
+        // --- HEADER DU TABLEAU ---
         const headerHeight = 10;
         doc.setFontSize(8);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 51, 102);
         doc.setFillColor(200, 220, 240);
         doc.rect(startX, startY + 8, cellWidth, headerHeight, "F");
 
@@ -717,12 +897,13 @@ const Planning = () => {
         doc.setFont("helvetica", "normal");
         let currentY = startY + 8 + headerHeight + 4;
 
+        // --- FILTRAGE ET TRI DES ÉVÉNEMENTS ---
         const startOfWeek = new Date(monday);
         startOfWeek.setHours(0, 0, 0, 0);
-
         const endOfWeek = new Date(sunday);
         endOfWeek.setHours(23, 59, 59, 999);
 
+        // 1. Filtrer
         const filteredEvents = events.filter((e) => {
           const d = new Date(e.start);
           return (
@@ -733,16 +914,16 @@ const Planning = () => {
           );
         });
 
-        console.log("Donnee filtres: ", filteredEvents);
+        // 2. TRIER PAR DATE ET HEURE (Important pour l'ordre Lundi -> Samedi)
+        filteredEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
+        // 3. GROUPER PAR JOUR
         const eventsByDay = {};
         filteredEvents.forEach((e) => {
           const dayKey = new Date(e.start).toISOString().split("T")[0];
           if (!eventsByDay[dayKey]) eventsByDay[dayKey] = [];
           eventsByDay[dayKey].push(e);
         });
-
-        console.log("EventsGrouped: ", eventsByDay);
 
         let toggle = false;
 
@@ -752,61 +933,60 @@ const Planning = () => {
             align: "center",
           });
         } else {
-          Object.keys(eventsByDay).forEach((dayKey) => {
+          // Extraire les jours et les trier alphabétiquement (YYYY-MM-DD se trie bien)
+          const sortedDayKeys = Object.keys(eventsByDay).sort();
+
+          sortedDayKeys.forEach((dayKey) => {
             const dayEvents = eventsByDay[dayKey];
-            let firstLine = true;
+            let firstLineOfDay = true;
 
             dayEvents.forEach((e) => {
-              if (currentY > startY + cellHeight - 2) return;
+              // Sécurité pour ne pas dépasser la cellule
+              if (currentY > startY + cellHeight - 5) return;
 
-              if (toggle) doc.setFillColor(230, 240, 250);
-              else doc.setFillColor(255, 255, 255);
+              // Alternance de couleur de ligne
+              doc.setFillColor(toggle ? (230, 240, 250) : (255, 255, 255));
               doc.rect(startX, currentY - 3, cellWidth, lineHeight, "F");
               toggle = !toggle;
 
+              doc.setTextColor(0, 0, 0);
               colX = startX + 2;
 
               const values = [
-                firstLine
+                firstLineOfDay
                   ? new Date(e.start)
                       .toLocaleDateString("fr-FR", { weekday: "short" })
                       .toUpperCase()
                   : "",
-                `${new Date(e.start).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })} - ${new Date(e.end).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}`,
+                `${new Date(e.start).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - ${new Date(e.end).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`,
                 e.title,
                 e.prenomEns,
                 e.salle,
               ];
 
               values.forEach((text, i) => {
+                const maxWidth = cellWidth * colWidths[i] - 2;
                 doc.text(
-                  doc.splitTextToSize(text, cellWidth * colWidths[i] - 2),
+                  doc.splitTextToSize(text.toString(), maxWidth),
                   colX,
                   currentY,
                 );
                 colX += cellWidth * colWidths[i];
               });
 
-              firstLine = false;
+              firstLineOfDay = false;
               currentY += lineHeight;
             });
           });
         }
 
+        // Contour final de la cellule de mention
         doc.setDrawColor(180);
         doc.rect(startX, startY, cellWidth, cellHeight);
       });
     });
 
-    doc.save("edt_grille_mentions.pdf");
+    doc.save(`Emploi_du_temps_de_la_semaine_.pdf`);
   };
 
   const [userRole, setUserRole] = useState(null);

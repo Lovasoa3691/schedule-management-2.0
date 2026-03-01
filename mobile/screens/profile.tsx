@@ -20,6 +20,7 @@ import { getUserIdFromToken } from "../decode";
 
 interface User {
   nom: string;
+  prenom: string;
   email: string;
   avatarUrl?: string;
 }
@@ -40,11 +41,20 @@ const UserProfile = () => {
         // setLoading(false);
         return;
       }
-      setUser({
-        nom: user.nom || "Utilisateur inconnu",
-        email: user.email || "Email non disponible",
-        avatarUrl: "https://avatars.githubusercontent.com/u/105380583?v=4",
-      });
+      // Alert.alert("Utilisateur: ", user.email);
+
+      api
+        .get(`/user/info?id=${user.userId}&role=${user.role}`)
+        .then((res) => {
+          console.log(res.data);
+          setUser({
+            nom: res.data[0]?.nom || "Utilisateur inconnu",
+            prenom: res.data[0]?.prenom || "",
+            email: res.data[0]?.email || "Email non disponible",
+            avatarUrl: "https://avatars.githubusercontent.com/u/105380583?v=4",
+          });
+        })
+        .catch((err) => console.error("Erreur de recuperation: ", err));
     } catch (error) {
       console.log(error);
       Alert.alert(
@@ -143,7 +153,7 @@ const UserProfile = () => {
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
             <Text style={styles.initials}>
-              {user.nom
+              {user.prenom
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
@@ -151,7 +161,7 @@ const UserProfile = () => {
             </Text>
           </View>
         )}
-        <Text style={styles.name}>{user.nom}</Text>
+        <Text style={styles.name}>{user.prenom}</Text>
         <View style={styles.emailContainer}>
           <Text style={styles.email}>{user.email}</Text>
         </View>

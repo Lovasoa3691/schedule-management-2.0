@@ -93,6 +93,12 @@ type WeatherUI = {
   icon: keyof typeof Ionicons.glyphMap;
 };
 
+interface User {
+  nom: string;
+  prenom: string;
+  email: string;
+}
+
 const weatherMap: Record<number, WeatherUI> = {
   0: { label: "Ciel dégagé", icon: "sunny-outline" },
   1: { label: "Principalement dégagé", icon: "partly-sunny-outline" },
@@ -158,6 +164,8 @@ const Dashboard: React.FC = () => {
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
 
+  const [user, setUser] = useState<User | null>(null);
+
   const loadWeather = async () => {
     try {
       const location = await getUserLocationWithCity();
@@ -178,11 +186,43 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const user = await getUserIdFromToken();
+      if (!user?.userId) {
+        Alert.alert("Erreur", "Utilisateur non authentifié");
+        return;
+      }
+
+      api
+        .get(`/user/info?id=${user.userId}&role=${user.role}`)
+        .then((res) => {
+          console.log(res.data);
+          setUser({
+            nom: res.data[0]?.nom || "Utilisateur inconnu",
+            prenom: res.data[0]?.prenom || "",
+            email: res.data[0]?.email || "Email non disponible",
+          });
+        })
+        .catch((err) => console.error("Erreur de recuperation: ", err));
+    } catch (error) {
+      console.log(error);
+      Alert.alert(
+        "Erreur",
+        "Impossible de récupérer les informations utilisateur",
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   const loadCourses = async () => {
     loadWeather();
 
     const today = new Date(selectedWeek);
-    const { monday, sunday } = getCurrentWeek(today);
+    const { monday, sunday } = getCurrentWeek(selectedWeek);
 
     const start = monday.toISOString().split("T")[0];
     const end = sunday.toISOString().split("T")[0];
@@ -203,21 +243,27 @@ const Dashboard: React.FC = () => {
     setEmail(data.email || "");
     setLoading(true);
 
-    // const today = new Date(selectedWeek);
-    // const { monday, sunday } = getCurrentWeek(today);
-
     const week = `${monday.getDate()}-${sunday.getDate()}_${monday.getMonth() + 1}_${monday.getFullYear()}`;
-
-    // Alert.alert("Semaine: ", week);
 
     api
       .get(`/edt/${data.userId}/week_${week}`, {
         params: { start, end },
       })
       .then((rep) => {
+        const joursSemaine = [
+          "Lundi",
+          "Mardi",
+          "Mercredi",
+          "Jeudi",
+          "Vendredi",
+          "Samedi",
+        ];
+        const resumeMap: { [key: string]: number } = {};
+        joursSemaine.forEach((j) => (resumeMap[j] = 0));
         // console.log("Données de l'emploi du temps: ", rep.data);
         if (rep.data.length > 0) {
-          const today = dateFormat(new Date());
+          const today = dateFormat(new Date(selectedWeek));
+          // Alert.alert("Today: ", today);
 
           const coursSemaine: Seance[] = rep.data
             .filter((c: any) => c.jour === today)
@@ -233,30 +279,21 @@ const Dashboard: React.FC = () => {
               status: c.dispo,
             }));
 
+          console.log("Cours de la semaine: ", coursSemaine);
+
           setCourses(coursSemaine);
 
           const cours: Seance[] = rep.data.filter((c: any) => ({
             id: c.numEd,
             hDeb: c.hDeb,
             hFin: c.hFin,
-            jour: c.jour.includes(dateFormat(new Date())),
+            jour: c.jour.includes(dateFormat(new Date(selectedWeek))),
             matiere: c.nomMatiere,
             mention: c.mention,
             niveau: c.niveau,
             salle: c.nomSalle,
             status: c.dispo === "Terminé" ? true : false,
           }));
-
-          const joursSemaine = [
-            "Lundi",
-            "Mardi",
-            "Mercredi",
-            "Jeudi",
-            "Vendredi",
-            "Samedi",
-          ];
-          const resumeMap: { [key: string]: number } = {};
-          joursSemaine.forEach((j) => (resumeMap[j] = 0));
 
           const getJourSemaine = (dateStr: string) => {
             const date = new Date(dateStr);
@@ -272,6 +309,14 @@ const Dashboard: React.FC = () => {
             }
           });
 
+          setResumeSemaine(
+            joursSemaine.map((j) => ({
+              jour: j,
+              cours: resumeMap[j],
+            })),
+          );
+        } else {
+          setCourses([]);
           setResumeSemaine(
             joursSemaine.map((j) => ({
               jour: j,
@@ -334,8 +379,13 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadCourses();
-    loadProchaineSeance();
-  }, [1000]);
+  }, [selectedWeek]);
+
+  useEffect(() => {
+    if (courses.length > 0) {
+      loadProchaineSeance();
+    }
+  }, [courses]);
 
   const hPrevue = 60;
   const hEffectue = 48;
@@ -375,6 +425,58 @@ const Dashboard: React.FC = () => {
     AlertInfo();
   }, []);
 
+  const normalizeDate = (date: Date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  const getStatutSeance = (
+    seanceDateStr: string, // "2026-03-01"
+    hDeb: string, // "08:00"
+    hFin: string, // "10:00"
+  ) => {
+    const now = new Date();
+
+    const today = normalizeDate(now);
+    const seanceDate = normalizeDate(new Date(seanceDateStr));
+
+    if (seanceDate > today) {
+      return "À venir";
+    }
+
+    if (seanceDate < today) {
+      return "Terminé";
+    }
+
+    const [hStart, mStart] = hDeb.split(":").map(Number);
+    const [hEnd, mEnd] = hFin.split(":").map(Number);
+
+    const startTime = new Date();
+    startTime.setHours(hStart, mStart, 0, 0);
+
+    const endTime = new Date();
+    endTime.setHours(hEnd, mEnd, 0, 0);
+
+    if (now < startTime) return "À venir";
+    if (now >= startTime && now <= endTime) return "En cours";
+
+    return "Terminé";
+  };
+
+  const today = new Date();
+  const selected = new Date(selectedWeek);
+
+  const isToday = today.toDateString() === selected.toDateString();
+
+  const title = isToday
+    ? "Votre programme d’aujourd’hui"
+    : `Programme du ${selected.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })}`;
+
   if (!weather) return null;
 
   const ui = getWeatherUI(weather.current_weather);
@@ -403,8 +505,8 @@ const Dashboard: React.FC = () => {
       }
     >
       <Text style={styles.greeting}>
-        Bonjour{" "}
-        <Text style={styles.greetingName}>{email.split("@")[0]}</Text>{" "}
+        Bonjour <Text style={styles.greetingName}>{user?.prenom}</Text>
+        {" !"}
       </Text>
 
       <Text style={styles.date}>
@@ -473,7 +575,7 @@ const Dashboard: React.FC = () => {
       <View style={styles.card}>
         <View style={[styles.iconTitle, { paddingBottom: 8 }]}>
           <Ionicons name="calendar-outline" size={20} color="#2980b9" />
-          <Text style={styles.cardTitle}> Votre programme d'aujourd’hui</Text>
+          <Text style={styles.cardTitle}> {title}</Text>
         </View>
 
         {courses.length === 0 ? (
@@ -491,20 +593,11 @@ const Dashboard: React.FC = () => {
             const [startH, startM] = seance.hFin.split(":").map(Number);
             endTime.setHours(startH, startM, 0, 0);
 
-            let statut = "";
-            if (now < startTime && seance.status === "En cours") {
-              statut = "À venir";
-            }
-            if (
-              now >= startTime &&
-              now <= endTime &&
-              seance.status === "En cours"
-            ) {
-              statut = "En cours";
-            }
-            if (now > endTime && seance.status === "Terminé") {
-              statut = "Terminé";
-            }
+            const statut = getStatutSeance(
+              seance.jour,
+              seance.hDeb,
+              seance.hFin,
+            );
 
             const statutColor =
               statut === "En cours"
@@ -512,6 +605,13 @@ const Dashboard: React.FC = () => {
                 : statut === "Terminé"
                   ? "#c0392b"
                   : "#2980b9";
+
+            const statutIcon =
+              statut === "En cours"
+                ? "play-circle-outline"
+                : statut === "Terminé"
+                  ? "checkmark-done-outline"
+                  : "time-outline";
 
             return (
               <View key={index} style={styles.seanceItem}>
@@ -524,18 +624,9 @@ const Dashboard: React.FC = () => {
                   {" "}
                   {seance.mention} {seance.niveau}
                 </Text>
+
                 <Text style={[styles.statut, { color: statutColor }]}>
-                  <Ionicons
-                    name={
-                      statut === "En cours"
-                        ? "play-circle-outline"
-                        : statut === "Terminé"
-                          ? "checkmark-done-outline"
-                          : "time-outline"
-                    }
-                    size={16}
-                    color={statutColor}
-                  />{" "}
+                  <Ionicons name={statutIcon} size={16} color={statutColor} />{" "}
                   {statut}
                 </Text>
                 <View
