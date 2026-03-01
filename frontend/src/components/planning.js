@@ -10,6 +10,8 @@ import {
   FaClock,
   FaFileExcel,
   FaFileExport,
+  FaPlayCircle,
+  FaRegClock,
   FaTimes,
   FaTimesCircle,
 } from "react-icons/fa";
@@ -480,15 +482,6 @@ const Planning = () => {
             confirmButtonText: "OK",
           });
         }
-        // if (err.response?.status === 409) {
-        // Swal.fire({
-        //   title: "Erreur",
-        //   text: `${err.response.data.message}`,
-        //   icon: "error",
-        //   confirmButtonText: "OK",
-        // });
-
-        // }
       });
     setShowForm(false);
   };
@@ -647,183 +640,6 @@ const Planning = () => {
         setConfirmDelete(false);
       });
   };
-
-  // const handleExportMulti = (selectedMentions, selectedNiveaux) => {
-  //   const { monday, sunday } = getCurrentWeek(currentDate);
-
-  //   const doc = new jsPDF({
-  //     orientation: "landscape",
-  //     unit: "mm",
-  //     format: "a4",
-  //   });
-
-  //   const pageWidth = doc.internal.pageSize.getWidth();
-  //   const pageHeight = doc.internal.pageSize.getHeight();
-
-  //   const marginX = 10;
-  //   const marginTop = 30;
-  //   const marginBottom = 10;
-
-  //   const usableWidth = pageWidth - marginX * 2;
-  //   const usableHeight = pageHeight - marginTop - marginBottom;
-
-  //   const colonnes = ["JOUR", "HORAIRE", "MATIÈRE", "PROF", "SALLE"];
-
-  //   const getGrid = (count) => {
-  //     if (count <= 3) return { cols: count, rows: 1 };
-  //     if (count === 4) return { cols: 2, rows: 2 };
-  //     if (count <= 6) return { cols: 3, rows: 2 };
-  //     return { cols: 3, rows: 3 };
-  //   };
-
-  //   selectedNiveaux.forEach((niveau, niveauIndex) => {
-  //     if (niveauIndex > 0) doc.addPage();
-
-  //     doc.setFontSize(14);
-  //     doc.setTextColor(0, 51, 102);
-  //     doc.text(`Emploi du temps pour le Niveau ${niveau.label}`, marginX, 12);
-
-  //     doc.setFontSize(10);
-  //     doc.setTextColor(0, 0, 0);
-  //     doc.text(
-  //       `Semaine du ${monday.toLocaleDateString("fr-FR")} au ${sunday.toLocaleDateString("fr-FR")}`,
-  //       marginX,
-  //       18,
-  //     );
-
-  //     const { cols, rows } = getGrid(selectedMentions.length);
-  //     const cellWidth = usableWidth / cols;
-  //     const cellHeight = usableHeight / rows;
-
-  //     const colWidths = [0.12, 0.18, 0.28, 0.22, 0.2];
-  //     const lineHeight = 8;
-
-  //     selectedMentions.forEach((mention, index) => {
-  //       const colIndex = index % cols;
-  //       const rowIndex = Math.floor(index / cols);
-
-  //       const startX = marginX + colIndex * cellWidth;
-  //       const startY = marginTop + rowIndex * cellHeight;
-
-  //       doc.setFillColor(245, 245, 245);
-  //       doc.rect(startX, startY, cellWidth, cellHeight, "F");
-
-  //       doc.setFontSize(11);
-  //       doc.setTextColor(0, 51, 102);
-  //       doc.text(mention.label, startX + 2, startY + 6);
-  //       doc.setDrawColor(0, 51, 102);
-  //       doc.line(startX, startY + 7, startX + cellWidth, startY + 7);
-
-  //       const headerHeight = 10;
-  //       doc.setFontSize(8);
-  //       doc.setFont("helvetica", "bold");
-  //       doc.setTextColor(0, 51, 102);
-  //       doc.setFillColor(200, 220, 240);
-  //       doc.rect(startX, startY + 8, cellWidth, headerHeight, "F");
-
-  //       let colX = startX + 2;
-  //       colonnes.forEach((col, i) => {
-  //         const verticalOffset = headerHeight / 2 + 1;
-  //         doc.text(col, colX, startY + 8 + verticalOffset, {
-  //           maxWidth: cellWidth * colWidths[i] - 2,
-  //         });
-  //         colX += cellWidth * colWidths[i];
-  //       });
-
-  //       doc.setFont("helvetica", "normal");
-  //       let currentY = startY + 8 + headerHeight + 4;
-
-  //       const startOfWeek = new Date(monday);
-  //       startOfWeek.setHours(0, 0, 0, 0);
-
-  //       const endOfWeek = new Date(sunday);
-  //       endOfWeek.setHours(23, 59, 59, 999);
-
-  //       const filteredEvents = events.filter((e) => {
-  //         const d = new Date(e.start);
-  //         return (
-  //           e.mention === mention.value &&
-  //           e.niveau === niveau.value &&
-  //           d >= startOfWeek &&
-  //           d <= endOfWeek
-  //         );
-  //       });
-
-  //       console.log("Donnee filtres: ", filteredEvents);
-
-  //       const eventsByDay = {};
-  //       filteredEvents.forEach((e) => {
-  //         const dayKey = new Date(e.start).toISOString().split("T")[0];
-  //         if (!eventsByDay[dayKey]) eventsByDay[dayKey] = [];
-  //         eventsByDay[dayKey].push(e);
-  //       });
-
-  //       console.log("EventsGrouped: ", eventsByDay);
-
-  //       let toggle = false;
-
-  //       if (filteredEvents.length === 0) {
-  //         doc.setTextColor(128, 0, 0);
-  //         doc.text("Aucun cours", startX + cellWidth / 2, currentY + 2, {
-  //           align: "center",
-  //         });
-  //       } else {
-  //         Object.keys(eventsByDay).forEach((dayKey) => {
-  //           const dayEvents = eventsByDay[dayKey];
-  //           let firstLine = true;
-
-  //           dayEvents.forEach((e) => {
-  //             if (currentY > startY + cellHeight - 2) return;
-
-  //             if (toggle) doc.setFillColor(230, 240, 250);
-  //             else doc.setFillColor(255, 255, 255);
-  //             doc.rect(startX, currentY - 3, cellWidth, lineHeight, "F");
-  //             toggle = !toggle;
-
-  //             colX = startX + 2;
-
-  //             const values = [
-  //               firstLine
-  //                 ? new Date(e.start)
-  //                     .toLocaleDateString("fr-FR", { weekday: "short" })
-  //                     .toUpperCase()
-  //                 : "",
-  //               `${new Date(e.start).toLocaleTimeString("fr-FR", {
-  //                 hour: "2-digit",
-  //                 minute: "2-digit",
-  //                 hour12: false,
-  //               })} - ${new Date(e.end).toLocaleTimeString("fr-FR", {
-  //                 hour: "2-digit",
-  //                 minute: "2-digit",
-  //                 hour12: false,
-  //               })}`,
-  //               e.title,
-  //               e.prenomEns,
-  //               e.salle,
-  //             ];
-
-  //             values.forEach((text, i) => {
-  //               doc.text(
-  //                 doc.splitTextToSize(text, cellWidth * colWidths[i] - 2),
-  //                 colX,
-  //                 currentY,
-  //               );
-  //               colX += cellWidth * colWidths[i];
-  //             });
-
-  //             firstLine = false;
-  //             currentY += lineHeight;
-  //           });
-  //         });
-  //       }
-
-  //       doc.setDrawColor(180);
-  //       doc.rect(startX, startY, cellWidth, cellHeight);
-  //     });
-  //   });
-
-  //   doc.save("edt_grille_mentions.pdf");
-  // };
 
   const handleExportMulti = (selectedMentions, selectedNiveaux) => {
     const { monday, sunday } = getCurrentWeek(currentDate);
@@ -1024,260 +840,6 @@ const Planning = () => {
     Terminé: FaCheckCircle,
   };
 
-  const eventsEdts = [
-    {
-      start: new Date("2026-03-02T09:00:00"),
-      end: new Date("2026-03-02T12:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Algorithmique",
-      prenomEns: "Rakoto Jean",
-      salle: "I101",
-    },
-    {
-      start: new Date("2026-03-02T14:00:00"),
-      end: new Date("2026-03-02T17:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "CAE",
-      prenomEns: "Rakoto Jean",
-      salle: "I101",
-    },
-    {
-      start: new Date("2026-03-02T10:00:00"),
-      end: new Date("2026-03-02T12:30:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Probabilité",
-      prenomEns: "Rakoto Jean",
-      salle: "I101",
-    },
-    {
-      start: new Date("2026-03-03T10:00:00"),
-      end: new Date("2026-03-03T12:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Programmation C",
-      prenomEns: "Ravelomanana Eric",
-      salle: "I102",
-    },
-    {
-      start: new Date("2026-03-04T08:00:00"),
-      end: new Date("2026-03-04T10:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Systèmes informatiques",
-      prenomEns: "Andrianina Solo",
-      salle: "I103",
-    },
-    {
-      start: new Date("2026-03-05T09:00:00"),
-      end: new Date("2026-03-05T11:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Mathématiques discrètes",
-      prenomEns: "Rasoanaivo Anna",
-      salle: "I104",
-    },
-    {
-      start: new Date("2026-03-06T14:00:00"),
-      end: new Date("2026-03-06T16:00:00"),
-      mention: "INFO",
-      niveau: "L1",
-      title: "Bureautique",
-      prenomEns: "Rakotoarisoa Léa",
-      salle: "I105",
-    },
-
-    // ===================== BTP L1 =====================
-    {
-      start: new Date("2026-03-02T08:00:00"),
-      end: new Date("2026-03-02T10:00:00"),
-      mention: "BTP",
-      niveau: "L1",
-      title: "Topographie",
-      prenomEns: "Razafindrakoto Alain",
-      salle: "B201",
-    },
-    {
-      start: new Date("2026-03-03T09:00:00"),
-      end: new Date("2026-03-03T11:00:00"),
-      mention: "BTP",
-      niveau: "L1",
-      title: "Matériaux de construction",
-      prenomEns: "Rabe Paul",
-      salle: "B202",
-    },
-    {
-      start: new Date("2026-03-04T10:00:00"),
-      end: new Date("2026-03-04T12:00:00"),
-      mention: "BTP",
-      niveau: "L1",
-      title: "Dessin technique",
-      prenomEns: "Randria Marc",
-      salle: "B203",
-    },
-    {
-      start: new Date("2026-03-05T08:00:00"),
-      end: new Date("2026-03-05T10:00:00"),
-      mention: "BTP",
-      niveau: "L1",
-      title: "Résistance des matériaux",
-      prenomEns: "Rajaonarison Luc",
-      salle: "B204",
-    },
-    {
-      start: new Date("2026-03-06T13:00:00"),
-      end: new Date("2026-03-06T15:00:00"),
-      mention: "BTP",
-      niveau: "L1",
-      title: "Géologie",
-      prenomEns: "Rakoto Faly",
-      salle: "B205",
-    },
-
-    // ===================== GM L1 =====================
-    {
-      start: new Date("2026-03-02T10:00:00"),
-      end: new Date("2026-03-02T12:00:00"),
-      mention: "GM",
-      niveau: "L1",
-      title: "Mécanique générale",
-      prenomEns: "Andriamanitra Toky",
-      salle: "G301",
-    },
-    {
-      start: new Date("2026-03-03T08:00:00"),
-      end: new Date("2026-03-03T10:00:00"),
-      mention: "GM",
-      niveau: "L1",
-      title: "Dessin industriel",
-      prenomEns: "Raveloson Hery",
-      salle: "G302",
-    },
-    {
-      start: new Date("2026-03-04T09:00:00"),
-      end: new Date("2026-03-04T11:00:00"),
-      mention: "GM",
-      niveau: "L1",
-      title: "Science des matériaux",
-      prenomEns: "Randriamampionona Joel",
-      salle: "G303",
-    },
-    {
-      start: new Date("2026-03-05T14:00:00"),
-      end: new Date("2026-03-05T16:00:00"),
-      mention: "GM",
-      niveau: "L1",
-      title: "Thermodynamique",
-      prenomEns: "Razanajatovo Eric",
-      salle: "G304",
-    },
-    {
-      start: new Date("2026-03-06T08:00:00"),
-      end: new Date("2026-03-06T10:00:00"),
-      mention: "GM",
-      niveau: "L1",
-      title: "Mathématiques appliquées",
-      prenomEns: "Rasoazanany Clara",
-      salle: "G305",
-    },
-
-    // ===================== DROIT L1 =====================
-    {
-      start: new Date("2026-03-02T08:00:00"),
-      end: new Date("2026-03-02T10:00:00"),
-      mention: "DROIT",
-      niveau: "L1",
-      title: "Introduction au droit",
-      prenomEns: "Rasoanaivo Anna",
-      salle: "D401",
-    },
-    {
-      start: new Date("2026-03-03T10:00:00"),
-      end: new Date("2026-03-03T12:00:00"),
-      mention: "DROIT",
-      niveau: "L1",
-      title: "Droit constitutionnel",
-      prenomEns: "Rakotomalala Jean",
-      salle: "D402",
-    },
-    {
-      start: new Date("2026-03-04T14:00:00"),
-      end: new Date("2026-03-04T16:00:00"),
-      mention: "DROIT",
-      niveau: "L1",
-      title: "Institutions politiques",
-      prenomEns: "Randriatsiferana Mireille",
-      salle: "D403",
-    },
-    {
-      start: new Date("2026-03-05T08:00:00"),
-      end: new Date("2026-03-05T10:00:00"),
-      mention: "DROIT",
-      niveau: "L1",
-      title: "Histoire du droit",
-      prenomEns: "Ravelonarivo Patrick",
-      salle: "D404",
-    },
-    {
-      start: new Date("2026-03-06T09:00:00"),
-      end: new Date("2026-03-06T11:00:00"),
-      mention: "DROIT",
-      niveau: "L1",
-      title: "Méthodologie juridique",
-      prenomEns: "Rakotoarisoa Léa",
-      salle: "D405",
-    },
-
-    // ===================== ICJ L1 =====================
-    {
-      start: new Date("2026-03-02T14:00:00"),
-      end: new Date("2026-03-02T16:00:00"),
-      mention: "ICJ",
-      niveau: "L1",
-      title: "Introduction à la justice",
-      prenomEns: "Razanakoto Fanja",
-      salle: "J501",
-    },
-    {
-      start: new Date("2026-03-03T08:00:00"),
-      end: new Date("2026-03-03T10:00:00"),
-      mention: "ICJ",
-      niveau: "L1",
-      title: "Organisation judiciaire",
-      prenomEns: "Rakotondrabe Joel",
-      salle: "J502",
-    },
-    {
-      start: new Date("2026-03-04T10:00:00"),
-      end: new Date("2026-03-04T12:00:00"),
-      mention: "ICJ",
-      niveau: "L1",
-      title: "Droit pénal général",
-      prenomEns: "Rasoazanany Clara",
-      salle: "J503",
-    },
-    {
-      start: new Date("2026-03-05T09:00:00"),
-      end: new Date("2026-03-05T11:00:00"),
-      mention: "ICJ",
-      niveau: "L1",
-      title: "Procédure civile",
-      prenomEns: "Ravelomanana Eric",
-      salle: "J504",
-    },
-    {
-      start: new Date("2026-03-06T13:00:00"),
-      end: new Date("2026-03-06T15:00:00"),
-      mention: "ICJ",
-      niveau: "L1",
-      title: "Déontologie juridique",
-      prenomEns: "Rakoto Jean",
-      salle: "J505",
-    },
-  ];
-
   return (
     <div>
       {showError && (
@@ -1380,22 +942,45 @@ const Planning = () => {
         }}
         components={{
           event: ({ event }) => {
-            const Icon = statusIcon[event.status] || FaCheckCircle;
+            // 1. Calcul dynamique du statut en fonction du temps réel
+            const now = new Date();
+            const start = new Date(event.start);
+            const end = new Date(event.end);
+
+            let currentStatus = "À venir";
+            let StatusIcon = FaRegClock;
+            let statusColor = "text-blue-200";
+
+            if (now > end) {
+              currentStatus = "Terminé";
+              StatusIcon = FaCheckCircle;
+              statusColor = "text-green-300";
+            } else if (now >= start && now <= end) {
+              currentStatus = "En cours";
+              StatusIcon = FaPlayCircle;
+              statusColor = "text-white";
+            } else {
+              currentStatus = "À venir";
+              StatusIcon = FaRegClock;
+              statusColor = "text-yellow-100";
+            }
 
             return (
-              <div className="p-2 text-sm leading-snug">
-                <div className="flex items-center gap-1 font-bold">
-                  {/* <Icon size={14} /> */}
-                  <span>
-                    {event.title} | Salle {event.salle}
-                  </span>
+              <div className="p-2 text-sm leading-snug h-full flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-1 font-bold">
+                    <span>
+                      {event.title} | Salle {event.salle}
+                    </span>
+                  </div>
+                  <div className="opacity-90">{event.prenomEns}</div>
                 </div>
 
-                <div>{event.prenomEns}</div>
-
-                <div className="flex items-center gap-1 text-xs opacity-90 mt-4">
-                  <Icon size={16} />
-                  <span>{event.status}</span>
+                <div
+                  className={`flex items-center gap-1 text-xs mt-2 font-medium ${statusColor}`}
+                >
+                  <StatusIcon size={14} />
+                  <span className="capitalize">{currentStatus}</span>
                 </div>
               </div>
             );
