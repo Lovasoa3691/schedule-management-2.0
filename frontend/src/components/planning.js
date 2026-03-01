@@ -464,15 +464,31 @@ const Planning = () => {
         });
       })
       .catch((err) => {
-        if (err.response?.status === 409) {
+        if (err.response && err.response.data) {
+          const serverMessage = err.response.data.message;
+          Swal.fire({
+            title: "Avertissement",
+            text: `Impossible d'ajouter le cours :\n${serverMessage}`,
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+        } else {
           Swal.fire({
             title: "Erreur",
-            text: `${err.response.data.message}`,
+            text: `Une erreur réseau est survenue.`,
             icon: "error",
             confirmButtonText: "OK",
           });
-          // console.error(err.response.data.message);
         }
+        // if (err.response?.status === 409) {
+        // Swal.fire({
+        //   title: "Erreur",
+        //   text: `${err.response.data.message}`,
+        //   icon: "error",
+        //   confirmButtonText: "OK",
+        // });
+
+        // }
       });
     setShowForm(false);
   };

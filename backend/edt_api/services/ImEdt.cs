@@ -89,26 +89,47 @@ public class ImEdt : IEdt
     {
         var conflit = await _db.Edts
             .Where(e => e.jour == dto.jour)
+            .Where(e => e.hDeb < dto.hFin && e.hFin > dto.hDeb) 
             .Where(e =>
-                (e.hDeb < dto.hFin && e.hFin > dto.hDeb)
-                &&
-                (
-                    e.enseignantId == dto.enseignantId ||
-                    e.salleId == dto.idSalle
-                )
+                    e.enseignantId == dto.enseignantId || 
+                    e.salleId == dto.idSalle ||         
+                    (e.mentionId == dto.mentionId && e.niveauId == dto.niveauId)
             )
             .FirstOrDefaultAsync();
+
         return conflit != null;
+    }
+
+    public async Task<string> GetConflictMessageAsync(CreateEdtDto dto)
+    {
+        var existingEdt = await _db.Edts
+            // .Include(e => e.enseignant)
+            .Include(e => e.salle)
+            .Where(e => e.jour == dto.jour && e.hDeb < dto.hFin && e.hFin > dto.hDeb)
+            .FirstOrDefaultAsync();
+
+        if (existingEdt == null) return null;
+
+        if (existingEdt.enseignantId == dto.enseignantId)
+            return $"L'enseignant est déjà occupé par un autre cours sur ce créneau.";
+    
+        if (existingEdt.salleId == dto.idSalle)
+            return $"La salle {existingEdt.salle?.nomSalle} est déjà réservée.";
+
+        if (existingEdt.mentionId == dto.mentionId && existingEdt.niveauId == dto.niveauId)
+            return $"Le niveau {dto.niveauId} ({dto.mentionId}) a déjà un autre cours prévu à cette heure.";
+
+        return "Un conflit d'horaire indéterminé a été détecté.";
     }
 
     public async Task<EdtDto> AddAsync(CreateEdtDto dto)
     {
         var now = DateTime.Now;
         
-        var conflict = await CheckConflitAsync(dto);
-        if (conflict)
+        var conflictMessage = await GetConflictMessageAsync(dto);
+        if (conflictMessage != null)
         {
-            throw new EdtConflictException("Chevauchement détecté : la salle ou l'enseignant est déjà occupé.");
+            throw new EdtConflictException(conflictMessage);
         }
 
         var activeAnne = await _db.AnneeScolaires.Where(a => a.status == "Active").FirstOrDefaultAsync();

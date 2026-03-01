@@ -14,4 +14,5 @@ public interface IEdt
     Task<bool> DeleteAsync(string id);
 
     Task<bool> CheckConflitAsync(CreateEdtDto dto);
+    Task<string> GetConflictMessageAsync(CreateEdtDto dto);
 }
