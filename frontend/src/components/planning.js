@@ -9,6 +9,7 @@ import {
   FaCheckCircle,
   FaClock,
   FaFileExcel,
+  FaFileExport,
   FaTimes,
   FaTimesCircle,
 } from "react-icons/fa";
@@ -25,6 +26,7 @@ import Confirm from "./notification/confirm";
 import api from "../hooks/api";
 import { can } from "../hooks/permission";
 import Swal from "sweetalert2";
+import ExportEdtModal from "./export/exportEdt";
 
 const locales = {
   fr: fr,
@@ -476,6 +478,9 @@ const Planning = () => {
   };
 
   const [showError, setshowError] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedMentions, setSelectedMentions] = useState([]);
+  const [selectedNiveaux, setSelectedNiveaux] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -627,104 +632,181 @@ const Planning = () => {
       });
   };
 
-  const handleExport = () => {
-    if (!selectedMention || !selectedNiveau) {
-      Swal.fire({
-        title: "Filtres manquants",
-        text: "Veuillez sélectionner une mention et un niveau pour exporter le PDF.",
-        icon: "warning",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-
+  const handleExportMulti = (selectedMentions, selectedNiveaux) => {
     const { monday, sunday } = getCurrentWeek(currentDate);
 
-    const filteredEvents = events.filter((e) => {
-      const eventDate = new Date(e.start);
-      return (
-        e.mention === selectedMention.value &&
-        e.niveau === selectedNiveau.value &&
-        eventDate >= monday &&
-        eventDate <= sunday
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const marginX = 10;
+    const marginTop = 30;
+    const marginBottom = 10;
+
+    const usableWidth = pageWidth - marginX * 2;
+    const usableHeight = pageHeight - marginTop - marginBottom;
+
+    const colonnes = ["JOUR", "HORAIRE", "MATIÈRE", "PROF", "SALLE"];
+
+    const getGrid = (count) => {
+      if (count <= 3) return { cols: count, rows: 1 };
+      if (count === 4) return { cols: 2, rows: 2 };
+      if (count <= 6) return { cols: 3, rows: 2 };
+      return { cols: 3, rows: 3 };
+    };
+
+    selectedNiveaux.forEach((niveau, niveauIndex) => {
+      if (niveauIndex > 0) doc.addPage();
+
+      doc.setFontSize(14);
+      doc.setTextColor(0, 51, 102);
+      doc.text(`Emploi du temps pour le Niveau ${niveau.label}`, marginX, 12);
+
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+        `Semaine du ${monday.toLocaleDateString("fr-FR")} au ${sunday.toLocaleDateString("fr-FR")}`,
+        marginX,
+        18,
       );
-    });
 
-    if (filteredEvents.length === 0) {
-      Swal.fire({
-        title: "Aucun événement",
-        text: "Aucun cours trouvé pour les filtres sélectionnés.",
-        icon: "warning",
-        confirmButtonText: "OK",
+      const { cols, rows } = getGrid(selectedMentions.length);
+      const cellWidth = usableWidth / cols;
+      const cellHeight = usableHeight / rows;
+
+      const colWidths = [0.12, 0.18, 0.28, 0.22, 0.2];
+      const lineHeight = 8;
+
+      selectedMentions.forEach((mention, index) => {
+        const colIndex = index % cols;
+        const rowIndex = Math.floor(index / cols);
+
+        const startX = marginX + colIndex * cellWidth;
+        const startY = marginTop + rowIndex * cellHeight;
+
+        doc.setFillColor(245, 245, 245);
+        doc.rect(startX, startY, cellWidth, cellHeight, "F");
+
+        doc.setFontSize(11);
+        doc.setTextColor(0, 51, 102);
+        doc.text(mention.label, startX + 2, startY + 6);
+        doc.setDrawColor(0, 51, 102);
+        doc.line(startX, startY + 7, startX + cellWidth, startY + 7);
+
+        const headerHeight = 10;
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 51, 102);
+        doc.setFillColor(200, 220, 240);
+        doc.rect(startX, startY + 8, cellWidth, headerHeight, "F");
+
+        let colX = startX + 2;
+        colonnes.forEach((col, i) => {
+          const verticalOffset = headerHeight / 2 + 1;
+          doc.text(col, colX, startY + 8 + verticalOffset, {
+            maxWidth: cellWidth * colWidths[i] - 2,
+          });
+          colX += cellWidth * colWidths[i];
+        });
+
+        doc.setFont("helvetica", "normal");
+        let currentY = startY + 8 + headerHeight + 4;
+
+        const startOfWeek = new Date(monday);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(sunday);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        const filteredEvents = events.filter((e) => {
+          const d = new Date(e.start);
+          return (
+            e.mention === mention.value &&
+            e.niveau === niveau.value &&
+            d >= startOfWeek &&
+            d <= endOfWeek
+          );
+        });
+
+        console.log("Donnee filtres: ", filteredEvents);
+
+        const eventsByDay = {};
+        filteredEvents.forEach((e) => {
+          const dayKey = new Date(e.start).toISOString().split("T")[0];
+          if (!eventsByDay[dayKey]) eventsByDay[dayKey] = [];
+          eventsByDay[dayKey].push(e);
+        });
+
+        console.log("EventsGrouped: ", eventsByDay);
+
+        let toggle = false;
+
+        if (filteredEvents.length === 0) {
+          doc.setTextColor(128, 0, 0);
+          doc.text("Aucun cours", startX + cellWidth / 2, currentY + 2, {
+            align: "center",
+          });
+        } else {
+          Object.keys(eventsByDay).forEach((dayKey) => {
+            const dayEvents = eventsByDay[dayKey];
+            let firstLine = true;
+
+            dayEvents.forEach((e) => {
+              if (currentY > startY + cellHeight - 2) return;
+
+              if (toggle) doc.setFillColor(230, 240, 250);
+              else doc.setFillColor(255, 255, 255);
+              doc.rect(startX, currentY - 3, cellWidth, lineHeight, "F");
+              toggle = !toggle;
+
+              colX = startX + 2;
+
+              const values = [
+                firstLine
+                  ? new Date(e.start)
+                      .toLocaleDateString("fr-FR", { weekday: "short" })
+                      .toUpperCase()
+                  : "",
+                `${new Date(e.start).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })} - ${new Date(e.end).toLocaleTimeString("fr-FR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}`,
+                e.title,
+                e.prenomEns,
+                e.salle,
+              ];
+
+              values.forEach((text, i) => {
+                doc.text(
+                  doc.splitTextToSize(text, cellWidth * colWidths[i] - 2),
+                  colX,
+                  currentY,
+                );
+                colX += cellWidth * colWidths[i];
+              });
+
+              firstLine = false;
+              currentY += lineHeight;
+            });
+          });
+        }
+
+        doc.setDrawColor(180);
+        doc.rect(startX, startY, cellWidth, cellHeight);
       });
-      return;
-    }
-
-    const doc = new jsPDF();
-    const colonnes = ["JOUR", "HORAIRE", "MATIERE", "PROFESSEUR", "SALLE"];
-
-    const grouped = {};
-
-    filteredEvents.forEach((e) => {
-      const jour = e.start
-        .toLocaleDateString("fr-FR", { weekday: "long" })
-        .toUpperCase();
-
-      const horaire = `${e.start.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })} - ${e.end.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`;
-
-      const key = `${jour}-${e.salle}`;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          jour,
-          salle: e.salle,
-          horaires: [horaire],
-          matieres: [e.title],
-          profs: [e.prenomEns],
-        };
-      } else {
-        grouped[key].horaires.push(horaire);
-        grouped[key].matieres.push(e.title);
-        grouped[key].profs.push(e.prenomEns);
-      }
     });
 
-    const lignes = Object.values(grouped).map((g) => [
-      g.jour,
-      g.horaires.join("\n"),
-      g.matieres.join("\n"),
-      g.profs.join("\n"),
-      g.salle,
-    ]);
-
-    doc.text(
-      `Emploi du temps - ${selectedMention.label} ${selectedNiveau.label}`,
-      15,
-      10,
-    );
-
-    doc.text(
-      `Semaine du ${monday.toLocaleDateString("fr-FR")} au ${sunday.toLocaleDateString("fr-FR")}`,
-      15,
-      16,
-    );
-
-    doc.autoTable({
-      head: [colonnes],
-      body: lignes,
-      startY: 25,
-      styles: { cellWidth: "wrap", valign: "middle" },
-    });
-
-    doc.save(
-      `edt_${selectedMention.value}_${selectedNiveau.value}_${monday.toISOString().slice(0, 10)}.pdf`,
-    );
+    doc.save("edt_grille_mentions.pdf");
   };
 
   const [userRole, setUserRole] = useState(null);
@@ -746,12 +828,262 @@ const Planning = () => {
     Terminé: FaCheckCircle,
   };
 
+  const eventsEdts = [
+    {
+      start: new Date("2026-03-02T09:00:00"),
+      end: new Date("2026-03-02T12:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Algorithmique",
+      prenomEns: "Rakoto Jean",
+      salle: "I101",
+    },
+    {
+      start: new Date("2026-03-02T14:00:00"),
+      end: new Date("2026-03-02T17:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "CAE",
+      prenomEns: "Rakoto Jean",
+      salle: "I101",
+    },
+    {
+      start: new Date("2026-03-02T10:00:00"),
+      end: new Date("2026-03-02T12:30:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Probabilité",
+      prenomEns: "Rakoto Jean",
+      salle: "I101",
+    },
+    {
+      start: new Date("2026-03-03T10:00:00"),
+      end: new Date("2026-03-03T12:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Programmation C",
+      prenomEns: "Ravelomanana Eric",
+      salle: "I102",
+    },
+    {
+      start: new Date("2026-03-04T08:00:00"),
+      end: new Date("2026-03-04T10:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Systèmes informatiques",
+      prenomEns: "Andrianina Solo",
+      salle: "I103",
+    },
+    {
+      start: new Date("2026-03-05T09:00:00"),
+      end: new Date("2026-03-05T11:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Mathématiques discrètes",
+      prenomEns: "Rasoanaivo Anna",
+      salle: "I104",
+    },
+    {
+      start: new Date("2026-03-06T14:00:00"),
+      end: new Date("2026-03-06T16:00:00"),
+      mention: "INFO",
+      niveau: "L1",
+      title: "Bureautique",
+      prenomEns: "Rakotoarisoa Léa",
+      salle: "I105",
+    },
+
+    // ===================== BTP L1 =====================
+    {
+      start: new Date("2026-03-02T08:00:00"),
+      end: new Date("2026-03-02T10:00:00"),
+      mention: "BTP",
+      niveau: "L1",
+      title: "Topographie",
+      prenomEns: "Razafindrakoto Alain",
+      salle: "B201",
+    },
+    {
+      start: new Date("2026-03-03T09:00:00"),
+      end: new Date("2026-03-03T11:00:00"),
+      mention: "BTP",
+      niveau: "L1",
+      title: "Matériaux de construction",
+      prenomEns: "Rabe Paul",
+      salle: "B202",
+    },
+    {
+      start: new Date("2026-03-04T10:00:00"),
+      end: new Date("2026-03-04T12:00:00"),
+      mention: "BTP",
+      niveau: "L1",
+      title: "Dessin technique",
+      prenomEns: "Randria Marc",
+      salle: "B203",
+    },
+    {
+      start: new Date("2026-03-05T08:00:00"),
+      end: new Date("2026-03-05T10:00:00"),
+      mention: "BTP",
+      niveau: "L1",
+      title: "Résistance des matériaux",
+      prenomEns: "Rajaonarison Luc",
+      salle: "B204",
+    },
+    {
+      start: new Date("2026-03-06T13:00:00"),
+      end: new Date("2026-03-06T15:00:00"),
+      mention: "BTP",
+      niveau: "L1",
+      title: "Géologie",
+      prenomEns: "Rakoto Faly",
+      salle: "B205",
+    },
+
+    // ===================== GM L1 =====================
+    {
+      start: new Date("2026-03-02T10:00:00"),
+      end: new Date("2026-03-02T12:00:00"),
+      mention: "GM",
+      niveau: "L1",
+      title: "Mécanique générale",
+      prenomEns: "Andriamanitra Toky",
+      salle: "G301",
+    },
+    {
+      start: new Date("2026-03-03T08:00:00"),
+      end: new Date("2026-03-03T10:00:00"),
+      mention: "GM",
+      niveau: "L1",
+      title: "Dessin industriel",
+      prenomEns: "Raveloson Hery",
+      salle: "G302",
+    },
+    {
+      start: new Date("2026-03-04T09:00:00"),
+      end: new Date("2026-03-04T11:00:00"),
+      mention: "GM",
+      niveau: "L1",
+      title: "Science des matériaux",
+      prenomEns: "Randriamampionona Joel",
+      salle: "G303",
+    },
+    {
+      start: new Date("2026-03-05T14:00:00"),
+      end: new Date("2026-03-05T16:00:00"),
+      mention: "GM",
+      niveau: "L1",
+      title: "Thermodynamique",
+      prenomEns: "Razanajatovo Eric",
+      salle: "G304",
+    },
+    {
+      start: new Date("2026-03-06T08:00:00"),
+      end: new Date("2026-03-06T10:00:00"),
+      mention: "GM",
+      niveau: "L1",
+      title: "Mathématiques appliquées",
+      prenomEns: "Rasoazanany Clara",
+      salle: "G305",
+    },
+
+    // ===================== DROIT L1 =====================
+    {
+      start: new Date("2026-03-02T08:00:00"),
+      end: new Date("2026-03-02T10:00:00"),
+      mention: "DROIT",
+      niveau: "L1",
+      title: "Introduction au droit",
+      prenomEns: "Rasoanaivo Anna",
+      salle: "D401",
+    },
+    {
+      start: new Date("2026-03-03T10:00:00"),
+      end: new Date("2026-03-03T12:00:00"),
+      mention: "DROIT",
+      niveau: "L1",
+      title: "Droit constitutionnel",
+      prenomEns: "Rakotomalala Jean",
+      salle: "D402",
+    },
+    {
+      start: new Date("2026-03-04T14:00:00"),
+      end: new Date("2026-03-04T16:00:00"),
+      mention: "DROIT",
+      niveau: "L1",
+      title: "Institutions politiques",
+      prenomEns: "Randriatsiferana Mireille",
+      salle: "D403",
+    },
+    {
+      start: new Date("2026-03-05T08:00:00"),
+      end: new Date("2026-03-05T10:00:00"),
+      mention: "DROIT",
+      niveau: "L1",
+      title: "Histoire du droit",
+      prenomEns: "Ravelonarivo Patrick",
+      salle: "D404",
+    },
+    {
+      start: new Date("2026-03-06T09:00:00"),
+      end: new Date("2026-03-06T11:00:00"),
+      mention: "DROIT",
+      niveau: "L1",
+      title: "Méthodologie juridique",
+      prenomEns: "Rakotoarisoa Léa",
+      salle: "D405",
+    },
+
+    // ===================== ICJ L1 =====================
+    {
+      start: new Date("2026-03-02T14:00:00"),
+      end: new Date("2026-03-02T16:00:00"),
+      mention: "ICJ",
+      niveau: "L1",
+      title: "Introduction à la justice",
+      prenomEns: "Razanakoto Fanja",
+      salle: "J501",
+    },
+    {
+      start: new Date("2026-03-03T08:00:00"),
+      end: new Date("2026-03-03T10:00:00"),
+      mention: "ICJ",
+      niveau: "L1",
+      title: "Organisation judiciaire",
+      prenomEns: "Rakotondrabe Joel",
+      salle: "J502",
+    },
+    {
+      start: new Date("2026-03-04T10:00:00"),
+      end: new Date("2026-03-04T12:00:00"),
+      mention: "ICJ",
+      niveau: "L1",
+      title: "Droit pénal général",
+      prenomEns: "Rasoazanany Clara",
+      salle: "J503",
+    },
+    {
+      start: new Date("2026-03-05T09:00:00"),
+      end: new Date("2026-03-05T11:00:00"),
+      mention: "ICJ",
+      niveau: "L1",
+      title: "Procédure civile",
+      prenomEns: "Ravelomanana Eric",
+      salle: "J504",
+    },
+    {
+      start: new Date("2026-03-06T13:00:00"),
+      end: new Date("2026-03-06T15:00:00"),
+      mention: "ICJ",
+      niveau: "L1",
+      title: "Déontologie juridique",
+      prenomEns: "Rakoto Jean",
+      salle: "J505",
+    },
+  ];
+
   return (
     <div>
-      {showAlert && alert && (
-        <AlertInfo alert={alert} setShowAlert={setShowAlert} />
-      )}
-
       {showError && (
         <ErrorDialog
           error={
@@ -803,15 +1135,31 @@ const Planning = () => {
             isClearable
           />
           <button
-            disabled={!selectedMention || !selectedNiveau}
-            onClick={handleExport}
+            // disabled={!selectedMention || !selectedNiveau}
+            onClick={() => setIsExportModalOpen(true)}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center space-x-2"
           >
-            <MdPrint className="w-5 h-5" />
-            <span>Exporter PDF</span>
+            <FaFileExport className="w-5 h-5" />
+            <span>Exporter</span>
           </button>
         </div>
       </div>
+
+      {isExportModalOpen && (
+        <ExportEdtModal
+          onClose={() => setIsExportModalOpen(false)}
+          mentionOptions={mentionOptions}
+          niveauOptions={niveauOptions}
+          selectedMentions={selectedMentions}
+          setSelectedMentions={setSelectedMentions}
+          selectedNiveaux={selectedNiveaux}
+          setSelectedNiveaux={setSelectedNiveaux}
+          onExport={() => {
+            handleExportMulti(selectedMentions, selectedNiveaux);
+            setIsExportModalOpen(false);
+          }}
+        />
+      )}
 
       <Calendar
         className="bg-white shadow-lg rounded-lg p-6"
