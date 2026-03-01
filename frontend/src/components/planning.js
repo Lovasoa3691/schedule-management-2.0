@@ -942,7 +942,6 @@ const Planning = () => {
         }}
         components={{
           event: ({ event }) => {
-            // 1. Calcul dynamique du statut en fonction du temps réel
             const now = new Date();
             const start = new Date(event.start);
             const end = new Date(event.end);

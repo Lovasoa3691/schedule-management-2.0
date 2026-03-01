@@ -2,6 +2,7 @@ using System.Text;
 using edt_api.config;
 using edt_api.seed;
 using edt_api.services;
+using edt_api.worker;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -103,6 +104,7 @@ builder.Services.AddScoped<IAnnee, ImAnnee>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHostedService<EdtStatusWorker>();
 
 var app = builder.Build();
 
