@@ -223,7 +223,7 @@ const Planning = () => {
   const loadDispo = (selectedDate) => {
     const today = getCurrentWeek(selectedDate);
     const week = `${today.monday.getDate()}-${today.sunday.getDate()}_${today.monday.getMonth() + 1}_${today.monday.getFullYear()}`;
-    console.log("Semaine: ", week);
+    // console.log("Semaine: ", week);
 
     api
       .get(`/disponibilite/all?week=${week}`)
@@ -240,10 +240,10 @@ const Planning = () => {
   useEffect(() => {
     if (selectedDate === null) {
       loadDispo(currentDate);
-      console.log("Date: ", currentDate);
+      // console.log("Date: ", currentDate);
     } else {
       loadDispo(selectedDate);
-      console.log("Date: ", currentDate);
+      // console.log("Date: ", currentDate);
     }
   }, [selectedDate]);
 
@@ -607,6 +607,122 @@ const Planning = () => {
     }));
   };
 
+  const loadHorairesByEnseignant = (enseignantId) => {
+    const selectedEns = ensignants.find(
+      (ens) => ens.id.toString() === enseignantId.toString(),
+    );
+    if (!selectedEns) return;
+
+    const dispoEns = disponibilite.filter((d) =>
+      selectedEns.nom.includes(d.nomEns),
+    );
+
+    setFilteredDispo(dispoEns);
+
+    const dispoDuJour = dispoEns.filter(
+      (d) => formatDate(d.dateDispo) === formatDate(selectedDate),
+    );
+
+    if (dispoDuJour.length === 0) {
+      setFilteredHoarire([]);
+      setShowForm(false);
+      Swal.fire({
+        title: "Information",
+        text: "Enseignant non disponible ce jour",
+        icon: "info",
+      });
+      return;
+    }
+
+    const toMinutes = (time) => {
+      const [hh, mm] = time.split(":").map(Number);
+      return hh * 60 + mm;
+    };
+
+    let hours = [];
+    dispoDuJour.forEach(({ hDeb, hFin }) => {
+      const start = toMinutes(hDeb);
+      const end = toMinutes(hFin);
+
+      const h = horaire.filter((ho) => {
+        const t = toMinutes(ho.heure);
+        return t >= start && t <= end;
+      });
+
+      hours = [...hours, ...h];
+    });
+
+    const uniqueHours = [...new Map(hours.map((h) => [h.heure, h])).values()];
+
+    setFilteredHoarire(uniqueHours);
+    setShowForm(true);
+  };
+
+  const loadMatieresByEnseignant = (enseignantId) => {
+    const ens = ensignants.find(
+      (e) => e.id.toString() === enseignantId.toString(),
+    );
+    if (!ens) return;
+
+    const fullName1 = `${ens.nom} ${ens.prenom}`.toLowerCase().trim();
+    const fullName2 = `${ens.prenom} ${ens.nom}`.toLowerCase().trim();
+
+    const mat = matieres.filter((mat) =>
+      mat.enseignants.some((e) => {
+        const name = e.toLowerCase().trim();
+        return name.includes(fullName1) || name.includes(fullName2);
+      }),
+    );
+
+    setFilteredMat(mat);
+  };
+
+  const loadMentionNiveauByMatiere = (matiereId) => {
+    const selectedMat = matieres.find(
+      (mat) => mat.id.toString() === matiereId.toString(),
+    );
+    if (!selectedMat) return;
+
+    setFilteredMent(
+      mentions.filter((mnt) => selectedMat.mentionId.includes(mnt.idMent)),
+    );
+
+    setFilteredNiv(
+      niveaux.filter((nv) => selectedMat.niveauId.includes(nv.idNiv)),
+    );
+  };
+
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+
+  //   if (name === "enseignantId") {
+  //     loadHorairesByEnseignant(value);
+  //     loadMatieresByEnseignant(value);
+  //   }
+
+  //   if (name === "matiereId") {
+  //     loadMentionNiveauByMatiere(value);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (modalMode === "edit" && formData?.enseignantId) {
+  //     loadHorairesByEnseignant(formData.enseignantId);
+  //     loadMatieresByEnseignant(formData.enseignantId);
+  //   }
+  // }, [modalMode, formData?.enseignantId]);
+
+  // useEffect(() => {
+  //   if (modalMode === "edit" && formData?.matiereId) {
+  //     loadMentionNiveauByMatiere(formData.matiereId);
+  //   }
+  // }, [modalMode, formData?.matiereId]);
+
   const formatDate = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
@@ -883,7 +999,6 @@ const Planning = () => {
             isClearable
           />
           <button
-            // disabled={!selectedMention || !selectedNiveau}
             onClick={() => setIsExportModalOpen(true)}
             className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center space-x-2"
           >
@@ -1007,6 +1122,7 @@ const Planning = () => {
             handleChange={handleChange}
             handleSubmit={handleSubmit}
             setShowModal={setShowForm}
+            modalType={"create"}
           />
         )}
 
@@ -1030,11 +1146,19 @@ const Planning = () => {
                       onClick={() => setShowModal(false)}
                       className="px-4 py-2 bg-gray-300 rounded"
                     >
-                      Annuler
+                      Fermer
                     </button>
 
                     <button
-                      onClick={() => setModalMode("edit")}
+                      // onClick={() => setModalMode("edit")}
+                      onClick={() => {
+                        Swal.fire({
+                          title: "Fonctionnalité indisponible",
+                          text: "La modification de l’emploi du temps sera disponible dans une prochaine mise à jour.",
+                          icon: "info",
+                          confirmButtonText: "OK",
+                        });
+                      }}
                       className="px-4 py-2 bg-blue-600 text-white rounded"
                     >
                       Modifier
@@ -1090,7 +1214,8 @@ const Planning = () => {
                   salles={salles}
                   matieres={filteredMat}
                   horaires={filteredHoraire}
-                  selectedDate={selectedEvent.start}
+                  selectedDate={new Date(selectedEvent.start)}
+                  modalType={"edit"}
                   data={{
                     numEd: selectedEvent.numEd,
                     jour: formatDate(selectedEvent.start),
@@ -1098,7 +1223,7 @@ const Planning = () => {
                     hFin: selectedEvent.hFin,
                     dispo: selectedEvent.status,
                     type: selectedEvent.type,
-                    responsableId: localStorage.getItem("user"),
+                    responsableId: userId,
                     enseignantId:
                       ensignants.find(
                         (ens) =>

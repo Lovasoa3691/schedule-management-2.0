@@ -10,12 +10,15 @@ const PlanningForm = ({
   handleChange,
   handleSubmit,
   setShowModal,
+  modalType,
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-white p-6 rounded-lg w-[500px] shadow-xl relative">
         <h2 className="text-lg font-semibold mb-4">
-          Ajouter un événement le {selectedDate.toLocaleDateString()}
+          {modalType === "create"
+            ? `Ajouter un événement le ${selectedDate.toLocaleDateString()}`
+            : `Modifier l'événement du ${selectedDate.toLocaleDateString()}`}
         </h2>
 
         <form onSubmit={handleSubmit}>
@@ -24,7 +27,7 @@ const PlanningForm = ({
             <select
               name="type"
               className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              value={data.type}
+              value={data.type || ""}
               onChange={handleChange}
               required
             >
@@ -33,6 +36,7 @@ const PlanningForm = ({
               </option>
               <option value="Hebdomadaire">Hebdomadaire</option>
               <option value="Semestriel">Semestriel</option>
+              <option value="Partiel">Partiel</option>
             </select>
           </div>
 
@@ -40,7 +44,7 @@ const PlanningForm = ({
             <label>Enseignant</label>
             <select
               name="enseignantId"
-              value={data.enseignantId}
+              value={data.enseignantId || ""}
               onChange={handleChange}
               className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
@@ -66,7 +70,7 @@ const PlanningForm = ({
             <label>Matière</label>
             <select
               name="matiereId"
-              value={data.matiereId}
+              value={data.matiereId || ""}
               onChange={handleChange}
               className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
               required
@@ -94,7 +98,7 @@ const PlanningForm = ({
               <label>Mention</label>
               <select
                 name="mentionId"
-                value={data.mentionId}
+                value={data.mentionId || ""}
                 onChange={handleChange}
                 className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
                 required
@@ -114,7 +118,7 @@ const PlanningForm = ({
               <label>Niveau</label>
               <select
                 name="niveauId"
-                value={data.niveauId}
+                value={data.niveauId || ""}
                 onChange={handleChange}
                 className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
                 required
@@ -136,7 +140,7 @@ const PlanningForm = ({
             <select
               name="idSalle"
               className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              value={data.idSalle}
+              value={data.idSalle || ""}
               onChange={handleChange}
               required
             >
@@ -157,7 +161,7 @@ const PlanningForm = ({
               <select
                 name="hDeb"
                 className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-                value={data.hDeb}
+                value={data.hDeb || ""}
                 onChange={handleChange}
                 required
               >
@@ -175,7 +179,7 @@ const PlanningForm = ({
               <select
                 name="hFin"
                 className="border p-2 w-full mb-4 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-                value={data.hFin}
+                value={data.hFin || ""}
                 onChange={handleChange}
                 required
               >
@@ -201,7 +205,10 @@ const PlanningForm = ({
               type="submit"
               className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded"
             >
-              Enregistrer
+              {
+                modalType === "create" ? "Enregistrer" : "Mettre à jour"
+              }
+              
             </button>
           </div>
         </form>
