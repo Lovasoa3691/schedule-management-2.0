@@ -198,7 +198,7 @@ const Dashboard = () => {
     api
       .get(`/user/info?id=${key}&role=${role}`)
       .then((res) => {
-        // console.log(res.data);
+        console.log(res.data);
         setUser(res.data);
       })
       .catch((err) => console.error("Erreur de recuperation: ", err));
@@ -214,7 +214,7 @@ const Dashboard = () => {
     <div className="dash-container">
       <h3 className="text-2xl">
         Bonjour{" "}
-        <span className="text-blue-500 underline">{user[0]?.email}</span>
+        <span className="text-blue-500 underline">{user[0]?.prenom}</span>
       </h3>
 
       <h2 className="text-2xl text-gray-700">
