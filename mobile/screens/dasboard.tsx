@@ -361,7 +361,7 @@ const Dashboard: React.FC = () => {
         const diff = target.getTime() - now.getTime();
 
         if (diff <= 0) {
-          setTimeLeft("La séance commence !");
+          setTimeLeft("N/A");
           clearInterval(interval);
           return;
         }
@@ -373,7 +373,7 @@ const Dashboard: React.FC = () => {
       }, 1000);
       return () => clearInterval(interval);
     } else {
-      setTimeLeft("Aucune autre séance aujourd’hui.");
+      setTimeLeft("N/A");
     }
   };
 

@@ -672,7 +672,6 @@ const Planning = () => {
     selectedNiveaux.forEach((niveau, niveauIndex) => {
       if (niveauIndex > 0) doc.addPage();
 
-      // --- TITRE DE LA PAGE ---
       doc.setFontSize(14);
       doc.setTextColor(0, 51, 102);
       doc.text(`Emploi du temps pour le Niveau ${niveau.label}`, marginX, 12);
@@ -699,18 +698,15 @@ const Planning = () => {
         const startX = marginX + colIndex * cellWidth;
         const startY = marginTop + rowIndex * cellHeight;
 
-        // Fond de la cellule de la mention
         doc.setFillColor(245, 245, 245);
         doc.rect(startX, startY, cellWidth, cellHeight, "F");
 
-        // Titre de la Mention
         doc.setFontSize(11);
         doc.setTextColor(0, 51, 102);
         doc.text(mention.label, startX + 2, startY + 6);
         doc.setDrawColor(0, 51, 102);
         doc.line(startX, startY + 7, startX + cellWidth, startY + 7);
 
-        // --- HEADER DU TABLEAU ---
         const headerHeight = 10;
         doc.setFontSize(8);
         doc.setFont("helvetica", "bold");
@@ -729,13 +725,11 @@ const Planning = () => {
         doc.setFont("helvetica", "normal");
         let currentY = startY + 8 + headerHeight + 4;
 
-        // --- FILTRAGE ET TRI DES ÉVÉNEMENTS ---
         const startOfWeek = new Date(monday);
         startOfWeek.setHours(0, 0, 0, 0);
         const endOfWeek = new Date(sunday);
         endOfWeek.setHours(23, 59, 59, 999);
 
-        // 1. Filtrer
         const filteredEvents = events.filter((e) => {
           const d = new Date(e.start);
           return (
@@ -746,10 +740,8 @@ const Planning = () => {
           );
         });
 
-        // 2. TRIER PAR DATE ET HEURE (Important pour l'ordre Lundi -> Samedi)
         filteredEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
-        // 3. GROUPER PAR JOUR
         const eventsByDay = {};
         filteredEvents.forEach((e) => {
           const dayKey = new Date(e.start).toISOString().split("T")[0];
@@ -765,7 +757,6 @@ const Planning = () => {
             align: "center",
           });
         } else {
-          // Extraire les jours et les trier alphabétiquement (YYYY-MM-DD se trie bien)
           const sortedDayKeys = Object.keys(eventsByDay).sort();
 
           sortedDayKeys.forEach((dayKey) => {
@@ -773,10 +764,8 @@ const Planning = () => {
             let firstLineOfDay = true;
 
             dayEvents.forEach((e) => {
-              // Sécurité pour ne pas dépasser la cellule
               if (currentY > startY + cellHeight - 5) return;
 
-              // Alternance de couleur de ligne
               doc.setFillColor(toggle ? (230, 240, 250) : (255, 255, 255));
               doc.rect(startX, currentY - 3, cellWidth, lineHeight, "F");
               toggle = !toggle;
@@ -812,13 +801,14 @@ const Planning = () => {
           });
         }
 
-        // Contour final de la cellule de mention
         doc.setDrawColor(180);
         doc.rect(startX, startY, cellWidth, cellHeight);
       });
     });
 
-    doc.save(`Emploi_du_temps_de_la_semaine_.pdf`);
+    doc.save(
+      `Emploi_du_temps_de_la_semaine_${monday.toLocaleDateString("fr-FR")}-${sunday.toLocaleDateString("fr-FR")}.pdf`,
+    );
   };
 
   const [userRole, setUserRole] = useState(null);
