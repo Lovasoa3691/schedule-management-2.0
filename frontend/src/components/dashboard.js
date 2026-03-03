@@ -178,14 +178,28 @@ const Dashboard = () => {
     setFilteredProgressPlan(filtered);
   };
 
-  const handleMentionChange = (selectedMention) => {
-    setSelectedMention(selectedMention);
-    filtrerData(selectedMention, selectedNiveau);
+  // const handleMentionChange = (selectedMention) => {
+  //   setSelectedMention(selectedMention);
+  //   filtrerData(selectedMention, selectedNiveau);
+  // };
+
+  // const handleNiveauChange = (selectedNiveau) => {
+  //   setSelectedNiveau(selectedNiveau);
+  //   filtrerData(selectedMention, selectedNiveau);
+  // };
+
+  useEffect(() => {
+    if (selectedMention && selectedNiveau) {
+      filtrerData(selectedMention, selectedNiveau);
+    }
+  }, [selectedMention, selectedNiveau]);
+
+  const handleMentionChange = (mention) => {
+    setSelectedMention(mention ?? mentionOptions[0]);
   };
 
-  const handleNiveauChange = (selectedNiveau) => {
-    setSelectedNiveau(selectedNiveau);
-    filtrerData(selectedMention, selectedNiveau);
+  const handleNiveauChange = (niveau) => {
+    setSelectedNiveau(niveau ?? niveauOptions[0]);
   };
 
   const total = enseignants?.length || 0;

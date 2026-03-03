@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://nine-based-yours-edition.trycloudflare.com/api",
+  baseURL: "https://switch-hosting-str-press.trycloudflare.com/api",
   // baseURL: "http://localhost:5142/api",
   timeout: 15000,
 });
