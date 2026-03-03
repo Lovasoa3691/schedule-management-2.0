@@ -163,7 +163,10 @@ const Dashboard = () => {
 
     const sorted = sortByHeure(filtered);
 
+     console.log("Edts: ", sorted)
+
     setFilteredProgressPlan(sorted);
+
   }, [progressPlan]);
 
   const mentionOptions = mentions.map((ment) => ({
