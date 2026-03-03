@@ -163,10 +163,7 @@ const Dashboard = () => {
 
     const sorted = sortByHeure(filtered);
 
-     console.log("Edts: ", sorted)
-
     setFilteredProgressPlan(sorted);
-
   }, [progressPlan]);
 
   const mentionOptions = mentions.map((ment) => ({
@@ -180,7 +177,7 @@ const Dashboard = () => {
   }));
 
   const filtrerData = (mention, niveau) => {
-    const filtered = filteredProgressPlan.filter(
+    const filtered = progressPlan.filter(
       (item) =>
         (!mention || item.mention === mention.value) &&
         (!niveau || item.niveau === niveau.value),
@@ -188,15 +185,6 @@ const Dashboard = () => {
 
     setFilteredProgressPlan(sortByHeure(filtered));
   };
-  // const handleMentionChange = (selectedMention) => {
-  //   setSelectedMention(selectedMention);
-  //   filtrerData(selectedMention, selectedNiveau);
-  // };
-
-  // const handleNiveauChange = (selectedNiveau) => {
-  //   setSelectedNiveau(selectedNiveau);
-  //   filtrerData(selectedMention, selectedNiveau);
-  // };
 
   useEffect(() => {
     if (selectedMention && selectedNiveau) {
@@ -211,6 +199,16 @@ const Dashboard = () => {
   const handleNiveauChange = (niveau) => {
     setSelectedNiveau(niveau ?? niveauOptions[0]);
   };
+
+  // const handleMentionChange = (selectedMention) => {
+  //   setSelectedMention(selectedMention);
+  //   filtrerData(selectedMention, selectedNiveau);
+  // };
+
+  // const handleNiveauChange = (selectedNiveau) => {
+  //   setSelectedNiveau(selectedNiveau);
+  //   filtrerData(selectedMention, selectedNiveau);
+  // };
 
   const total = enseignants?.length || 0;
   const manPercent = total ? Math.floor((Man.length * 100) / total) : 0;
