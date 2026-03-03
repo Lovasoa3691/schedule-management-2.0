@@ -87,30 +87,32 @@ export default function courses(): React.JSX.Element {
 
     const week = `${monday.getDate()}-${sunday.getDate()}_${monday.getMonth() + 1}_${monday.getFullYear()}`;
 
-    // Alert.alert(week);
-
     api
       .get(`/edt/${data.userId}/week_${week}`, {
         params: { start, end },
       })
       .then((rep) => {
-        // console.log("Cours chargés: ", rep.data);
         if (rep.data.length > 0) {
-          const cours: coursesList[] = rep.data.map((c: any) => ({
-            id: c.numEd,
-            hDeb: c.hDeb,
-            hFin: c.hFin,
-            jour: c.jour,
-            matiere: c.nomMatiere,
-            status: c.dispo,
-            mention: c.mention,
-            niveau: c.niveau,
-            salle: c.nomSalle,
-            localisation: "",
-            completed: c.dispo === "Terminé" ? true : false,
-            canceled: c.dispo === "Annulé" ? true : false,
-            statusEns: c.status === "Accompli" ? true : false,
-          }));
+          const cours = rep.data
+            .sort((a: any, b: any) => {
+              if (a.jour !== b.jour) return a.jour.localeCompare(b.jour);
+              return a.hDeb.localeCompare(b.hDeb);
+            })
+            .map((c: any) => ({
+              id: c.numEd,
+              hDeb: c.hDeb,
+              hFin: c.hFin,
+              jour: c.jour,
+              matiere: c.nomMatiere,
+              status: c.dispo,
+              mention: c.mention,
+              niveau: c.niveau,
+              salle: c.nomSalle,
+              localisation: "",
+              completed: c.dispo === "Terminé",
+              canceled: c.dispo === "Annulé",
+              statusEns: c.status === "Accompli",
+            }));
           setCourses(cours);
         } else {
           setCourses([]);
@@ -149,25 +151,24 @@ export default function courses(): React.JSX.Element {
     }
   }, [modalVisible]);
 
+  const [loadingDoneIds, setLoadingDoneIds] = useState<string[]>([]);
+
   const done = (id: string) => {
-    setLoadingDone(true);
+    // Ajouter l'id dans la liste des chargements
+    setLoadingDoneIds((prev) => [...prev, id]);
+
     api
       .put(`/edt/status/${id}/done`)
       .then(() => {
-        loadCourses();
+        loadCourses(); // recharge les cours
       })
       .catch((err) => {
         console.error("Erreur lors de la mise à jour du cours:", err);
       })
-      .finally(() => setLoadingDone(false));
-  };
-
-  const toggleComplete = (id: string) => {
-    setCourses((prev) =>
-      prev.map((cours) =>
-        cours.id === id ? { ...cours, completed: !cours.completed } : cours,
-      ),
-    );
+      .finally(() => {
+        // Retirer l'id de la liste
+        setLoadingDoneIds((prev) => prev.filter((itemId) => itemId !== id));
+      });
   };
 
   const getStatus = (cours: coursesList): "Annulé" | "En cours" | "Terminé" => {
@@ -205,29 +206,6 @@ export default function courses(): React.JSX.Element {
     ]);
   };
 
-  const openCourseMenu = (item: coursesList) => {
-    const options = ["⏸ Arrêter le cours", "❌ Annuler le cours", "Fermer"];
-    const cancelButtonIndex = 2;
-    const destructiveButtonIndex = 1;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        destructiveButtonIndex,
-      },
-      (index?: number) => {
-        if (index === 0) {
-          // TODO: logique arrêter le cours
-          Alert.alert("Info", "Cours arrêté (à implémenter côté API)");
-        }
-        if (index === 1) {
-          cancelCours(item.id);
-        }
-      },
-    );
-  };
-
   const [loadingDone, setLoadingDone] = useState(false);
 
   const onRefresh = async () => {
@@ -244,6 +222,17 @@ export default function courses(): React.JSX.Element {
       today.getFullYear() === target.getFullYear() &&
       today.getMonth() === target.getMonth() &&
       today.getDate() === target.getDate()
+    );
+  };
+
+  const confirmDone = (id: string) => {
+    Alert.alert(
+      "Confirmation",
+      "Êtes-vous sûr de vouloir marquer ce cours comme fait ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Oui", onPress: () => done(id) },
+      ],
     );
   };
 
@@ -335,14 +324,16 @@ export default function courses(): React.JSX.Element {
                 {status === "En cours" && (
                   <View style={{ flexDirection: "row", marginTop: 10 }}>
                     <TouchableOpacity
-                      onPress={() => done(item.id)}
+                      onPress={() => confirmDone(item.id)}
                       style={[
                         styles.completeButton,
-                        (!today || loadingDone) && { opacity: 0.5 },
+                        (!today || loadingDoneIds.includes(item.id)) && {
+                          opacity: 0.5,
+                        },
                       ]}
-                      disabled={!today || loadingDone}
+                      disabled={!today || loadingDoneIds.includes(item.id)}
                     >
-                      {loadingDone ? (
+                      {loadingDoneIds.includes(item.id) ? (
                         <ActivityIndicator size="small" color="#fff" />
                       ) : (
                         <>

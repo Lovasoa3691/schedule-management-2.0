@@ -438,7 +438,7 @@ export default function DisponibilityCalendar() {
                 ]);
               }}
             >
-              <Text style={styles.actionBtnText}>Annuler la disponibilité</Text>
+              <Text style={styles.actionBtnText}>Modifier</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

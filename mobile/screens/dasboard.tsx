@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -19,6 +20,7 @@ import * as Notifications from "expo-notifications";
 import * as Speech from "expo-speech";
 import * as Location from "expo-location";
 import { usePlanning } from "./utils/PlanningContext";
+import useRepeatSpeech from "./utils/Speech";
 
 export const getUserLocationWithCity = async () => {
   // Permission
@@ -267,6 +269,7 @@ const Dashboard: React.FC = () => {
 
           const coursSemaine: Seance[] = rep.data
             .filter((c: any) => c.jour === today)
+            .sort((a: any, b: any) => a.hDeb.localeCompare(b.hDeb))
             .map((c: any) => ({
               id: c.numEd,
               hDeb: c.hDeb,
@@ -278,8 +281,6 @@ const Dashboard: React.FC = () => {
               salle: c.nomSalle,
               status: c.dispo,
             }));
-
-          console.log("Cours de la semaine: ", coursSemaine);
 
           setCourses(coursSemaine);
 
@@ -401,30 +402,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const message = "Votre séance commence dans dix minutes";
-
-  const AlertInfo = async () => {
-    const trigger: Notifications.TimeIntervalTriggerInput = {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 5,
-      repeats: false,
-    };
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Rappel emploi du temps",
-        body: message,
-      },
-      trigger,
-    });
-
-    Speech.speak(message, { language: "fr" });
-  };
-
-  useEffect(() => {
-    AlertInfo();
-  }, []);
-
   const normalizeDate = (date: Date) => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -432,9 +409,9 @@ const Dashboard: React.FC = () => {
   };
 
   const getStatutSeance = (
-    seanceDateStr: string, // "2026-03-01"
-    hDeb: string, // "08:00"
-    hFin: string, // "10:00"
+    seanceDateStr: string,
+    hDeb: string,
+    hFin: string,
   ) => {
     const now = new Date();
 
@@ -481,6 +458,41 @@ const Dashboard: React.FC = () => {
 
   const ui = getWeatherUI(weather.current_weather);
 
+  const message = "Votre séance commence dans dix minutes";
+
+  // const speak = () => {
+  //   Speech.speak(message, { language: "fr" });
+  // };
+
+  // const askPermissions = async () => {
+  //   const { status } = await Notifications.requestPermissionsAsync();
+  //   if (status !== "granted") {
+  //     alert("Autorisation notifications refusée !");
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
+  // const scheduleNotification = async () => {
+  //   const hasPermission = await askPermissions();
+  //   if (!hasPermission) return;
+
+  //   const trigger: Notifications.TimeIntervalTriggerInput = {
+  //     seconds: 60,
+  //     repeats: true,
+  //     type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+  //   };
+
+  //   await Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: "Rappel emploi du temps",
+  //       body: message,
+  //       sound: true,
+  //     },
+  //     trigger,
+  //   });
+  // };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -504,13 +516,16 @@ const Dashboard: React.FC = () => {
         />
       }
     >
+      {/* <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Button title="Lire message" onPress={scheduleNotification} />
+      </View> */}
       <Text style={styles.greeting}>
         Bonjour <Text style={styles.greetingName}>{user?.prenom}</Text>
         {" !"}
       </Text>
 
       <Text style={styles.date}>
-        Aujourd'hui, {currentDate} |{" "}
+        Aujourd'hui, {currentDate}
         <View style={styles.weatherRow}>
           <Ionicons name={ui.icon} size={18} color="#f59e0b" />
           <Text style={styles.weatherText}>
