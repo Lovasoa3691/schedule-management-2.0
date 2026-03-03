@@ -177,8 +177,11 @@ const Dashboard = () => {
   }));
 
   const filtrerData = (mention, niveau) => {
+    const today = formatDate(Date.now());
+
     const filtered = progressPlan.filter(
       (item) =>
+        item.jour === today &&
         (!mention || item.mention === mention.value) &&
         (!niveau || item.niveau === niveau.value),
     );
