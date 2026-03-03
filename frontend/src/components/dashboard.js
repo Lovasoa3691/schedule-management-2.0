@@ -148,15 +148,22 @@ const Dashboard = () => {
     setHebdomadaire(hebd);
   }, [enseignants, planning]);
 
+  const sortByHeure = (data) => {
+    return [...data].sort((a, b) => {
+      const hA = new Date(`1970-01-01T${a.hDeb}`);
+      const hB = new Date(`1970-01-01T${b.hDeb}`);
+      return hA - hB;
+    });
+  };
+
   useEffect(() => {
-    // setLoading(true);
-    // setTimeout(() => {
     const filtered = progressPlan.filter(
       (p) => p.jour === formatDate(Date.now()),
     );
-    setFilteredProgressPlan(filtered);
-    //   setLoading(false);
-    // }, 1500);
+
+    const sorted = sortByHeure(filtered);
+
+    setFilteredProgressPlan(sorted);
   }, [progressPlan]);
 
   const mentionOptions = mentions.map((ment) => ({
@@ -175,9 +182,9 @@ const Dashboard = () => {
         (!mention || item.mention === mention.value) &&
         (!niveau || item.niveau === niveau.value),
     );
-    setFilteredProgressPlan(filtered);
-  };
 
+    setFilteredProgressPlan(sortByHeure(filtered));
+  };
   // const handleMentionChange = (selectedMention) => {
   //   setSelectedMention(selectedMention);
   //   filtrerData(selectedMention, selectedNiveau);

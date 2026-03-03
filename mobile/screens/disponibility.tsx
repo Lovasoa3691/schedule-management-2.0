@@ -428,14 +428,10 @@ export default function DisponibilityCalendar() {
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: "#e74c3c" }]}
               onPress={() => {
-                Alert.alert("Confirmation", "Annuler cette disponibilité ?", [
-                  { text: "Non", style: "cancel" },
-                  {
-                    text: "Oui",
-                    style: "destructive",
-                    onPress: () => cancelDispo(),
-                  },
-                ]);
+                Alert.alert(
+                  "Fonctionnalité indisponible",
+                  "Cette fonctionnalité n’est pas encore disponible en raison de la complexité de manipulation du projet. Elle sera implémentée ultérieurement.",
+                );
               }}
             >
               <Text style={styles.actionBtnText}>Modifier</Text>
