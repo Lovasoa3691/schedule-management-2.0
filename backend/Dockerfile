@@ -1,4 +1,7 @@
-# ===== BUILD =====
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+EXPOSE 8000
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
@@ -7,16 +10,9 @@ COPY edt_api/ edt_api/
 RUN dotnet restore
 
 WORKDIR /src/edt_api
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish -c Release -o /app/publish
 
-# ===== RUNTIME DISTROLESS =====
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled
+FROM runtime
 WORKDIR /app
-
-ENV ASPNETCORE_URLS=http://+:8000
-
 COPY --from=build /app/publish .
-
-EXPOSE 8000
-
 ENTRYPOINT ["dotnet", "edt_api.dll"]
