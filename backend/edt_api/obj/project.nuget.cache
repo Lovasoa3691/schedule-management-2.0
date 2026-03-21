@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "V06pqKHNwvo=",
+  "dgSpecHash": "DQG8jp48yBLQlGBGaNg8kr0LZDKslPrpFWAkVh02ZnvWqXU6A0loaUaIoxelYRzfT9vTRsd8jhdXOTISgGJ4uQ==",
   "success": true,
-  "projectFilePath": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj",
+  "projectFilePath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
   "expectedPackageFiles": [
     "/home/julianot/.nuget/packages/automapper/12.0.0/automapper.12.0.0.nupkg.sha512",
     "/home/julianot/.nuget/packages/automapper.extensions.microsoft.dependencyinjection/12.0.0/automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",

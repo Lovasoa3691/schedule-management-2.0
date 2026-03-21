@@ -1,0 +1,12 @@
+node_modules
+mobile
+.git
+.gitignore
+Dockerfile
+docker-compose.yaml
+docker-compose.prod.yaml
+README.md
+.env
+dist
+build
+coverage

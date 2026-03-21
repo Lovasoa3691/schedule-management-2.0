@@ -1,18 +1,21 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-WORKDIR /app
-EXPOSE 8000
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
 
 COPY edt_api.sln .
 COPY edt_api/ edt_api/
+
 RUN dotnet restore
 
 WORKDIR /src/edt_api
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish \
+    -p:PublishTrimmed=true \
+    -p:PublishSingleFile=true \
+    --no-restore
 
-FROM runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
+
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "edt_api.dll"]
+
+EXPOSE 8000
+ENTRYPOINT ["./edt_api"]

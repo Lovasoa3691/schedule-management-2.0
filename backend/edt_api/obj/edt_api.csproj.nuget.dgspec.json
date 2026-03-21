@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj": {}
+    "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj": {}
   },
   "projects": {
-    "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj": {
+    "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj",
+        "projectUniqueName": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
         "projectName": "edt_api",
-        "projectPath": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/edt_api.csproj",
+        "projectPath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/edt_api.csproj",
         "packagesPath": "/home/julianot/.nuget/packages/",
-        "outputPath": "/media/julianot/DATA/Projects/schedule-management/backend/edt_api/obj/",
+        "outputPath": "/home/julianot/Desktop/Projects/schedule-management/backend/edt_api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/julianot/.nuget/NuGet/NuGet.Config"
@@ -88,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.122/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
