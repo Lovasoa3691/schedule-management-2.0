@@ -50,12 +50,6 @@ L’application est entièrement conteneurisée afin de garantir la portabilité
 - Backend (ASP.NET Core)
 - Base de données (MySQL)
 
-### 🔨 Build && Lancement avec Docker Compose
-
-```bash
-docker compose up -d --build
-```
-
 
 ## Pipeline CI/CD
 
@@ -97,7 +91,6 @@ Kubernetes
  cd schedule-management
 ```
 
-### Installer le runtime et dotnet SDK 8.0
 ### Configurer la base de données
 ```bash
 # Configure la connection dans appsettings.json (backend):
@@ -113,18 +106,9 @@ cd backend/edt_api
 dotnet ef database update
 ```
 
+### 🔨 Build && Lancement avec Docker Compose
 
-### Lancer le backend
-```bash 
-dotnet run
-```
-Par défaut, l'API sera disponible sur http://localhost:5142
-
-
-### Lancer le frontend
 ```bash
-cd schedule-management
-npm install
-npm start
+docker compose up -d --build
 ```
-L'application sera disponible sur http://localhost:3000
+L'application sera disponible sur http://localhost
