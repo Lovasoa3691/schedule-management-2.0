@@ -87,7 +87,7 @@ Kubernetes
 ### Cloner le projet
 
  ```bash
- git clone https://github.com/Lovasoa3691/schedule-management.git`
+ git clone https://github.com/Lovasoa3691/schedule-management-2.0.git`
  cd schedule-management
 ```
 
