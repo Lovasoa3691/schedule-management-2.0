@@ -1,28 +1,44 @@
 # Schedule Management System
 
 Un système full stack de gestion d’emploi du temps permettant d’organiser efficacement les horaires des enseignants, étudiants et salles de cours, tout en évitant les conflits de planification.
-Développé avec **React.js**, **React Native**, **ASP.NET Core (Entity Framework)** et **MySQL**, et intégrant une approche complète **DevOps (Docker, Kubernetes, CI/CD Jenkins)**.
 
-## Architecture du projet
+Le projet illustre une architecture DevOps complète avec :
+
+- conteneurisation Docker
+- orchestration Kubernetes
+- CI/CD Jenkins
+- API REST ASP.NET Core
+- frontend React.js / React Native
+- base de données MySQL
+
+## Architecture globale
 ```
-├── frontend-web (React.js)
-├── mobile-app (React Native)
-├── backend-api (ASP.Net Core)
-├── database (MySQL)
-├── docker
-│   ├── Dockerfile.frontend
-│   ├── Dockerfile.backend
-│   └── docker-compose.yml
-├── kubernetes
-│   ├── frontend.yaml
-│   ├── backend.yaml
-│   ├── mysql-deployment.yaml
-│   └── mysql-service.yaml
-└── Jenkinsfile
+                        ┌──────────────┐
+                        │  Frontend    │
+                        │ React / RN   │
+                        └──────┬───────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │   Nginx      │
+                        │  Gateway     │
+                        └──────┬───────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │  Backend     │
+                        │ ASP.NET Core │
+                        └──────┬───────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │   MySQL      │
+                        │ (Dockerized) │
+                        └──────────────┘
 ```
 
 
-## ⚙️ Technologies utilisées
+## ⚙️ Stack technique
 
 ### Backend & Frontend
 - React.js
@@ -32,23 +48,46 @@ Développé avec **React.js**, **React Native**, **ASP.NET Core (Entity Framewor
 - MySQL
 
 ### DevOps & Infrastructure
-- Docker
-- Docker Compose
-- Kubernetes
-- Jenkins (CI/CD)
-- Git & GitHub
-- Nginx
-- Linux base Ubuntu
+- Docker & Docker Compose
+- Kubernetes (Deployments, Services, Ingress)
+- Jenkins CI/CD
+- Nginx Reverse Proxy
+- Git / GitHub
 
 
 ## 🐳 Conteneurisation avec Docker
 
-L’application est entièrement conteneurisée afin de garantir la portabilité et la cohérence des environnements.
+L’application est 100% conteneurisée, aucune dépendance locale requise.
 
-### Services conteneurisés
-- Frontend (React.js)
-- Backend (ASP.NET Core)
-- Base de données (MySQL)
+### Services :
+- frontend (React)
+- backend (ASP.NET Core)
+- mysql (database)
+- nginx (gateway)
+
+## Lancement rapide
+### Prérequis
+- Docker
+- Docker Compose
+``` bash
+git clone https://github.com/Lovasoa3691/schedule-management-2.0.git
+cd schedule-management-2.0
+docker compose up --build
+```
+L'application sera disponible sur http://localhost
+
+
+
+## Compte de démonstration
+
+Lors du premier démarrage, la base de données est initialisée automatiquement avec un compte administrateur de test.
+```
+Email : admin@gmail.com
+Mot de passe : Admin@134
+```
+
+Vous pouvez utiliser ce compte pour explorer immédiatement l'application.
+
 
 
 ## Pipeline CI/CD
@@ -63,16 +102,26 @@ Un pipeline Jenkins automatise :
 
 Flux :
 ```
-GitHub
-↓
-Jenkins
-↓
-Docker Build
-↓
-Docker Registry
-↓
-Kubernetes
+GitHub Push
+   ↓
+Jenkins Build
+   ↓
+Docker Build Images
+   ↓
+Push Registry
+   ↓
+Deploy Kubernetes
 ```
+
+## Déploiement Kubernetes
+Le projet inclut :
+
+- Deployments (frontend, backend)
+- StatefulSet (MySQL)
+- Services internes
+- Ingress Controller (Nginx)
+- ConfigMaps & Secrets
+
 
 ## Fonctionnalites principales de l'application
 - Authentification et gestion des utilisateurs (responsable/enseignants)
@@ -82,33 +131,29 @@ Kubernetes
 - Exportation en PDF de l'emploi du temps
 
 
-
-## Installation et lancement
-### Cloner le projet
-
- ```bash
- git clone https://github.com/Lovasoa3691/schedule-management-2.0.git`
- cd schedule-management
+## Structure du projet
+```
+├── frontend-web (React)
+├── mobile-app (React Native)
+├── backend-api (ASP.NET Core)
+├── docker-compose.yaml
+├── k8s/
+├── nginx/
+├── Jenkinsfile
 ```
 
-### Configurer la base de données
-```bash
-# Configure la connection dans appsettings.json (backend):
-"ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=db_edt_p;User=ton_username;Password=ton_mot_de_passe"
-  }
-```
-  
-### Applique les migrations EF:
+## Objectif
+Ce projet démontre une maîtrise de :
 
-```bash
-cd backend/edt_api
-dotnet ef database update
-```
+- architecture microservices simple
+- containerisation complète
+- orchestration Kubernetes
+- pipeline CI/CD automatisé
+- déploiement cloud-ready
 
-### 🔨 Build && Lancement avec Docker Compose
 
-```bash
-docker compose up -d --build
-```
-L'application sera disponible sur http://localhost
+## Améliorations futures
+- monitoring (Prometheus / Grafana)
+- logs centralisés (ELK stack)
+- Helm charts Kubernetes
+- déploiement cloud (AWS / GCP)
