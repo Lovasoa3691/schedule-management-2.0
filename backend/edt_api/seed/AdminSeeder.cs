@@ -18,10 +18,10 @@ public class AdminSeeder
 
         var res = new Administrateur
         {
-            nom = "FENONANTENAIKO",
-            prenom = "Julianot Lovasoa",
+            nom = "ADMIN",
+            prenom = "Admin admin",
             telephone = "+261345416063",
-            adresse = "fenomanana",
+            adresse = "paris",
             genre = "Masculin",
             role = "Admin",
         };
@@ -34,7 +34,7 @@ public class AdminSeeder
 
         var auth = new Authentification
         {
-            email = "fenonantenaikolovasoa@gmail.com",
+            email = "admin@gmail.com",
             mdp = hashedPass,
             utilisateurId = res.idUt,
             isActive = true

@@ -18,24 +18,22 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+
           env:
             - name: ConnectionStrings__DefaultConnection
               valueFrom:
                 secretKeyRef:
                   name: backend-secrets-k8s
                   key: db-connection
+
+            - name: Cors__Origins
+              value: "http://frontend-service"
+
+            - name: Jwt__Issuer
+              value: "http://backend-service"
+
+            - name: Jwt__Audience
+              value: "http://backend-service"
+
       imagePullSecrets:
         - name: regcred
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-spec:
-  selector:
-    app: backend-api
-  ports:
-    - port: 80
-      targetPort: 8080
-  type: NodePort

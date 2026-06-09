@@ -35,27 +35,45 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddCors(options =>
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowAll", policy =>
+//     {
+//         policy.WithOrigins("http://192.168.49.2:31483","http://192.168.49.2:32395/")
+//         // policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
+//             .AllowAnyHeader()
+//             .AllowAnyMethod()
+//             .AllowCredentials();
+//     });
+// });
+
+var origins = builder.Configuration["Cors:Origins"];
+
+if (!string.IsNullOrEmpty(origins))
 {
-    options.AddPolicy("AllowAll", policy =>
+    builder.Services.AddCors(options =>
     {
-        policy.WithOrigins("http://192.168.49.2:31483","http://192.168.49.2:32395/")
-        // policy.WithOrigins("http://localhost:3000","http://localhost:5142/")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        options.AddPolicy("CorsPolicy", policy =>
+        {
+            policy.WithOrigins(origins.Split(","))
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
     });
-});
+}
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, serverVersion)
+    options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+        mySqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,                          
+            maxRetryDelay: TimeSpan.FromSeconds(5), 
+            errorNumbersToAdd: null
+        )
+    )
 );
-
-// builder.Services.AddDbContext<AppDbContext>(options =>
-//     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-// );
 
 builder.Services.AddAuthentication(options =>
     {
@@ -108,14 +126,14 @@ builder.Services.AddHostedService<EdtStatusWorker>();
 
 var app = builder.Build();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//     db.Database.Migrate();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 await AdminSeeder.SeedAsync(app.Services);
 
-app.UseCors("AllowAll");
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
