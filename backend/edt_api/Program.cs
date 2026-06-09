@@ -47,21 +47,18 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 //     });
 // });
 
-var origins = builder.Configuration["Cors:Origins"];
+var corsOrigins = builder.Configuration["Cors:Origins"]
+    .Split(",", StringSplitOptions.RemoveEmptyEntries);
 
-if (!string.IsNullOrEmpty(origins))
+builder.Services.AddCors(options =>
 {
-    builder.Services.AddCors(options =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        options.AddPolicy("CorsPolicy", policy =>
-        {
-            policy.WithOrigins(origins.Split(","))
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+        policy.WithOrigins(corsOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
-}
+});
 
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 35));
 
@@ -133,7 +130,7 @@ using (var scope = app.Services.CreateScope())
 }
 await AdminSeeder.SeedAsync(app.Services);
 
-app.UseCors("CorsPolicy");
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

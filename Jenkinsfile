@@ -5,11 +5,11 @@ pipeline {
         githubPush()
     }
     environment {
-        DB_HOST     = credentials('AIVEN_DB_HOST')
-        DB_PORT     = credentials('AIVEN_DB_PORT')
-        DB_NAME     = credentials('AIVEN_DB_NAME')
-        DB_USER     = credentials('AIVEN_DB_USER')
-        DB_PASSWORD = credentials('AIVEN_DB_PASSWORD')
+        // DB_HOST     = credentials('AIVEN_DB_HOST')
+        // DB_PORT     = credentials('AIVEN_DB_PORT')
+        // DB_NAME     = credentials('AIVEN_DB_NAME')
+        // DB_USER     = credentials('AIVEN_DB_USER')
+        // DB_PASSWORD = credentials('AIVEN_DB_PASSWORD')
         DOCKER_HUB_CREDS = 'docker-hub-creds' 
         DOCKER_USERNAME = '' 
         DOCKER_PASSWORD = '' 
@@ -23,9 +23,9 @@ pipeline {
             }
         }
         stage('Build & Push Backend') {
-            // when {
-            //     changeset "backend/**"
-            // }
+            when {
+                changeset "backend/**"
+            }
             steps {
                 dir('backend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -42,9 +42,9 @@ pipeline {
             }
         }
         stage('Build & Push Frontend') {
-            //  when {
-            //     changeset "frontend/**"
-            // }
+             when {
+                changeset "frontend/**"
+            }
             steps {
                 dir('frontend') {
                     withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDS}", 
@@ -60,9 +60,9 @@ pipeline {
             }
         }
         stage('Deploy Backend to Minikube') {
-            //  when {
-            //     changeset "backend/**"
-            // }
+             when {
+                changeset "backend/**"
+            }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
@@ -74,9 +74,9 @@ pipeline {
             }
         }
         stage('Deploy Frontend to Minikube') {
-            //  when {
-            //     changeset "frontend/**"
-            // }
+             when {
+                changeset "frontend/**"
+            }
             steps {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
