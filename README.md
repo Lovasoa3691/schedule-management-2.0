@@ -1,4 +1,4 @@
-# Schedule Management System
+# SchedConnect - Schedule Management System
 
 Un système full stack de gestion d’emploi du temps permettant d’organiser efficacement les horaires des enseignants, étudiants et salles de cours, tout en évitant les conflits de planification.
 
