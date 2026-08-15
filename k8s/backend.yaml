@@ -4,18 +4,22 @@ metadata:
   name: backend-api
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: backend-api
+
   template:
     metadata:
       labels:
         app: backend-api
+
     spec:
       containers:
         - name: backend-api
           image: juliannot3691/backend-api:latest
           imagePullPolicy: Always
+
           ports:
             - containerPort: 8080
 
@@ -27,13 +31,29 @@ spec:
                   key: db-connection
 
             - name: Cors__Origins
-              value: "http://frontend-service"
+              value: "http://app.local"
 
             - name: Jwt__Issuer
-              value: "http://backend-service"
+              value: "http://app.local"
 
             - name: Jwt__Audience
-              value: "http://backend-service"
+              value: "http://app.local"
 
       imagePullSecrets:
         - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend-api
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
+  type: ClusterIP
