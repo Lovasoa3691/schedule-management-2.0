@@ -1,23 +1,22 @@
-import { FiBell, FiChevronDown, FiMessageSquare } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../hooks/api";
-import { FiCamera } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
-import { Loader, Loader2, Spinner } from "./spin/Spinner";
+import { Loader, Spinner } from "./spin/Spinner";
+import { FiChevronDown } from "react-icons/fi";
 
 const Avatar = ({ user, avatar, setAvatar }) => {
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // const handleUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
 
-    const preview = URL.createObjectURL(file);
-    setAvatar(preview);
-    // 👉 plus tard : upload vers backend
-    // const formData = new FormData();
-    // formData.append("avatar", file);
-    // api.post("/utilisateur/avatar", formData);
-  };
+  //   const preview = URL.createObjectURL(file);
+  //   setAvatar(preview);
+  //   // 👉 plus tard : upload vers backend
+  //   // const formData = new FormData();
+  //   // formData.append("avatar", file);
+  //   // api.post("/utilisateur/avatar", formData);
+  // };
 
   return (
     <div className="relative w-12 h-12">

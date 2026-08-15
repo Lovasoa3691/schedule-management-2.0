@@ -1,6 +1,4 @@
-import logo from "./logo.svg";
 // import "./App.css";
-
 import Planning from "./components/planning";
 import Navbar from "./components/navbar";
 import TopBar from "./components/topbar";
@@ -13,7 +11,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   Navigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -25,7 +22,7 @@ import TeacherHour from "./components/statistics/teacherHour";
 import Week from "./components/statistics/week";
 import Profil from "./components/settings/profil";
 import Sector from "./components/settings/sector";
-import AssistantFloatingForm from "./components/forms/assistant";
+// import AssistantFloatingForm from "./components/forms/assistant";
 import api from "./hooks/api";
 import ForgotPassword from "./components/auth/forgetPassword";
 import Users from "./components/users";
@@ -33,14 +30,16 @@ import Users from "./components/users";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     api
       .get("/user/profile")
       .then((rep) => {
-        setUserRole(rep.data.userRole);
-        setIsAuthenticated(true);
+        console.log("rep.data: ", rep.data);
+        if (rep.data) {
+          setIsAuthenticated(true);
+        }
+        setIsAuthenticated(false);
       })
       .catch(() => {
         setIsAuthenticated(false);
@@ -62,6 +61,10 @@ function App() {
               <TopBar setIsAuthenticated={setIsAuthenticated} />
               <div className="p-20 mt-5">
                 <Routes>
+                  <Route
+                    path="/"
+                    element={<Navigate to="/dashboard" replace />}
+                  />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/enseignant" element={<Teacher />} />
                   <Route path="/planning" element={<Planning />} />
