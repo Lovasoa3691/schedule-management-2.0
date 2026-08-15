@@ -46,7 +46,7 @@ const Login = ({ setIsAuthentificated }) => {
         setShowAlert(true);
       }
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

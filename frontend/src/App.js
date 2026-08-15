@@ -35,13 +35,17 @@ function App() {
     api
       .get("/user/profile")
       .then((rep) => {
-        console.log("rep.data: ", rep.data);
         if (rep.data) {
           setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
         }
-        setIsAuthenticated(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Erreur vérification authentification :", error);
+        console.error("Status :", error.response?.status);
+        console.error("Response :", error.response?.data);
+
         setIsAuthenticated(false);
       })
       .finally(() => {
