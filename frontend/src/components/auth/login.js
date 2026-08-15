@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/calendar.png";
 import Office from "../../assets/espace-de-travail.png";
 import { useEffect, useState } from "react";
-import { FileWarning, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import api from "../../hooks/api";
 
 const Login = ({ setIsAuthentificated }) => {
