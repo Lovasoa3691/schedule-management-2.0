@@ -46,7 +46,7 @@ const Login = ({ setIsAuthentificated }) => {
         setShowAlert(true);
       }
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -76,7 +76,10 @@ const Login = ({ setIsAuthentificated }) => {
 
             <div className="flex justify-center">
               <button
-                onClick={() => setShowAlert(false)}
+                onClick={() => {
+                  setShowAlert(false);
+                  setLoading(false);
+                }}
                 className="px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl shadow hover:from-red-600 hover:to-red-700 transition"
               >
                 Ok
@@ -89,7 +92,11 @@ const Login = ({ setIsAuthentificated }) => {
         <div className="flex w-full md:w-1/2 items-center justify-center bg-slate-100 p-10">
           <div className="w-full max-w-md">
             <div className="flex flex-col items-center mb-6">
-              <img src={Logo} className="w-32 h-32 mb-2 text-white" />
+              <img
+                src={Logo}
+                alt="SchedConnect"
+                className="w-32 h-32 mb-2 text-white"
+              />
               <span className="text-[#333333] font-bold text-3xl">
                 Sched<span className="text-blue-600">Connect</span>
               </span>
@@ -214,7 +221,7 @@ const Login = ({ setIsAuthentificated }) => {
           </div>
         </div>
         <div className="hidden md:flex w-1/2 bg-blue-600 relative justify-center items-center">
-          <img src={Office} className="w-80 h-80" />
+          <img src={Office} alt="" className="w-80 h-80" />
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-20 h-1 bg-white/70 rounded-full" />
         </div>
       </div>
