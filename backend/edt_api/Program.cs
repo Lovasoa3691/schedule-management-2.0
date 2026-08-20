@@ -6,6 +6,7 @@ using edt_api.worker;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,8 +101,11 @@ using (var scope = app.Services.CreateScope())
 }
 await AdminSeeder.SeedAsync(app.Services);
 
+app.UseRouting();
+app.UseHttpMetrics();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapMetrics();
 app.Run();
