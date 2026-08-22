@@ -35,11 +35,11 @@ pipeline {
 
                         VERSION=${BUILD_NUMBER}
 
-                        docker build -t $DOCKER_USERNAME/backend-api:$VERSION .
-                        docker tag $DOCKER_USERNAME/backend-api:$VERSION $DOCKER_USERNAME/backend-api:latest
+                        docker build -t $DOCKER_USERNAME/schedconnect-api:$VERSION .
+                        docker tag $DOCKER_USERNAME/schedconnect-api:$VERSION $DOCKER_USERNAME/schedconnect-api:latest
 
-                        docker push $DOCKER_USERNAME/backend-api:$VERSION
-                        docker push $DOCKER_USERNAME/backend-api:latest
+                        docker push $DOCKER_USERNAME/schedconnect-api:$VERSION
+                        docker push $DOCKER_USERNAME/schedconnect-api:latest
                         '''
                     }
                 }
@@ -63,11 +63,11 @@ pipeline {
 
                         VERSION=${BUILD_NUMBER}
 
-                        docker build -t $DOCKER_USERNAME/frontend-react:$VERSION .
-                        docker tag $DOCKER_USERNAME/frontend-react:$VERSION $DOCKER_USERNAME/frontend-react:latest
+                        docker build -t $DOCKER_USERNAME/schedconnect-front:$VERSION .
+                        docker tag $DOCKER_USERNAME/schedconnect-front:$VERSION $DOCKER_USERNAME/schedconnect-front:latest
 
-                        docker push $DOCKER_USERNAME/frontend-react:$VERSION
-                        docker push $DOCKER_USERNAME/frontend-react:latest
+                        docker push $DOCKER_USERNAME/schedconnect-front:$VERSION
+                        docker push $DOCKER_USERNAME/schedconnect-front:latest
                         '''
                     }
                 }
@@ -82,8 +82,8 @@ pipeline {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
                     kubectl apply -f k8s/backend.yaml
-                    kubectl rollout restart deployment/backend-api
-                    kubectl rollout status deployment/backend-api
+                    kubectl rollout restart deployment/schedconnect-api
+                    kubectl rollout status deployment/schedconnect-api
                     '''
                 }
             }
@@ -97,8 +97,8 @@ pipeline {
                 withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                     sh '''
                     kubectl apply -f k8s/frontend.yaml
-                    kubectl rollout restart deployment/frontend-react
-                    kubectl rollout status deployment/frontend-react
+                    kubectl rollout restart deployment/schedconnect-front
+                    kubectl rollout status deployment/schedconnect-front
                     '''
                 }
             }
