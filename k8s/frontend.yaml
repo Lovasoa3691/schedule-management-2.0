@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-react
+  name: schedconnect-front
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend-react
+      app: schedconnect-front
   template:
     metadata:
       labels:
-        app: frontend-react
+        app: schedconnect-front
     spec:
       containers:
-        - name: frontend-react
-          image: juliannot3691/frontend-react:latest
+        - name: schedconnect-front
+          image: juliannot3691/schedconnect-front:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -31,7 +31,7 @@ metadata:
   name: frontend-service
 spec:
   selector:
-    app: frontend-react
+    app: schedconnect-front
   ports:
     - port: 80
       targetPort: 80

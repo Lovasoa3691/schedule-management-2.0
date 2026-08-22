@@ -55,7 +55,7 @@ services:
     container_name: schedule-prometheus
     restart: unless-stopped
     volumes:
-      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"

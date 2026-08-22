@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-api
+  name: schedconnect-api
 spec:
   replicas: 1
 
   selector:
     matchLabels:
-      app: backend-api
+      app: schedconnect-api
 
   template:
     metadata:
       labels:
-        app: backend-api
+        app: schedconnect-api
 
     spec:
       containers:
-        - name: backend-api
-          image: juliannot3691/backend-api:latest
+        - name: schedconnect-api
+          image: juliannot3691/schedconnect-api:latest
           imagePullPolicy: Always
 
           ports:
@@ -49,7 +49,7 @@ metadata:
   name: backend-service
 spec:
   selector:
-    app: backend-api
+    app: schedconnect-api
 
   ports:
     - protocol: TCP
