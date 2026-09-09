@@ -14,6 +14,7 @@ web-build/
 *.aab
 *.ipa
 
+backend/edt_api/obj/
 
 # React Native
 mobile/android/app/build/
@@ -44,7 +45,6 @@ obj/
 *.suo
 *.cache
 *.vs/
-
 
 .vscode/
 .idea/
